@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PilotRep — Reputation Precedes You</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #04080f;
+      --bg2:       #0b1220;
+      --bg3:       #101b2e;
+      --panel:     #0e1a2b;
+      --panel2:    #121f33;
+      --border:    rgba(100,180,255,0.10);
+      --cyan:      #4fc3f7;
+      --cyan-dim:  #2a8bbf;
+      --orange:    #e8871a;
+      --white:     #e8eef5;
+      --muted:     #5a7490;
+      --grade-a:   #4fc3f7;
+      --grade-b:   #4fc3f7;
+      --grade-c:   #f0c040;
+      --grade-d:   #e87a1a;
+      --grade-f:   #e83a1a;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'Exo 2', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── STARFIELD ── */
+    .starfield {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 20%, rgba(30,60,120,0.35) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 70% 60%, rgba(20,40,80,0.20) 0%, transparent 60%);
+    }
+    .starfield::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.7) 0%, transparent 100%),
+        radial-gradient(1px 1px at 25% 40%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 40% 10%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 55% 75%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 30%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 80% 55%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 20%, rgba(255,255,255,0.7) 0%, transparent 100%),
+        radial-gradient(1px 1px at 15% 80%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 60% 50%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 35% 65%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 85% 85%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 5%  50%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 95% 45%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 48% 88%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 20% 25%, rgba(200,230,255,0.4) 0%, transparent 100%);
+    }
+
+    /* ── LAYOUT WRAPPER ── */
+    .page { position: relative; z-index: 1; }
+
+    /* ── HERO ── */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px 60px;
+      text-align: center;
+      min-height: 60vh;
+    }
+
+    .logo-wrap { margin-bottom: 28px; }
+    .logo-wrap img { height: 90px; width: auto; }
+
+    /* Fallback text logo if image not loaded */
+    .logo-text {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: clamp(48px, 8vw, 88px);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      line-height: 1;
+      text-shadow: 0 0 40px rgba(79,195,247,0.4), 0 0 80px rgba(79,195,247,0.15);
+    }
+    .logo-text .o-ring {
+      display: inline-block;
+      width: 0.7em;
+      height: 0.7em;
+      border: 0.12em solid var(--white);
+      border-radius: 50%;
+      vertical-align: middle;
+      margin: 0 0.02em;
+      position: relative;
+      top: -0.06em;
+    }
+
+    .tagline {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: clamp(16px, 3vw, 26px);
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      color: var(--cyan-dim);
+      text-transform: uppercase;
+      margin-bottom: 48px;
+    }
+
+    /* ── SEARCH ── */
+    .search-wrap {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto 16px;
+    }
+    .search-input {
+      flex: 1;
+      background: rgba(79,195,247,0.08);
+      border: 1.5px solid var(--cyan-dim);
+      border-right: none;
+      border-radius: 4px 0 0 4px;
+      color: var(--white);
+      font-family: 'Exo 2', sans-serif;
+      font-size: 15px;
+      padding: 12px 18px;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .search-input::placeholder { color: var(--muted); }
+    .search-input:focus {
+      border-color: var(--cyan);
+      background: rgba(79,195,247,0.13);
+    }
+    .search-btn {
+      background: var(--cyan);
+      border: none;
+      border-radius: 0 4px 4px 0;
+      color: var(--bg);
+      cursor: pointer;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .search-btn:hover { background: #7dd8fa; }
+    .search-btn svg { width: 18px; height: 18px; }
+
+    .search-sub {
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      margin-bottom: 44px;
+    }
+
+    /* ── EVE LOGIN BUTTON ── */
+    .eve-login {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #1a1a2e;
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: 4px;
+      color: var(--white);
+      cursor: pointer;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      padding: 10px 20px;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .eve-login:hover { border-color: var(--cyan); background: rgba(79,195,247,0.08); }
+    .eve-logo {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 0.15em;
+      color: var(--white);
+    }
+    .eve-divider { width: 1px; height: 18px; background: rgba(255,255,255,0.2); }
+
+    /* ── PILOT LISTS ── */
+    .lists-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 960px;
+      margin: 60px auto 0;
+      padding: 0 24px;
+    }
+
+    .list-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .list-header {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      text-align: center;
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .pilot-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .pilot-row:last-child { border-bottom: none; }
+    .pilot-row:hover { background: rgba(79,195,247,0.05); }
+
+    .pilot-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 3px;
+      background: var(--bg3);
+      flex-shrink: 0;
+      object-fit: cover;
+      border: 1px solid var(--border);
+    }
+    .avatar-placeholder {
+      width: 42px;
+      height: 42px;
+      border-radius: 3px;
+      background: linear-gradient(135deg, #0e1a2b 0%, #1a2a40 100%);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .avatar-placeholder svg { width: 22px; height: 22px; opacity: 0.3; }
+
+    .pilot-info { flex: 1; min-width: 0; }
+    .pilot-name {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .pilot-corp {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .grade {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      min-width: 32px;
+      text-align: right;
+    }
+    .grade-A  { color: var(--grade-a); }
+    .grade-Ap { color: var(--grade-a); }
+    .grade-B  { color: var(--grade-b); }
+    .grade-Bm { color: var(--grade-b); }
+    .grade-Cp { color: var(--grade-c); }
+    .grade-C  { color: var(--grade-c); }
+    .grade-Dp { color: var(--grade-d); }
+    .grade-D  { color: var(--grade-d); }
+    .grade-F  { color: var(--grade-f); }
+
+    /* ── FOOTER BADGE ── */
+    .eve-badge {
+      max-width: 480px;
+      margin: 70px auto 0;
+      padding: 0 24px;
+    }
+    .eve-badge-inner {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 22px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      background: var(--panel);
+    }
+    .eve-badge-logo {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: 0.2em;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .eve-badge-logo .partner { color: var(--orange); font-size: 20px; }
+    .badge-legal {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .badge-legal a { color: var(--cyan); text-decoration: none; }
+
+    /* ── SITE FOOTER ── */
+    .site-footer {
+      margin-top: 60px;
+      padding: 30px 24px 40px;
+      text-align: center;
+    }
+    .footer-about {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--white);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      display: block;
+      text-decoration: none;
+    }
+    .footer-about:hover { color: var(--cyan); }
+    .footer-links {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+    .footer-links a {
+      color: var(--muted);
+      text-decoration: none;
+      padding: 2px 10px;
+      transition: color 0.15s;
+    }
+    .footer-links a:hover { color: var(--cyan); }
+    .footer-links .sep { color: var(--border); user-select: none; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .lists-section {
+        grid-template-columns: 1fr;
+      }
+      .hero { padding: 60px 16px 40px; }
+    }
+  </style>
+</head>
+<body>
+<div class="starfield"></div>
+<div class="page">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="logo-wrap">
+      <div class="logo-text">PIL<span class="o-ring"></span>T REP</div>
+    </div>
+
+    <p class="tagline">Reputation Precedes You</p>
+
+    <div class="search-wrap">
+      <input class="search-input" type="text" placeholder="Search pilots, corporations, alliances…" />
+      <button class="search-btn" aria-label="Search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </button>
+    </div>
+
+    <p class="search-sub">Search New Eden. Rate Encounters.</p>
+
+    <a href="#" class="eve-login">
+      <span class="eve-logo">ΞVΞ</span>
+      <span class="eve-divider"></span>
+      LOG IN with EVE Online
+    </a>
+  </section>
+
+  <!-- PILOT LISTS -->
+  <section class="lists-section">
+
+    <!-- Recently Rated -->
+    <div class="list-panel">
+      <div class="list-header">Recently Rated Pilots</div>
+
+      <a href="#" class="pilot-row">
+        <div class="avatar-placeholder">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        </div>
+        <div class="pilot-info">
+          <div class="pilot-name">Fishers Ghost</div>
+          <div class="pilot-corp">High Sec Mining Corp</div>
+        </div>
+        <span class="grade grade-A">A</span>
+      </a>
+
+      <a href="#" class="pilot-row">
+        <div class="avatar-placeholder">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        </div>
+        <div class="pilot-info">
+          <div class="pilot-name">Fishers Ghost</div>
+          <div class="pilot-corp">High Sec Mining Corp</div>
+        </div>
+        <span class="grade grade-Cp">C+</span>
+      </a>
+
+      <a href="#" class="pilot-row">
+        <div class="avatar-placeholder">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        </div>
+        <div class="pilot-info">
+          <div class="pilot-name">Fishers Ghost</div>
+          <div class="pilot-corp">High Sec Mining Corp</div>
+        </div>
+        <span class="grade grade-Dp">D+</span>
+      </a>
+
+      <a href="#" class="pilot-row">
+        <div class="avatar-placeholder">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        </div>
+        <div class="pilot-info">
+          <div class="pilot-name">Fishers Ghost</div>
+          <div class="pilot-corp">High Sec Mining Corp</div>
+        </div>
+        <span class="grade grade-Bm">B-</span>
+      </a>
+
+      <a href="#" class="pilot-row">
+        <div class="avatar-placeholder">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        </div>
+        <div class="pilot-info">
+          <div class="pilot-name">Fishers Ghost</div>
+          <div class="pilot-corp">High Sec Mining Corp</div>
+        </div>
+        <span class="grade grade-F">F</span>
+      </a>
+    </div>
+
+    <!-- Most Reviewed -->
+    <div class="list-panel">
+      <div class="list-header">Most Reviewed Pilots</div>
+
+      <a href="#" class="pilot-row">
+        <div class="avatar-placeholder">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        </div>
+        <div class="pilot-info">
+          <div class="pilot-name">Fishers Ghost</div>
+          <div class="pilot-corp">High Sec Mining Corp</div>
+        </div>
+        <span class="grade grade-A">A</span>
+      </a>
+
+      <a href="#" class="pilot-row">
+        <div class="avatar-placeholder">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        </div>
+        <div class="pilot-info">
+          <div class="pilot-name">Fishers Ghost</div>
+          <div class="pilot-corp">High Sec Mining Corp</div>
+        </div>
+        <span class="grade grade-Cp">C+</span>
+      </a>
+
+      <a href="#" class="pilot-row">
+        <div class="avatar-placeholder">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        </div>
+        <div class="pilot-info">
+          <div class="pilot-name">Fishers Ghost</div>
+          <div class="pilot-corp">High Sec Mining Corp</div>
+        </div>
+        <span class="grade grade-Dp">D+</span>
+      </a>
+
+      <a href="#" class="pilot-row">
+        <div class="avatar-placeholder">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        </div>
+        <div class="pilot-info">
+          <div class="pilot-name">Fishers Ghost</div>
+          <div class="pilot-corp">High Sec Mining Corp</div>
+        </div>
+        <span class="grade grade-Bm">B-</span>
+      </a>
+
+      <a href="#" class="pilot-row">
+        <div class="avatar-placeholder">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        </div>
+        <div class="pilot-info">
+          <div class="pilot-name">Fishers Ghost</div>
+          <div class="pilot-corp">High Sec Mining Corp</div>
+        </div>
+        <span class="grade grade-F">F</span>
+      </a>
+    </div>
+
+  </section>
+
+  <!-- EVE PARTNER BADGE -->
+  <div class="eve-badge">
+    <div class="eve-badge-inner">
+      <div class="eve-badge-logo">
+        <span>ΞVΞ ONLINE</span>
+        <span style="color:rgba(255,255,255,0.2)">|</span>
+        <span class="partner">PARTNER</span>
+      </div>
+      <p class="badge-legal">
+        All <a href="#">EVE related materials</a> are property of <a href="#">Fenris Creations</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <a href="about.html" class="footer-about">About</a>
+    <nav class="footer-links">
+      <a href="#">Payments</a><span class="sep"> | </span>
+      <a href="#">FAQ</a><span class="sep"> | </span>
+      <a href="#">API / Github</a><span class="sep"> | </span>
+      <a href="#">Features</a><span class="sep"> | </span>
+      <a href="#">Legal</a><span class="sep"> | </span>
+      <a href="#">Direct Login</a>
+    </nav>
+  </footer>
+
+</div>
+</body>
+</html>
