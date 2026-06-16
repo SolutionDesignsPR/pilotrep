@@ -20,11 +20,18 @@
       --orange:    #e8871a;
       --white:     #e8eef5;
       --muted:     #5a7490;
-      --grade-a:   #4fc3f7;
-      --grade-b:   #4fc3f7;
-      --grade-c:   #f0c040;
-      --grade-d:   #e87a1a;
-      --grade-f:   #e83a1a;
+      --grade-ap: #008bd1;
+      --grade-a:  #008bd1;
+      --grade-b:  #00af10;
+      --grade-bp: #00af10;
+      --grade-bm: #00af10;
+      --grade-c:  #00af10;
+      --grade-cp: #00af10;
+      --grade-cm: #00af10;
+      --grade-d:  #610b0f;
+      --grade-dp: #610b0f;
+      --grade-dm: #610b0f;
+      --grade-f:  #610b0f;
     }
 
     html { scroll-behavior: smooth; }
@@ -216,10 +223,10 @@
 
     .list-header {
       font-family: Helvetica, Arial, sans-serif;
-      font-size: 13px;
+      font-size: 15px;
       font-weight: 600;
       letter-spacing: 0.2em;
-      color: var(--cyan);
+      color: var(--white);
       text-transform: uppercase;
       text-align: center;
       padding: 18px 20px 14px;
@@ -268,7 +275,7 @@
       font-size: 14px;
       font-weight: 600;
       letter-spacing: 0.06em;
-      color: var(--cyan);
+      color: var(--white);
       text-transform: uppercase;
       white-space: nowrap;
       overflow: hidden;
@@ -286,18 +293,21 @@
       font-family: Helvetica, Arial, sans-serif;
       font-size: 22px;
       font-weight: 700;
-      min-width: 32px;
-      text-align: right;
+      min-width: 38px;
+      text-align: center;
     }
-    .grade-A  { color: var(--grade-a); }
-    .grade-Ap { color: var(--grade-a); }
-    .grade-B  { color: var(--grade-b); }
-    .grade-Bm { color: var(--grade-b); }
-    .grade-Cp { color: var(--grade-c); }
-    .grade-C  { color: var(--grade-c); }
-    .grade-Dp { color: var(--grade-d); }
-    .grade-D  { color: var(--grade-d); }
-    .grade-F  { color: var(--grade-f); }
+    .grade-Ap { color: var(--grade-ap); }
+    .grade-A  { color: var(--grade-a);  }
+    .grade-Bp { color: var(--grade-bp); }
+    .grade-B  { color: var(--grade-b);  }
+    .grade-Bm { color: var(--grade-bm); }
+    .grade-Cp { color: var(--grade-cp); }
+    .grade-C  { color: var(--grade-c);  }
+    .grade-Cm { color: var(--grade-cm); }
+    .grade-Dp { color: var(--grade-dp); }
+    .grade-D  { color: var(--grade-d);  }
+    .grade-Dm { color: var(--grade-dm); }
+    .grade-F  { color: var(--grade-f);  }
 
     /* ── LEGAL NOTE ── */
     .legal-note {
