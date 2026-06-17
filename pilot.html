@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fishers Ghost — Pilot RepScore | PilotRep</title>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #04080f;
+      --bg2:       #0b1220;
+      --bg3:       #101b2e;
+      --panel:     #0e1a2b;
+      --panel2:    #121f33;
+      --border:    rgba(100,180,255,0.10);
+      --cyan:      #4fc3f7;
+      --cyan-dim:  #2a8bbf;
+      --orange:    #e8871a;
+      --white:     #e8eef5;
+      --muted:     #5a7490;
+      --grade-ap: #008bd1;
+      --grade-a:  #008bd1;
+      --grade-b:  #00af10;
+      --grade-bp: #00af10;
+      --grade-bm: #00af10;
+      --grade-c:  #00af10;
+      --grade-cp: #00af10;
+      --grade-cm: #00af10;
+      --grade-d:  #610b0f;
+      --grade-dp: #610b0f;
+      --grade-dm: #610b0f;
+      --grade-f:  #610b0f;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: Helvetica, Arial, sans-serif;
+      font-weight: 400;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── STARFIELD ── */
+    .starfield {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 20%, rgba(30,60,120,0.35) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 70% 60%, rgba(20,40,80,0.20) 0%, transparent 60%);
+    }
+    .starfield::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.7) 0%, transparent 100%),
+        radial-gradient(1px 1px at 25% 40%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 40% 10%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 55% 75%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 30%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 80% 55%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 20%, rgba(255,255,255,0.7) 0%, transparent 100%),
+        radial-gradient(1px 1px at 15% 80%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 60% 50%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 35% 65%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 85% 85%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 5%  50%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 95% 45%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 48% 88%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 20% 25%, rgba(200,230,255,0.4) 0%, transparent 100%);
+    }
+
+    .page { position: relative; z-index: 1; }
+
+    /* ── TOP NAV ── */
+    .topnav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 22px 32px;
+      flex-wrap: wrap;
+    }
+    .nav-logo {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .nav-logo .o-ring {
+      display: inline-block;
+      width: 0.62em;
+      height: 0.62em;
+      border: 0.13em solid var(--white);
+      border-radius: 50%;
+      vertical-align: middle;
+      margin: 0 0.01em;
+      position: relative;
+      top: -0.07em;
+    }
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      flex: 1;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .nav-links a {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--white);
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .nav-links a.active { color: var(--muted); pointer-events: none; }
+    .nav-links a:hover:not(.active) { color: var(--cyan); }
+
+    .nav-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+    .eve-login-sm {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #1a1a2e;
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: 4px;
+      color: var(--white);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 8px 14px;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: border-color 0.2s, background 0.2s;
+      white-space: nowrap;
+    }
+    .eve-login-sm:hover { border-color: var(--cyan); background: rgba(79,195,247,0.08); }
+    .eve-logo-sm { font-weight: 700; font-size: 13px; letter-spacing: 0.15em; }
+    .eve-divider-sm { width: 1px; height: 14px; background: rgba(255,255,255,0.2); }
+
+    .nav-search {
+      display: flex;
+      align-items: center;
+      width: 220px;
+    }
+    .nav-search input {
+      flex: 1;
+      background: rgba(79,195,247,0.08);
+      border: 1.5px solid var(--cyan-dim);
+      border-right: none;
+      border-radius: 4px 0 0 4px;
+      color: var(--white);
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      padding: 8px 12px;
+      outline: none;
+      min-width: 0;
+    }
+    .nav-search input::placeholder { color: var(--muted); }
+    .nav-search button {
+      background: var(--cyan);
+      border: 1.5px solid var(--cyan);
+      border-radius: 0 4px 4px 0;
+      color: var(--bg);
+      cursor: pointer;
+      padding: 8px 11px;
+      display: flex;
+      align-items: center;
+    }
+    .nav-search svg { width: 14px; height: 14px; }
+    .nav-search-sub {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.03em;
+    }
+
+    /* ── PAGE TITLE ── */
+    .page-title {
+      text-align: center;
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      color: var(--cyan-dim);
+      text-transform: uppercase;
+      margin: 36px 0 50px;
+    }
+
+    /* ── PILOT HEADER ── */
+    .pilot-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 36px;
+      max-width: 960px;
+      margin: 0 auto 50px;
+      padding: 0 24px;
+      flex-wrap: wrap;
+    }
+    .pilot-portrait {
+      width: 170px;
+      height: 200px;
+      border-radius: 4px;
+      object-fit: cover;
+      background: linear-gradient(135deg, #0e1a2b 0%, #1a2a40 100%);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .pilot-header-info { text-align: left; }
+    .pilot-header-name {
+      font-size: clamp(26px, 4vw, 36px);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .pilot-header-corp,
+    .pilot-header-alliance {
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: var(--white);
+      text-transform: uppercase;
+    }
+    .pilot-header-secstatus {
+      margin-top: 18px;
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .pilot-header-secstatus strong {
+      color: var(--white);
+      font-weight: 700;
+      font-size: 18px;
+      margin-left: 8px;
+    }
+
+    /* ── PANELS ── */
+    .panels-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 50px;
+      align-items: start;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 32px 28px;
+    }
+
+    /* RepScore panel */
+    .grade-circle-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+    .grade-circle {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: 3px solid var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .grade-circle::before,
+    .grade-circle::after {
+      content: '';
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 2px solid var(--white);
+    }
+    .grade-circle::before { top: -3px; left: 50%; transform: translate(-50%, -2px); }
+    .grade-circle::after { bottom: -3px; left: 50%; transform: translate(-50%, 2px); }
+    .grade-circle-letter {
+      font-size: 56px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      text-align: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .stat-num { font-size: 30px; font-weight: 700; color: var(--cyan); }
+    .stat-label {
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .comments-headrow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .comments-headrow span {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--white);
+      text-transform: uppercase;
+    }
+    .sort-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .sort-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
+
+    .comments-list {
+      border-radius: 4px;
+      overflow: hidden;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+    .comment-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(0,0,0,0.2);
+    }
+    .comment-row:last-child { border-bottom: none; }
+    .comment-row.neg    { background: var(--grade-d); }
+    .comment-row.pos    { background: #00598b; }
+    .comment-row.neutral{ background: var(--grade-b); }
+
+    .comment-meta { font-size: 11px; opacity: 0.85; letter-spacing: 0.05em; text-transform: uppercase; }
+    .comment-text { font-size: 14px; font-weight: 600; text-transform: uppercase; margin-top: 2px; }
+    .comment-system {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: rgba(0,0,0,0.25);
+      padding: 4px 10px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    .see-all-wrap { text-align: center; margin-top: 18px; }
+    .see-all-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 8px 18px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .see-all-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
+
+    /* Leave A Rep panel */
+    .panel-title {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      color: var(--cyan-dim);
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+    .panel-divider { border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+
+    .subsection-label {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      color: var(--white);
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    /* slider */
+    .grade-slider {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 420px;
+      margin: 0 auto 10px;
+      padding: 0 8px;
+    }
+    .grade-slider::before {
+      content: '';
+      position: absolute;
+      left: 8px; right: 8px; top: 50%;
+      height: 2px;
+      background: var(--border);
+      transform: translateY(-50%);
+      z-index: 0;
+    }
+    .grade-dot {
+      position: relative;
+      z-index: 1;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 2px solid var(--muted);
+      background: var(--bg);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .grade-dot[data-tier="neg"]  { border-color: var(--grade-d); color: var(--grade-d); }
+    .grade-dot[data-tier="neutral"] { border-color: var(--grade-b); color: var(--grade-b); }
+    .grade-dot[data-tier="pos"]  { border-color: var(--grade-a); color: var(--grade-a); }
+    .grade-dot.selected[data-tier="neg"]  { background: var(--grade-d); color: var(--white); }
+    .grade-dot.selected[data-tier="neutral"] { background: var(--grade-b); color: var(--white); width: 42px; height: 42px; font-size: 16px; }
+    .grade-dot.selected[data-tier="pos"]  { background: var(--grade-a); color: var(--white); }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      max-width: 420px;
+      margin: 0 auto 26px;
+      padding: 0 8px;
+    }
+    .tier-tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 3px;
+      color: var(--white);
+    }
+    .tier-tag.neg { background: var(--grade-d); }
+    .tier-tag.neutral { background: var(--grade-b); }
+    .tier-tag.pos { background: var(--grade-a); }
+    .tier-tag.spacer { visibility: hidden; }
+
+    .system-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      max-width: 420px;
+      margin: 0 auto 24px;
+    }
+    .system-btn {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      color: var(--white);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 12px 8px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .system-btn:hover { border-color: var(--cyan-dim); }
+    .system-btn.selected { border-color: var(--cyan); color: var(--cyan); background: rgba(79,195,247,0.08); }
+
+    .comment-field-wrap { max-width: 420px; margin: 0 auto; }
+    .comment-input {
+      width: 100%;
+      background: var(--white);
+      border: none;
+      border-radius: 4px;
+      color: #0b1220;
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 14px 16px;
+      outline: none;
+    }
+    .comment-input::placeholder { color: #7a8aa0; }
+    .comment-hint {
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      margin-top: 10px;
+      margin-bottom: 26px;
+    }
+
+    .submit-wrap { text-align: center; }
+    .submit-btn {
+      background: var(--white);
+      border: none;
+      border-radius: 4px;
+      color: var(--bg);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 14px 36px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .submit-btn:hover { background: var(--cyan); }
+
+    /* ── LEGAL + FOOTER (shared) ── */
+    .legal-note {
+      max-width: 480px;
+      margin: 10px auto 0;
+      padding: 0 24px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .legal-note a { color: var(--cyan); text-decoration: none; }
+
+    .site-footer {
+      margin-top: 60px;
+      padding: 30px 24px 40px;
+      text-align: center;
+    }
+    .footer-about {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--white);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      display: block;
+      text-decoration: none;
+    }
+    .footer-about:hover { color: var(--cyan); }
+    .footer-links {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+    .footer-links a {
+      color: var(--muted);
+      text-decoration: none;
+      padding: 2px 10px;
+      transition: color 0.15s;
+    }
+    .footer-links a:hover { color: var(--cyan); }
+    .footer-links .sep { color: var(--border); user-select: none; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 760px) {
+      .panels-section { grid-template-columns: 1fr; }
+      .pilot-header { text-align: center; justify-content: center; }
+      .pilot-header-info { text-align: center; }
+      .nav-links { order: 3; width: 100%; }
+      .nav-right { align-items: center; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+<div class="starfield"></div>
+<div class="page">
+
+  <!-- TOP NAV -->
+  <header class="topnav">
+    <a href="index.html" class="nav-logo">PIL<span class="o-ring"></span>T REP</a>
+
+    <nav class="nav-links">
+      <a href="pilots.html" class="active">Pilots</a>
+      <a href="corporations.html">Corporations</a>
+      <a href="alliances.html">Alliances</a>
+    </nav>
+
+    <div class="nav-right">
+      <a href="#" class="eve-login-sm">
+        <span class="eve-logo-sm">ΞVΞ</span>
+        <span class="eve-divider-sm"></span>
+        LOG IN with EVE Online
+      </a>
+      <div class="nav-search">
+        <input type="text" placeholder="Search…" />
+        <button aria-label="Search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </button>
+      </div>
+      <div class="nav-search-sub">Search New Eden. Rate Encounters.</div>
+    </div>
+  </header>
+
+  <!-- PAGE TITLE -->
+  <h1 class="page-title">Pilot RepScore</h1>
+
+  <!-- PILOT HEADER -->
+  <section class="pilot-header">
+    <div class="pilot-portrait"></div>
+    <div class="pilot-header-info">
+      <div class="pilot-header-name">Fishers Ghost</div>
+      <div class="pilot-header-corp">High Sec Mining Corp</div>
+      <div class="pilot-header-alliance">United Galaxy Alliance</div>
+      <div class="pilot-header-secstatus">Security Status <strong>5.0</strong></div>
+    </div>
+  </section>
+
+  <!-- PANELS -->
+  <section class="panels-section">
+
+    <!-- RepScore Panel -->
+    <div class="panel">
+      <div class="grade-circle-wrap">
+        <div class="grade-circle">
+          <span class="grade-circle-letter grade-A">A</span>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div>
+          <div class="stat-num">24</div>
+          <div class="stat-label">Reps</div>
+        </div>
+        <div>
+          <div class="stat-num">42</div>
+          <div class="stat-label">Comments</div>
+        </div>
+      </div>
+
+      <div class="comments-headrow">
+        <span>Comments</span>
+        <button class="sort-btn">▾ Sort</button>
+      </div>
+
+      <div class="comments-list">
+        <div class="comment-row neg">
+          <div>
+            <div class="comment-meta">June 2026</div>
+            <div class="comment-text">Tried to gank me</div>
+          </div>
+          <span class="comment-system">Low Sec</span>
+        </div>
+        <div class="comment-row pos">
+          <div>
+            <div class="comment-meta">June 2026</div>
+            <div class="comment-text">Helped in fleet ops</div>
+          </div>
+          <span class="comment-system">Null Sec</span>
+        </div>
+        <div class="comment-row pos">
+          <div>
+            <div class="comment-meta">May 2026</div>
+            <div class="comment-text">Shipped stuff null to Jita</div>
+          </div>
+          <span class="comment-system">Low Sec</span>
+        </div>
+        <div class="comment-row neutral">
+          <div>
+            <div class="comment-meta">April 2026</div>
+            <div class="comment-text">Left me alone on relic</div>
+          </div>
+          <span class="comment-system">High Sec</span>
+        </div>
+        <div class="comment-row neg">
+          <div>
+            <div class="comment-meta">February 2026</div>
+            <div class="comment-text">Killed me at the sun</div>
+          </div>
+          <span class="comment-system">Wormhole</span>
+        </div>
+      </div>
+
+      <div class="see-all-wrap">
+        <button class="see-all-btn">▾ See All Comments</button>
+      </div>
+    </div>
+
+    <!-- Leave A Rep Panel -->
+    <div class="panel">
+      <h2 class="panel-title">Leave A Rep</h2>
+      <div class="panel-divider"></div>
+
+      <div class="subsection-label">Pilot Respect</div>
+
+      <div class="grade-slider" id="gradeSlider">
+        <div class="grade-dot" data-grade="F" data-tier="neg">F</div>
+        <div class="grade-dot" data-grade="D" data-tier="neg">D</div>
+        <div class="grade-dot selected" data-grade="C" data-tier="neutral">C</div>
+        <div class="grade-dot selected" data-grade="B" data-tier="neutral">B</div>
+        <div class="grade-dot" data-grade="A" data-tier="pos">A</div>
+        <div class="grade-dot" data-grade="A+" data-tier="pos">A+</div>
+      </div>
+      <div class="slider-labels">
+        <span class="tier-tag neg">Negative</span>
+        <span class="tier-tag neutral">Neutral</span>
+        <span class="tier-tag pos">Positive</span>
+      </div>
+
+      <div class="subsection-label">System</div>
+      <div class="system-grid">
+        <button class="system-btn">Nullsec</button>
+        <button class="system-btn">Lowsec</button>
+        <button class="system-btn">Highsec</button>
+        <button class="system-btn">Wormhole</button>
+        <button class="system-btn">Pochven</button>
+        <button class="system-btn">N/A</button>
+      </div>
+
+      <div class="subsection-label">Comment On Your Encounter</div>
+      <div class="comment-field-wrap">
+        <input type="text" class="comment-input" maxlength="30" placeholder="MAXIMUM 5 WORDS OR 30 LETTERS" />
+        <div class="comment-hint">No spam • No profanity • Keep it professional • Comments are moderated</div>
+      </div>
+
+      <div class="submit-wrap">
+        <button class="submit-btn">Submit PilotRep</button>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- LEGAL NOTE -->
+  <div class="legal-note">
+    EVE Online and all related materials are property of Fenris Creations. PilotRep is a third-party fan site and is not affiliated with Fenris Creations.
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <a href="about.html" class="footer-about">About</a>
+    <nav class="footer-links">
+      <a href="#">Payments</a><span class="sep"> | </span>
+      <a href="#">FAQ</a><span class="sep"> | </span>
+      <a href="#">API / Github</a><span class="sep"> | </span>
+      <a href="#">Features</a><span class="sep"> | </span>
+      <a href="#">Legal</a><span class="sep"> | </span>
+      <a href="#">Direct Login</a>
+    </nav>
+  </footer>
+
+</div>
+
+<script>
+  // Grade slider: single-select, click a dot to choose pilot respect grade
+  const dots = document.querySelectorAll('#gradeSlider .grade-dot');
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      dots.forEach(d => d.classList.remove('selected'));
+      dot.classList.add('selected');
+    });
+  });
+
+  // System buttons: single-select
+  const sysButtons = document.querySelectorAll('.system-btn');
+  sysButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      sysButtons.forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+  });
+
+  // Comment field: enforce 5 word / 30 letter limit
+  const commentInput = document.querySelector('.comment-input');
+  commentInput.addEventListener('input', () => {
+    let words = commentInput.value.trim().split(/\s+/).filter(Boolean);
+    if (words.length > 5) {
+      commentInput.value = words.slice(0, 5).join(' ');
+    }
+  });
+</script>
+</body>
+</html>

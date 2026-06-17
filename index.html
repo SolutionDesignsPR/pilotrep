@@ -80,13 +80,33 @@
     /* ── LAYOUT WRAPPER ── */
     .page { position: relative; z-index: 1; }
 
+    /* ── TOP NAV ── */
+    .topnav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 36px;
+      padding: 26px 24px 0;
+      flex-wrap: wrap;
+    }
+    .topnav a {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--white);
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .topnav a:hover { color: var(--cyan); }
+
     /* ── HERO ── */
     .hero {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 80px 24px 0;
+      padding: 50px 24px 0;
       text-align: center;
       min-height: 60vh;
     }
@@ -369,6 +389,13 @@
 <body>
 <div class="starfield"></div>
 <div class="page">
+
+  <!-- TOP NAV -->
+  <nav class="topnav">
+    <a href="pilot.html">Pilots</a>
+    <a href="corporations.html">Corporations</a>
+    <a href="alliances.html">Alliances</a>
+  </nav>
 
   <!-- HERO -->
   <section class="hero">
