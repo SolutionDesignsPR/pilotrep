@@ -159,7 +159,7 @@
     .nav-search {
       display: flex;
       align-items: center;
-      width: 280px;
+      width: 320px;
     }
     .nav-search input {
       flex: 1;
@@ -401,19 +401,25 @@
     .panel-title {
       text-align: center;
       font-size: 22px;
-      font-weight: 600;
-      letter-spacing: 0.18em;
+      font-weight: 400;
+      letter-spacing: 0.1em;
       color: var(--cyan-dim);
       text-transform: uppercase;
       margin-bottom: 18px;
     }
     .panel-divider { border-bottom: 1px solid var(--border); margin-bottom: 24px; }
 
+    .section-divider {
+      border-bottom: 1px solid var(--border);
+      max-width: 420px;
+      margin: 60px auto;
+    }
+
     .subsection-label {
       text-align: center;
       font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.14em;
+      font-weight: 400;
+      letter-spacing: 0.08em;
       color: var(--white);
       text-transform: uppercase;
       margin-bottom: 18px;
@@ -441,13 +447,13 @@
     .grade-dot {
       position: relative;
       z-index: 1;
-      width: 30px;
-      height: 30px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
-      border: 2px solid var(--muted);
+      border: 2.5px solid var(--muted);
       background: var(--bg);
       color: var(--muted);
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 700;
       display: flex;
       align-items: center;
@@ -455,18 +461,20 @@
       cursor: pointer;
       transition: all 0.15s;
     }
-    .grade-dot[data-tier="neg"]  { border-color: var(--grade-d); color: var(--grade-d); }
-    .grade-dot[data-tier="neutral"] { border-color: var(--grade-b); color: var(--grade-b); }
-    .grade-dot[data-tier="pos"]  { border-color: var(--grade-a); color: var(--grade-a); }
-    .grade-dot.selected[data-tier="neg"]  { background: var(--grade-d); color: var(--white); }
-    .grade-dot.selected[data-tier="neutral"] { background: var(--grade-b); color: var(--white); width: 42px; height: 42px; font-size: 16px; }
-    .grade-dot.selected[data-tier="pos"]  { background: var(--grade-a); color: var(--white); }
+    .grade-dot[data-tier="neg"]      { border-color: var(--grade-d); color: var(--grade-d); }
+    .grade-dot[data-tier="neutral"]  { border-color: var(--grade-b); color: var(--grade-b); }
+    .grade-dot[data-tier="pos"]      { border-color: var(--grade-a); color: var(--grade-a); }
+
+    .grade-dot.selected[data-tier="neg"]     { background: var(--grade-d); color: var(--white); }
+    .grade-dot.selected[data-tier="neutral"] { background: var(--grade-b); color: var(--white); }
+    .grade-dot.selected[data-tier="pos"]     { background: var(--grade-a); color: var(--white); }
+    .grade-dot.selected { width: 46px; height: 46px; font-size: 16px; }
 
     .slider-labels {
       display: flex;
       justify-content: space-between;
       max-width: 420px;
-      margin: 0 auto 26px;
+      margin: 0 auto;
       padding: 0 8px;
     }
     .tier-tag {
@@ -488,7 +496,7 @@
       grid-template-columns: 1fr 1fr 1fr;
       gap: 12px;
       max-width: 420px;
-      margin: 0 auto 24px;
+      margin: 0 auto;
     }
     .system-btn {
       background: transparent;
@@ -546,6 +554,20 @@
       transition: background 0.15s;
     }
     .submit-btn:hover { background: var(--cyan); }
+
+    .login-prompt {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+    }
+    .login-prompt.show { display: block; }
+    .login-prompt-text {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      margin-bottom: 12px;
+    }
+    .login-prompt .eve-login-sm { margin: 0 auto; }
 
     /* ── LEGAL + FOOTER (shared) ── */
     .legal-note {
@@ -619,11 +641,6 @@
     </nav>
 
     <div class="nav-right">
-      <a href="#" class="eve-login-sm">
-        <span class="eve-logo-sm">ΞVΞ</span>
-        <span class="eve-divider-sm"></span>
-        LOG IN with EVE Online
-      </a>
       <div class="nav-search">
         <input type="text" placeholder="Search Pilots, Corps and Alliances" />
         <button aria-label="Search">
@@ -730,8 +747,8 @@
       <div class="grade-slider" id="gradeSlider">
         <div class="grade-dot" data-grade="F" data-tier="neg">F</div>
         <div class="grade-dot" data-grade="D" data-tier="neg">D</div>
-        <div class="grade-dot selected" data-grade="C" data-tier="neutral">C</div>
-        <div class="grade-dot selected" data-grade="B" data-tier="neutral">B</div>
+        <div class="grade-dot" data-grade="C" data-tier="neutral">C</div>
+        <div class="grade-dot" data-grade="B" data-tier="neutral">B</div>
         <div class="grade-dot" data-grade="A" data-tier="pos">A</div>
         <div class="grade-dot" data-grade="A+" data-tier="pos">A+</div>
       </div>
@@ -740,6 +757,8 @@
         <span class="tier-tag neutral">Neutral</span>
         <span class="tier-tag pos">Positive</span>
       </div>
+
+      <div class="section-divider"></div>
 
       <div class="subsection-label">System</div>
       <div class="system-grid">
@@ -751,6 +770,8 @@
         <button class="system-btn">N/A</button>
       </div>
 
+      <div class="section-divider"></div>
+
       <div class="subsection-label">Comment On Your Encounter</div>
       <div class="comment-field-wrap">
         <input type="text" class="comment-input" maxlength="30" placeholder="MAXIMUM 5 WORDS OR 30 LETTERS" />
@@ -759,6 +780,14 @@
 
       <div class="submit-wrap">
         <button class="submit-btn">Submit PilotRep</button>
+        <div class="login-prompt" id="loginPrompt">
+          <div class="login-prompt-text">You must be logged in to submit a PilotRep.</div>
+          <a href="#" class="eve-login-sm">
+            <span class="eve-logo-sm">ΞVΞ</span>
+            <span class="eve-divider-sm"></span>
+            LOG IN with EVE Online
+          </a>
+        </div>
       </div>
     </div>
 
@@ -810,6 +839,26 @@
     if (words.length > 5) {
       commentInput.value = words.slice(0, 5).join(' ');
     }
+  });
+
+  // ── AUTH GATE (placeholder) ──
+  // TODO: replace isLoggedIn() with real Supabase/EVE SSO session check
+  // once auth is wired up. For now this just simulates a logged-out user
+  // so the gate behavior is visible during testing.
+  function isLoggedIn() {
+    return false;
+  }
+
+  const submitBtn = document.querySelector('.submit-btn');
+  const loginPrompt = document.getElementById('loginPrompt');
+  submitBtn.addEventListener('click', (e) => {
+    if (!isLoggedIn()) {
+      e.preventDefault();
+      loginPrompt.classList.add('show');
+      return;
+    }
+    loginPrompt.classList.remove('show');
+    // TODO: real submission logic (Supabase insert) goes here
   });
 </script>
 </body>
