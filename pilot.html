@@ -303,7 +303,11 @@
       font-size: 56px;
       font-weight: 700;
       letter-spacing: 0.02em;
+      color: var(--muted);
     }
+    .grade-circle-letter.grade-F { color: var(--grade-f); }
+    .grade-circle-letter.grade-B { color: var(--grade-b); }
+    .grade-circle-letter.grade-A { color: var(--grade-a); }
 
     .stats-row {
       display: flex;
@@ -355,6 +359,13 @@
       overflow: hidden;
       max-height: 320px;
       overflow-y: auto;
+    }
+    .comments-empty {
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      padding: 28px 16px;
     }
     .comment-row {
       display: flex;
@@ -412,7 +423,7 @@
     .section-divider {
       border-bottom: 1px solid var(--border);
       max-width: 420px;
-      margin: 60px auto;
+      margin: 30px auto;
     }
 
     .subsection-label {
@@ -422,7 +433,7 @@
       letter-spacing: 0.08em;
       color: var(--white);
       text-transform: uppercase;
-      margin-bottom: 18px;
+      margin-bottom: 28px;
     }
 
     /* slider */
@@ -674,17 +685,17 @@
     <div class="panel">
       <div class="grade-circle-wrap">
         <div class="grade-circle">
-          <span class="grade-circle-letter grade-A">A</span>
+          <span class="grade-circle-letter" id="gradeCircleLetter">–</span>
         </div>
       </div>
 
       <div class="stats-row">
         <div>
-          <div class="stat-num">24</div>
+          <div class="stat-num" id="repsCount">0</div>
           <div class="stat-label">Reps</div>
         </div>
         <div>
-          <div class="stat-num">42</div>
+          <div class="stat-num" id="commentsCount">0</div>
           <div class="stat-label">Comments</div>
         </div>
       </div>
@@ -694,42 +705,8 @@
         <button class="sort-btn">▾ Sort</button>
       </div>
 
-      <div class="comments-list">
-        <div class="comment-row neg">
-          <div>
-            <div class="comment-meta">June 2026</div>
-            <div class="comment-text">Tried to gank me</div>
-          </div>
-          <span class="comment-system">Low Sec</span>
-        </div>
-        <div class="comment-row pos">
-          <div>
-            <div class="comment-meta">June 2026</div>
-            <div class="comment-text">Helped in fleet ops</div>
-          </div>
-          <span class="comment-system">Null Sec</span>
-        </div>
-        <div class="comment-row pos">
-          <div>
-            <div class="comment-meta">May 2026</div>
-            <div class="comment-text">Shipped stuff null to Jita</div>
-          </div>
-          <span class="comment-system">Low Sec</span>
-        </div>
-        <div class="comment-row neutral">
-          <div>
-            <div class="comment-meta">April 2026</div>
-            <div class="comment-text">Left me alone on relic</div>
-          </div>
-          <span class="comment-system">High Sec</span>
-        </div>
-        <div class="comment-row neg">
-          <div>
-            <div class="comment-meta">February 2026</div>
-            <div class="comment-text">Killed me at the sun</div>
-          </div>
-          <span class="comment-system">Wormhole</span>
-        </div>
+      <div class="comments-list" id="commentsList">
+        <div class="comments-empty" id="commentsEmpty">No reps yet. Be the first to leave one.</div>
       </div>
 
       <div class="see-all-wrap">
@@ -843,22 +820,102 @@
 
   // ── AUTH GATE (placeholder) ──
   // TODO: replace isLoggedIn() with real Supabase/EVE SSO session check
-  // once auth is wired up. For now this just simulates a logged-out user
-  // so the gate behavior is visible during testing.
+  // once auth is wired up. Set to true here ONLY so the live-preview demo
+  // below can be tested end-to-end. Flip back to false to see the gate.
   function isLoggedIn() {
-    return false;
+    return true;
+  }
+
+  // ── LIVE PREVIEW (client-side only, nothing persists on refresh) ──
+  // Maps each grade letter to a numeric value (for averaging) and a
+  // tier (for colour-coding), matching the existing dot grouping.
+  const gradeValue = { F: 0, D: 1, C: 2, B: 3, A: 4, 'A+': 5 };
+  const gradeLetterByValue = ['F', 'D', 'C', 'B', 'A', 'A+'];
+  const tierByGrade = {
+    F: 'neg', D: 'neg', C: 'neutral', B: 'neutral', A: 'pos', 'A+': 'pos'
+  };
+
+  let submittedReps = []; // { grade, tier, system, comment }
+
+  const repsCountEl = document.getElementById('repsCount');
+  const commentsCountEl = document.getElementById('commentsCount');
+  const gradeCircleLetterEl = document.getElementById('gradeCircleLetter');
+  const commentsListEl = document.getElementById('commentsList');
+  const commentsEmptyEl = document.getElementById('commentsEmpty');
+
+  function recalcAndRender() {
+    repsCountEl.textContent = submittedReps.length;
+    commentsCountEl.textContent = submittedReps.filter(r => r.comment).length;
+
+    if (submittedReps.length === 0) {
+      gradeCircleLetterEl.textContent = '–';
+      gradeCircleLetterEl.className = 'grade-circle-letter';
+    } else {
+      const avg = submittedReps.reduce((sum, r) => sum + gradeValue[r.grade], 0) / submittedReps.length;
+      const roundedLetter = gradeLetterByValue[Math.round(avg)];
+      const tier = tierByGrade[roundedLetter];
+      const tierColorClass = tier === 'neg' ? 'grade-F' : tier === 'neutral' ? 'grade-B' : 'grade-A';
+      gradeCircleLetterEl.textContent = roundedLetter;
+      gradeCircleLetterEl.className = 'grade-circle-letter ' + tierColorClass;
+    }
+  }
+
+  function addCommentRow(rep) {
+    commentsEmptyEl.style.display = 'none';
+    const row = document.createElement('div');
+    row.className = 'comment-row ' + rep.tier;
+    row.innerHTML = `
+      <div>
+        <div class="comment-meta">Just now</div>
+        <div class="comment-text">${rep.comment || '(no comment left)'}</div>
+      </div>
+      <span class="comment-system">${rep.system}</span>
+    `;
+    commentsListEl.prepend(row);
   }
 
   const submitBtn = document.querySelector('.submit-btn');
   const loginPrompt = document.getElementById('loginPrompt');
+
   submitBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+
     if (!isLoggedIn()) {
-      e.preventDefault();
       loginPrompt.classList.add('show');
       return;
     }
     loginPrompt.classList.remove('show');
-    // TODO: real submission logic (Supabase insert) goes here
+
+    const selectedDot = document.querySelector('#gradeSlider .grade-dot.selected');
+    const selectedSys = document.querySelector('.system-btn.selected');
+
+    if (!selectedDot) {
+      alert('Please select a grade (F through A+) before submitting.');
+      return;
+    }
+    if (!selectedSys) {
+      alert('Please select a system type before submitting.');
+      return;
+    }
+
+    const rep = {
+      grade: selectedDot.dataset.grade,
+      tier: selectedDot.dataset.tier,
+      system: selectedSys.textContent,
+      comment: commentInput.value.trim()
+    };
+
+    submittedReps.push(rep);
+    addCommentRow(rep);
+    recalcAndRender();
+
+    // Reset the form for the next test submission
+    dots.forEach(d => d.classList.remove('selected'));
+    sysButtons.forEach(b => b.classList.remove('selected'));
+    commentInput.value = '';
+
+    // TODO: replace the above in-memory push with a real Supabase insert
+    // once the database is connected, then re-fetch/re-render from there.
   });
 </script>
 </body>
