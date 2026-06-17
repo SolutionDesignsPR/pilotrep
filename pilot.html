@@ -357,8 +357,6 @@
     .comments-list {
       border-radius: 4px;
       overflow: hidden;
-      max-height: 320px;
-      overflow-y: auto;
     }
     .comments-empty {
       text-align: center;
@@ -709,8 +707,8 @@
         <div class="comments-empty" id="commentsEmpty">No reps yet. Be the first to leave one.</div>
       </div>
 
-      <div class="see-all-wrap">
-        <button class="see-all-btn">▾ See All Comments</button>
+      <div class="see-all-wrap" id="seeAllWrap" style="display:none;">
+        <button class="see-all-btn" id="seeAllBtn">▾ See All Comments</button>
       </div>
     </div>
 
@@ -835,13 +833,56 @@
     F: 'neg', D: 'neg', C: 'neutral', B: 'neutral', A: 'pos', 'A+': 'pos'
   };
 
-  let submittedReps = []; // { grade, tier, system, comment }
+  let submittedReps = []; // { grade, tier, system, comment } — newest first
+  let commentsExpanded = false;
+  const VISIBLE_LIMIT = 5;
 
   const repsCountEl = document.getElementById('repsCount');
   const commentsCountEl = document.getElementById('commentsCount');
   const gradeCircleLetterEl = document.getElementById('gradeCircleLetter');
   const commentsListEl = document.getElementById('commentsList');
   const commentsEmptyEl = document.getElementById('commentsEmpty');
+  const seeAllWrapEl = document.getElementById('seeAllWrap');
+  const seeAllBtnEl = document.getElementById('seeAllBtn');
+
+  function buildCommentRow(rep) {
+    const row = document.createElement('div');
+    row.className = 'comment-row ' + rep.tier;
+    row.innerHTML = `
+      <div>
+        <div class="comment-meta">Just now</div>
+        <div class="comment-text">${rep.comment || '(no comment left)'}</div>
+      </div>
+      <span class="comment-system">${rep.system}</span>
+    `;
+    return row;
+  }
+
+  function renderComments() {
+    commentsListEl.innerHTML = '';
+
+    if (submittedReps.length === 0) {
+      commentsListEl.appendChild(commentsEmptyEl);
+      commentsEmptyEl.style.display = 'block';
+      seeAllWrapEl.style.display = 'none';
+      return;
+    }
+
+    const visible = commentsExpanded ? submittedReps : submittedReps.slice(0, VISIBLE_LIMIT);
+    visible.forEach(rep => commentsListEl.appendChild(buildCommentRow(rep)));
+
+    if (submittedReps.length > VISIBLE_LIMIT) {
+      seeAllWrapEl.style.display = 'block';
+      seeAllBtnEl.textContent = commentsExpanded ? '▴ Show Less' : '▾ See All Comments';
+    } else {
+      seeAllWrapEl.style.display = 'none';
+    }
+  }
+
+  seeAllBtnEl.addEventListener('click', () => {
+    commentsExpanded = !commentsExpanded;
+    renderComments();
+  });
 
   function recalcAndRender() {
     repsCountEl.textContent = submittedReps.length;
@@ -858,20 +899,8 @@
       gradeCircleLetterEl.textContent = roundedLetter;
       gradeCircleLetterEl.className = 'grade-circle-letter ' + tierColorClass;
     }
-  }
 
-  function addCommentRow(rep) {
-    commentsEmptyEl.style.display = 'none';
-    const row = document.createElement('div');
-    row.className = 'comment-row ' + rep.tier;
-    row.innerHTML = `
-      <div>
-        <div class="comment-meta">Just now</div>
-        <div class="comment-text">${rep.comment || '(no comment left)'}</div>
-      </div>
-      <span class="comment-system">${rep.system}</span>
-    `;
-    commentsListEl.prepend(row);
+    renderComments();
   }
 
   const submitBtn = document.querySelector('.submit-btn');
@@ -905,8 +934,7 @@
       comment: commentInput.value.trim()
     };
 
-    submittedReps.push(rep);
-    addCommentRow(rep);
+    submittedReps.unshift(rep); // newest first
     recalcAndRender();
 
     // Reset the form for the next test submission
