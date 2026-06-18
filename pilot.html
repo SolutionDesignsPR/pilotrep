@@ -305,6 +305,13 @@
       letter-spacing: 0.02em;
       color: var(--muted);
     }
+    .grade-circle-letter .modifier {
+      font-size: 0.42em;
+      font-weight: 700;
+      vertical-align: super;
+      line-height: 0;
+      letter-spacing: 0;
+    }
     .grade-circle-letter.grade-F { color: var(--grade-f); }
     .grade-circle-letter.grade-B { color: var(--grade-b); }
     .grade-circle-letter.grade-A { color: var(--grade-a); }
@@ -921,21 +928,23 @@
   //   F=0  D=2  C=5  B=8  A=11  A+=12
   // Averaging then rounds to the nearest of 13 slots:
   //   0=F  1=D−  2=D  3=D+  4=C−  5=C  6=C+  7=B−  8=B  9=B+  10=A−  11=A  12=A+
-  const INPUT_TO_NUM = { 'F': 0, 'D': 2, 'C': 5, 'B': 8, 'A': 11, 'A+': 12 };
+  // Evenly-spaced anchors across 0–12 (each grade 2.4 apart) so A+ is
+  // always reachable when it dominates, and mixing grades scales linearly.
+  const INPUT_TO_NUM = { 'F': 0, 'D': 2.4, 'C': 4.8, 'B': 7.2, 'A': 9.6, 'A+': 12 };
   const GRADE_TABLE = [
-    { text: 'F',   cls: 'grade-F' },  // 0
-    { text: 'D−',  cls: 'grade-F' },  // 1
-    { text: 'D',   cls: 'grade-F' },  // 2
-    { text: 'D+',  cls: 'grade-F' },  // 3
-    { text: 'C−',  cls: 'grade-B' },  // 4
-    { text: 'C',   cls: 'grade-B' },  // 5
-    { text: 'C+',  cls: 'grade-B' },  // 6
-    { text: 'B−',  cls: 'grade-B' },  // 7
-    { text: 'B',   cls: 'grade-B' },  // 8
-    { text: 'B+',  cls: 'grade-B' },  // 9
-    { text: 'A−',  cls: 'grade-A' },  // 10
-    { text: 'A',   cls: 'grade-A' },  // 11
-    { text: 'A+',  cls: 'grade-A' },  // 12
+    { html: 'F',                                    cls: 'grade-F' },  // 0
+    { html: 'D<span class="modifier">−</span>',     cls: 'grade-F' },  // 1
+    { html: 'D',                                    cls: 'grade-F' },  // 2
+    { html: 'D<span class="modifier">+</span>',     cls: 'grade-F' },  // 3
+    { html: 'C<span class="modifier">−</span>',     cls: 'grade-B' },  // 4
+    { html: 'C',                                    cls: 'grade-B' },  // 5
+    { html: 'C<span class="modifier">+</span>',     cls: 'grade-B' },  // 6
+    { html: 'B<span class="modifier">−</span>',     cls: 'grade-B' },  // 7
+    { html: 'B',                                    cls: 'grade-B' },  // 8
+    { html: 'B<span class="modifier">+</span>',     cls: 'grade-B' },  // 9
+    { html: 'A<span class="modifier">−</span>',     cls: 'grade-A' },  // 10
+    { html: 'A',                                    cls: 'grade-A' },  // 11
+    { html: 'A<span class="modifier">+</span>',     cls: 'grade-A' },  // 12
   ];
 
   let submittedReps = [];
@@ -997,7 +1006,7 @@
       const avg = submittedReps.reduce((sum, r) => sum + r.gradeNum, 0) / submittedReps.length;
       const idx = Math.min(12, Math.max(0, Math.round(avg)));
       const grade = GRADE_TABLE[idx];
-      gradeCircleLetterEl.textContent = grade.text;
+      gradeCircleLetterEl.innerHTML = grade.html;
       gradeCircleLetterEl.className = 'grade-circle-letter ' + grade.cls;
     }
     renderComments();
