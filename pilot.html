@@ -928,9 +928,10 @@
   //   F=0  D=2  C=5  B=8  A=11  A+=12
   // Averaging then rounds to the nearest of 13 slots:
   //   0=F  1=D−  2=D  3=D+  4=C−  5=C  6=C+  7=B−  8=B  9=B+  10=A−  11=A  12=A+
-  // Evenly-spaced anchors across 0–12 (each grade 2.4 apart) so A+ is
-  // always reachable when it dominates, and mixing grades scales linearly.
-  const INPUT_TO_NUM = { 'F': 0, 'D': 2.4, 'C': 4.8, 'B': 7.2, 'A': 9.6, 'A+': 12 };
+  // Anchors: F and A+ sit at the extremes; middle grades evenly spaced.
+  // A+ is set to 11.5 (not 12) so Math.round tips to index 12 with a
+  // realistic A+ majority — e.g. 5× A+ and 1× B already reaches A+.
+  const INPUT_TO_NUM = { 'F': 0, 'D': 2.4, 'C': 4.8, 'B': 7.2, 'A': 9.6, 'A+': 11.5 };
   const GRADE_TABLE = [
     { html: 'F',                                    cls: 'grade-F' },  // 0
     { html: 'D<span class="modifier">−</span>',     cls: 'grade-F' },  // 1
