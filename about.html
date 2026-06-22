@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About — PilotRep</title>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #04080f;
+      --white:    #e8eef5;
+      --cyan:     #4fc3f7;
+      --cyan-dim: #2a8bbf;
+      --muted:    #5a7490;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--white);
+      font-family: Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Starfield ── */
+    .starfield {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 20%, rgba(30,60,120,0.35) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 70% 60%, rgba(20,40,80,0.20) 0%, transparent 60%);
+    }
+    .starfield::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.7) 0%, transparent 100%),
+        radial-gradient(1px 1px at 25% 40%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 40% 10%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 55% 75%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 30%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 80% 55%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 20%, rgba(255,255,255,0.7) 0%, transparent 100%),
+        radial-gradient(1px 1px at 15% 80%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 60% 50%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 35% 65%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 85% 85%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 5%  50%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 95% 45%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 48% 88%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 20% 25%, rgba(200,230,255,0.4) 0%, transparent 100%);
+    }
+
+    .page { position: relative; z-index: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── TOP NAV — matches pilot.html exactly ── */
+    .topnav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 22px 32px;
+      flex-wrap: wrap;
+    }
+    .nav-logo {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .nav-logo .o-ring {
+      display: inline-block;
+      width: 0.62em;
+      height: 0.62em;
+      border: 0.13em solid var(--white);
+      border-radius: 50%;
+      vertical-align: middle;
+      margin: 0 0.01em;
+      position: relative;
+      top: -0.07em;
+    }
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      flex: 1;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .nav-links a {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--white);
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .nav-links a.active { color: var(--muted); pointer-events: none; }
+    .nav-links a:hover:not(.active) { color: var(--cyan); }
+
+    .nav-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+    .nav-search {
+      display: flex;
+      align-items: center;
+      width: 320px;
+    }
+    .nav-search input {
+      flex: 1;
+      background: rgba(79,195,247,0.08);
+      border: 1.5px solid var(--cyan-dim);
+      border-right: none;
+      border-radius: 4px 0 0 4px;
+      color: var(--white);
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      padding: 8px 12px;
+      outline: none;
+      min-width: 0;
+    }
+    .nav-search input::placeholder { color: var(--muted); }
+    .nav-search button {
+      background: var(--cyan);
+      border: 1.5px solid var(--cyan);
+      border-radius: 0 4px 4px 0;
+      color: var(--bg);
+      cursor: pointer;
+      padding: 8px 11px;
+      display: flex;
+      align-items: center;
+    }
+    .nav-search svg { width: 14px; height: 14px; }
+    .nav-search-sub {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.03em;
+    }
+
+    /* ── PAGE TITLE — matches pilot.html scale/weight ── */
+    .page-title {
+      text-align: center;
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      color: var(--cyan-dim);
+      text-transform: uppercase;
+      margin: 36px 0 40px;
+    }
+
+    /* ── ABOUT PANEL ── */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 20px 0;
+    }
+
+    .about-panel {
+      background: rgba(14,26,43,0.9);
+      border: 1px solid rgba(79,195,247,0.12);
+      border-radius: 6px;
+      max-width: 720px;
+      width: 100%;
+      padding: 44px 52px;
+      text-align: center;
+      line-height: 1.8;
+    }
+
+    .about-panel .lead {
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: var(--cyan);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 1.6em;
+    }
+
+    .about-panel p {
+      font-size: 0.9rem;
+      color: #8aaabb;
+      margin-bottom: 1.2em;
+    }
+    .about-panel p:last-child { margin-bottom: 0; }
+    .about-panel strong { color: var(--cyan); }
+
+    /* ── LOGIN BUTTON below panel — matches pilot.html style ── */
+    .about-login-wrap {
+      max-width: 720px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      padding: 28px 0 60px;
+    }
+    .eve-login-sm {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #1a1a2e;
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: 4px;
+      color: var(--white);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 8px 14px;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: border-color 0.2s, background 0.2s;
+      white-space: nowrap;
+    }
+    .eve-login-sm:hover { border-color: var(--cyan); background: rgba(79,195,247,0.08); }
+    .eve-logo-sm { font-weight: 700; font-size: 13px; letter-spacing: 0.15em; }
+    .eve-divider-sm { width: 1px; height: 14px; background: rgba(255,255,255,0.2); }
+
+    /* ── LEGAL + FOOTER — matches pilot.html exactly ── */
+    .legal-note {
+      max-width: 480px;
+      margin: 10px auto 0;
+      padding: 0 24px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .site-footer {
+      margin-top: 60px;
+      padding: 30px 24px 40px;
+      text-align: center;
+    }
+    .footer-grid {
+      display: inline-grid;
+      grid-template-columns: repeat(4, auto);
+      gap: 10px 40px;
+      justify-content: center;
+      text-align: center;
+    }
+    .footer-grid a {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .footer-grid a:hover { color: var(--cyan); }
+    .footer-grid a.active { color: var(--cyan); }
+  </style>
+</head>
+<body>
+
+  <div class="starfield"></div>
+
+  <div class="page">
+
+    <!-- TOP NAV -->
+    <header class="topnav">
+      <a href="index.html" class="nav-logo">PIL<span class="o-ring"></span>T REP</a>
+
+      <nav class="nav-links">
+        <a href="pilot.html">Pilots</a>
+        <a href="corporation.html">Corporations</a>
+        <a href="alliance.html">Alliances</a>
+      </nav>
+
+      <div class="nav-right">
+        <div class="nav-search">
+          <input type="text" placeholder="Search Pilots, Corps and Alliances" id="searchInput" />
+          <button aria-label="Search" onclick="doSearch()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </button>
+        </div>
+        <div class="nav-search-sub">Search New Eden. Rate Encounters.</div>
+      </div>
+    </header>
+
+    <!-- PAGE TITLE -->
+    <h1 class="page-title">About</h1>
+
+    <!-- MAIN -->
+    <main>
+      <div class="about-panel">
+        <p class="lead">Reputation Precedes You</p>
+        <p>
+          <strong>PilotRep</strong> is a third-party reputation platform built for the pilots, corporations and alliances of New Eden. In a universe where trust is a currency and betrayal is a profession knowing who you're flying with matters.
+        </p>
+        <p>
+          We give the EVE Online community a neutral structured space to record and review their encounters. From reliable logistics runners to known scammers, war criminals to stalwart allies. Every rep submitted is a data point in a living record of New Eden's social fabric.
+        </p>
+        <p>
+          PilotRep is not affiliated with Fenris Creations. We are an independent fan project operating under the EVE Online Third-Party Developer license. All EVE-related assets remain the property of Fenris Creations.
+        </p>
+      </div>
+
+      <!-- LOGIN BUTTON BELOW PANEL -->
+      <div class="about-login-wrap">
+        <a href="login.html" class="eve-login-sm">
+          <span class="eve-logo-sm">ΞVΞ</span>
+          <span class="eve-divider-sm"></span>
+          LOG IN with EVE Online
+        </a>
+      </div>
+    </main>
+
+    <!-- LEGAL NOTE -->
+    <div class="legal-note">
+      EVE Online and all related materials are property of Fenris Creations.<br>PilotRep is a third-party fan site and is not affiliated with Fenris Creations.
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+      <div class="footer-grid">
+        <a href="about.html" class="active">About</a>
+        <a href="faq.html">FAQ</a>
+        <a href="subscriptions.html">Subscriptions</a>
+        <a href="login.html">Login</a>
+        <a href="search.html">Search New Eden</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms Of Service</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </footer>
+
+  </div>
+
+<script>
+  function doSearch() {
+    const q = document.getElementById('searchInput').value.trim();
+    if (q) window.location.href = 'search.html?q=' + encodeURIComponent(q);
+  }
+  document.getElementById('searchInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doSearch();
+  });
+</script>
+</body>
+</html>

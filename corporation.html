@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fishers Ghost — Pilot RepScore | PilotRep</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Corporation RepScore — PilotRep</title>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -11,26 +11,15 @@
     :root {
       --bg:        #04080f;
       --bg2:       #0b1220;
-      --bg3:       #101b2e;
       --panel:     #0e1a2b;
-      --panel2:    #121f33;
       --border:    rgba(100,180,255,0.10);
       --cyan:      #4fc3f7;
       --cyan-dim:  #2a8bbf;
-      --orange:    #e8871a;
       --white:     #e8eef5;
       --muted:     #5a7490;
-      --grade-ap: #008bd1;
       --grade-a:  #008bd1;
       --grade-b:  #00af10;
-      --grade-bp: #00af10;
-      --grade-bm: #00af10;
-      --grade-c:  #00af10;
-      --grade-cp: #00af10;
-      --grade-cm: #00af10;
       --grade-d:  #610b0f;
-      --grade-dp: #610b0f;
-      --grade-dm: #610b0f;
       --grade-f:  #610b0f;
     }
 
@@ -79,7 +68,7 @@
 
     .page { position: relative; z-index: 1; }
 
-    /* ── TOP NAV ── */
+    /* ── TOP NAV — exact match to pilot.html ── */
     .topnav {
       display: flex;
       align-items: center;
@@ -203,58 +192,50 @@
       margin: 36px 0 50px;
     }
 
-    /* ── PILOT HEADER ── */
-    .pilot-header {
+    /* ── ALLIANCE IDENTITY ── */
+    .alliance-header {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 36px;
-      max-width: 960px;
+      align-items: flex-start;
+      gap: 28px;
+      max-width: 1100px;
       margin: 0 auto 50px;
       padding: 0 24px;
       flex-wrap: wrap;
     }
-    .pilot-portrait {
-      width: 170px;
-      height: 200px;
-      border-radius: 4px;
-      object-fit: cover;
-      background: linear-gradient(135deg, #0e1a2b 0%, #1a2a40 100%);
-      border: 1px solid var(--border);
+    .alliance-logo {
+      width: 130px;
+      height: 130px;
       flex-shrink: 0;
-    }
-    .pilot-header-info { text-align: left; }
-    .pilot-header-name {
-      font-size: clamp(26px, 4vw, 36px);
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      color: var(--cyan);
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-    .pilot-header-corp,
-    .pilot-header-alliance {
-      font-size: 16px;
-      font-weight: 500;
-      letter-spacing: 0.08em;
-      color: var(--white);
-      text-transform: uppercase;
-    }
-    .pilot-header-secstatus {
-      margin-top: 18px;
-      font-size: 14px;
-      letter-spacing: 0.08em;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
       color: var(--muted);
+      letter-spacing: 0.08em;
       text-transform: uppercase;
+      text-align: center;
     }
-    .pilot-header-secstatus strong {
-      color: var(--white);
+    .alliance-info { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; }
+    .alliance-name {
+      font-size: clamp(22px, 3vw, 32px);
       font-weight: 700;
-      font-size: 18px;
-      margin-left: 8px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      line-height: 1.1;
+    }
+    .alliance-corps {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      line-height: 1.8;
     }
 
-    /* ── PANELS ── */
+    /* ── PANELS — exact copy from pilot.html ── */
     .panels-section {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -298,7 +279,7 @@
       border: 2px solid var(--white);
     }
     .grade-circle::before { top: -3px; left: 50%; transform: translate(-50%, -2px); }
-    .grade-circle::after { bottom: -3px; left: 50%; transform: translate(-50%, 2px); }
+    .grade-circle::after  { bottom: -3px; left: 50%; transform: translate(-50%, 2px); }
     .grade-circle-letter {
       font-size: 56px;
       font-weight: 700;
@@ -385,10 +366,7 @@
     }
     .share-toast.show { opacity: 1; }
 
-    .comments-list {
-      border-radius: 4px;
-      overflow: hidden;
-    }
+    .comments-list { border-radius: 4px; overflow: hidden; }
     .comments-empty {
       text-align: center;
       font-size: 13px;
@@ -405,9 +383,9 @@
       border-bottom: 1px solid rgba(0,0,0,0.2);
     }
     .comment-row:last-child { border-bottom: none; }
-    .comment-row.neg    { background: var(--grade-d); }
-    .comment-row.pos    { background: #00598b; }
-    .comment-row.neutral{ background: var(--grade-b); }
+    .comment-row.neg     { background: var(--grade-d); }
+    .comment-row.pos     { background: #00598b; }
+    .comment-row.neutral { background: var(--grade-b); }
 
     .comment-meta { font-size: 11px; opacity: 0.85; letter-spacing: 0.05em; text-transform: uppercase; }
     .comment-text { font-size: 14px; font-weight: 600; text-transform: uppercase; margin-top: 2px; }
@@ -465,7 +443,6 @@
       margin-bottom: 28px;
     }
 
-    /* slider */
     .grade-slider {
       position: relative;
       display: flex;
@@ -501,9 +478,9 @@
       cursor: pointer;
       transition: all 0.15s;
     }
-    .grade-dot[data-tier="neg"]      { border-color: var(--grade-d); background: var(--grade-d); color: var(--white); }
-    .grade-dot[data-tier="neutral"]  { border-color: var(--grade-b); background: var(--grade-b); color: var(--white); }
-    .grade-dot[data-tier="pos"]      { border-color: var(--grade-a); background: var(--grade-a); color: var(--white); }
+    .grade-dot[data-tier="neg"]     { border-color: var(--grade-d); background: var(--grade-d); color: var(--white); }
+    .grade-dot[data-tier="neutral"] { border-color: var(--grade-b); background: var(--grade-b); color: var(--white); }
+    .grade-dot[data-tier="pos"]     { border-color: var(--grade-a); background: var(--grade-a); color: var(--white); }
 
     .grade-dot.selected[data-tier="neg"]     { background: var(--grade-d); color: var(--white); box-shadow: 0 0 0 3px rgba(255,255,255,0.4); }
     .grade-dot.selected[data-tier="neutral"] { background: var(--grade-b); color: var(--white); box-shadow: 0 0 0 3px rgba(255,255,255,0.4); }
@@ -526,10 +503,9 @@
       border-radius: 3px;
       color: var(--white);
     }
-    .tier-tag.neg { background: var(--grade-d); }
+    .tier-tag.neg     { background: var(--grade-d); }
     .tier-tag.neutral { background: var(--grade-b); }
-    .tier-tag.pos { background: var(--grade-a); }
-    .tier-tag.spacer { visibility: hidden; }
+    .tier-tag.pos     { background: var(--grade-a); }
 
     .system-grid {
       display: grid;
@@ -584,18 +560,11 @@
       align-items: center;
       gap: 10px;
       max-width: 420px;
-      margin: 0 auto 0;
+      margin: 0 auto;
       flex-wrap: wrap;
     }
-    .anon-submitting {
-      font-size: 12px;
-      color: var(--muted);
-      letter-spacing: 0.04em;
-    }
-    .anon-submitting strong {
-      color: var(--cyan);
-      font-weight: 600;
-    }
+    .anon-submitting { font-size: 12px; color: var(--muted); letter-spacing: 0.04em; }
+    .anon-submitting strong { color: var(--cyan); font-weight: 600; }
     .anon-label {
       display: flex;
       align-items: center;
@@ -607,12 +576,7 @@
       cursor: pointer;
       white-space: nowrap;
     }
-    .anon-label input[type="checkbox"] {
-      accent-color: var(--cyan);
-      width: 13px;
-      height: 13px;
-      cursor: pointer;
-    }
+    .anon-label input[type="checkbox"] { accent-color: var(--cyan); width: 13px; height: 13px; cursor: pointer; }
 
     .submit-wrap { text-align: center; }
     .submit-btn {
@@ -644,7 +608,7 @@
     }
     .login-prompt .eve-login-sm { margin: 0 auto; }
 
-    /* ── LEGAL + FOOTER (shared) ── */
+    /* ── LEGAL + FOOTER — exact match to pilot.html ── */
     .legal-note {
       max-width: 480px;
       margin: 10px auto 0;
@@ -653,8 +617,6 @@
       font-size: 12px;
       color: var(--muted);
     }
-    .legal-note a { color: var(--cyan); text-decoration: none; }
-
     .site-footer {
       margin-top: 60px;
       padding: 30px 24px 40px;
@@ -666,7 +628,6 @@
       gap: 10px 40px;
       justify-content: center;
       text-align: center;
-      margin-bottom: 0;
     }
     .footer-grid a {
       font-size: 12px;
@@ -679,17 +640,16 @@
     }
     .footer-grid a:hover { color: var(--cyan); }
 
-    /* ── RESPONSIVE ── */
     @media (max-width: 760px) {
       .panels-section { grid-template-columns: 1fr; }
-      .pilot-header { text-align: center; justify-content: center; }
-      .pilot-header-info { text-align: center; }
+      .alliance-header { justify-content: center; text-align: center; }
       .nav-links { order: 3; width: 100%; }
       .nav-right { align-items: center; width: 100%; }
     }
   </style>
 </head>
 <body>
+
 <div class="starfield"></div>
 <div class="page">
 
@@ -698,15 +658,15 @@
     <a href="index.html" class="nav-logo">PIL<span class="o-ring"></span>T REP</a>
 
     <nav class="nav-links">
-      <a href="pilot.html" class="active">Pilots</a>
-      <a href="corporation.html">Corporations</a>
+      <a href="pilot.html">Pilots</a>
+      <a href="corporation.html" class="active">Corporations</a>
       <a href="alliance.html">Alliances</a>
     </nav>
 
     <div class="nav-right">
       <div class="nav-search">
-        <input type="text" placeholder="Search Pilots, Corps and Alliances" />
-        <button aria-label="Search">
+        <input type="text" placeholder="Search Pilots, Corps and Alliances" id="searchInput" />
+        <button aria-label="Search" onclick="doSearch()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
@@ -717,18 +677,19 @@
   </header>
 
   <!-- PAGE TITLE -->
-  <h1 class="page-title">Pilot RepScore</h1>
+  <h1 class="page-title">Corporation RepScore</h1>
 
-  <!-- PILOT HEADER -->
-  <section class="pilot-header">
-    <div class="pilot-portrait"></div>
-    <div class="pilot-header-info">
-      <div class="pilot-header-name">Fishers Ghost</div>
-      <div class="pilot-header-corp">High Sec Mining Corp</div>
-      <div class="pilot-header-alliance">United Galaxy Alliance</div>
-      <div class="pilot-header-secstatus">Security Status <strong>5.0</strong></div>
+  <!-- CORPORATION IDENTITY -->
+  <div class="alliance-header">
+    <div class="alliance-logo">Corp<br>Logo</div>
+    <div class="alliance-info">
+      <div class="alliance-name">High Sec Mining Corp</div>
+      <div class="alliance-corps">
+        ALLIANCE &bull; United Galaxy Alliance<br>
+        CEO &bull; Fishers Ghost
+      </div>
     </div>
-  </section>
+  </div>
 
   <!-- PANELS -->
   <section class="panels-section">
@@ -769,7 +730,7 @@
       </div>
 
       <div class="see-all-wrap" id="seeAllWrap" style="display:none;">
-        <button class="see-all-btn" id="seeAllBtn">▾ See All Comments</button>
+        <button class="see-all-btn" id="seeAllBtn">&#9662; See All Comments</button>
       </div>
     </div>
 
@@ -781,11 +742,11 @@
       <div class="subsection-label">Rate Your Encounter</div>
 
       <div class="grade-slider" id="gradeSlider">
-        <div class="grade-dot" data-grade="F" data-tier="neg">F</div>
-        <div class="grade-dot" data-grade="D" data-tier="neg">D</div>
-        <div class="grade-dot" data-grade="C" data-tier="neutral">C</div>
-        <div class="grade-dot" data-grade="B" data-tier="neutral">B</div>
-        <div class="grade-dot" data-grade="A" data-tier="pos">A</div>
+        <div class="grade-dot" data-grade="F"  data-tier="neg">F</div>
+        <div class="grade-dot" data-grade="D"  data-tier="neg">D</div>
+        <div class="grade-dot" data-grade="C"  data-tier="neutral">C</div>
+        <div class="grade-dot" data-grade="B"  data-tier="neutral">B</div>
+        <div class="grade-dot" data-grade="A"  data-tier="pos">A</div>
         <div class="grade-dot" data-grade="A+" data-tier="pos">A+</div>
       </div>
       <div class="slider-labels">
@@ -810,25 +771,25 @@
 
       <div class="subsection-label">Comment On Your Encounter</div>
       <div class="comment-field-wrap">
-        <input type="text" class="comment-input" maxlength="30" placeholder="MAXIMUM 5 WORDS OR 30 LETTERS" />
-        <div class="comment-hint">No Spam • No Profanity • Keep It Professional • Comments Are Moderated</div>
+        <input type="text" class="comment-input" id="commentInput" maxlength="30" placeholder="MAXIMUM 5 WORDS OR 30 LETTERS" />
+        <div class="comment-hint">No Spam &bull; No Profanity &bull; Keep It Professional &bull; Comments Are Moderated</div>
       </div>
 
       <div class="section-divider"></div>
 
       <div class="anon-row">
-        <span class="anon-submitting">Submitting as: <strong id="submitterName">Adrelia Voss</strong></span>
+        <span class="anon-submitting">Submitting as: <strong id="submitterName">CapsuleerName</strong></span>
         <label class="anon-label">
           <input type="checkbox" id="anonCheck"> Remain Anonymous
         </label>
       </div>
 
       <div class="submit-wrap" style="margin-top:24px;">
-        <button class="submit-btn">Submit A Rep</button>
+        <button class="submit-btn" id="submitBtn">Submit A Rep</button>
         <div class="login-prompt" id="loginPrompt">
           <div class="login-prompt-text">You must be logged in to submit a PilotRep.</div>
           <a href="/.netlify/functions/auth-start" class="eve-login-sm">
-            <span class="eve-logo-sm">ΞVΞ</span>
+            <span class="eve-logo-sm">&#926;V&#926;</span>
             <span class="eve-divider-sm"></span>
             LOG IN with EVE Online
           </a>
@@ -860,39 +821,11 @@
     </div>
   </footer>
 
-</div>
+</div><!-- /.page -->
 
 <script>
-  // Grade slider: single-select
-  const dots = document.querySelectorAll('#gradeSlider .grade-dot');
-  dots.forEach(dot => {
-    dot.addEventListener('click', () => {
-      dots.forEach(d => d.classList.remove('selected'));
-      dot.classList.add('selected');
-    });
-  });
-
-  // System buttons: single-select
-  const sysButtons = document.querySelectorAll('.system-btn');
-  sysButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      sysButtons.forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-    });
-  });
-
-  // Comment field: enforce 5 word / 30 letter limit
-  const commentInput = document.querySelector('.comment-input');
-  commentInput.addEventListener('input', () => {
-    let words = commentInput.value.trim().split(/\s+/).filter(Boolean);
-    if (words.length > 5) {
-      commentInput.value = words.slice(0, 5).join(' ');
-    }
-  });
-
-  // ── AUTH GATE ──
+  // ── Auth — real EVE SSO session check ──
   let currentUser = null;
-  let sessionLoaded = false;
 
   async function loadSession() {
     try {
@@ -903,168 +836,167 @@
         const submitterName = document.getElementById('submitterName');
         if (submitterName) submitterName.textContent = currentUser;
       }
-    } catch (e) {
-      console.warn('Session check failed:', e);
-    }
-    sessionLoaded = true;
+    } catch (e) { console.warn('Session check failed:', e); }
   }
 
   function isLoggedIn() { return currentUser !== null; }
 
-  // ── ANONYMOUS CHECKBOX ──
-  const anonCheck = document.getElementById('anonCheck');
-  const submitterName = document.getElementById('submitterName');
-  anonCheck.addEventListener('change', () => {
-    submitterName.textContent = anonCheck.checked ? 'Anonymous' : (currentUser || 'Unknown');
-  });
-
   loadSession();
 
-  // ── SHARE BUTTON ──
-  const shareBtn = document.getElementById('shareBtn');
-  const shareToast = document.getElementById('shareToast');
-  shareBtn.addEventListener('click', () => {
-    const url = window.location.href;
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(url).then(showToast);
-    } else {
-      const ta = document.createElement('textarea');
-      ta.value = url; document.body.appendChild(ta);
-      ta.select(); document.execCommand('copy');
-      document.body.removeChild(ta);
-      showToast();
-    }
+  const GRADES = ['F','D','C','B','A','A+'];
+  const TIERS  = { 'F':'neg','D':'neg','C':'neutral','B':'neutral','A':'pos','A+':'pos' };
+
+  let selectedGrade  = null;
+  let selectedSystem = null;
+  let allGrades      = [];
+  let allComments    = [];
+  let repsCount      = 0;
+  let commentsCount  = 0;
+  let showingAll     = false;
+  const PREVIEW      = 5;
+
+  // Grade dots
+  document.querySelectorAll('.grade-dot').forEach(dot => {
+    dot.addEventListener('click', () => {
+      document.querySelectorAll('.grade-dot').forEach(d => d.classList.remove('selected'));
+      dot.classList.add('selected');
+      selectedGrade = dot.dataset.grade;
+    });
   });
-  function showToast() {
-    shareToast.classList.add('show');
-    setTimeout(() => shareToast.classList.remove('show'), 2200);
+
+  // System buttons
+  document.querySelectorAll('.system-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.system-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedSystem = btn.textContent.trim();
+    });
+  });
+
+  // Anon toggle
+  document.getElementById('anonCheck').addEventListener('change', function() {
+    document.getElementById('submitterName').textContent = this.checked ? 'Anonymous' : (currentUser || 'CapsuleerName');
+  });
+
+  // Submit
+  document.getElementById('submitBtn').addEventListener('click', () => {
+    if (!isLoggedIn()) {
+      document.getElementById('loginPrompt').classList.add('show');
+      return;
+    }
+    if (!selectedGrade)  { showToast('Select A Grade');  return; }
+    if (!selectedSystem) { showToast('Select A System'); return; }
+
+    const raw   = document.getElementById('commentInput').value.trim();
+    const words = raw ? raw.split(/\s+/).slice(0, 5).join(' ') : '';
+
+    allGrades.push(selectedGrade);
+    repsCount++;
+    document.getElementById('repsCount').textContent = repsCount;
+
+    if (words) {
+      commentsCount++;
+      document.getElementById('commentsCount').textContent = commentsCount;
+      allComments.unshift({
+        grade: selectedGrade,
+        tier:  TIERS[selectedGrade] || 'neutral',
+        system: selectedSystem,
+        comment: words,
+        date: nowLabel()
+      });
+    }
+
+    updateGradeCircle();
+    renderComments();
+
+    // Reset
+    document.querySelectorAll('.grade-dot').forEach(d => d.classList.remove('selected'));
+    document.querySelectorAll('.system-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById('commentInput').value = '';
+    selectedGrade  = null;
+    selectedSystem = null;
+    showToast('Rep Submitted!');
+  });
+
+  function nowLabel() {
+    const m = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const d = new Date();
+    return m[d.getMonth()] + ' ' + d.getFullYear();
   }
 
-  // ── 13-POINT GRADE SCALE ──
-  // Input dots map to these anchor values on a 0–12 scale:
-  //   F=0  D=2  C=5  B=8  A=11  A+=12
-  // Averaging then rounds to the nearest of 13 slots:
-  //   0=F  1=D−  2=D  3=D+  4=C−  5=C  6=C+  7=B−  8=B  9=B+  10=A−  11=A  12=A+
-  // Anchors: F and A+ sit at the extremes; middle grades evenly spaced.
-  // A+ is set to 11.5 (not 12) so Math.round tips to index 12 with a
-  // realistic A+ majority — e.g. 5× A+ and 1× B already reaches A+.
-  const INPUT_TO_NUM = { 'F': 0, 'D': 2.4, 'C': 4.8, 'B': 7.2, 'A': 9.6, 'A+': 11.5 };
-  const GRADE_TABLE = [
-    { html: 'F',                                    cls: 'grade-F' },  // 0
-    { html: 'D<span class="modifier">−</span>',     cls: 'grade-F' },  // 1
-    { html: 'D',                                    cls: 'grade-F' },  // 2
-    { html: 'D<span class="modifier">+</span>',     cls: 'grade-F' },  // 3
-    { html: 'C<span class="modifier">−</span>',     cls: 'grade-B' },  // 4
-    { html: 'C',                                    cls: 'grade-B' },  // 5
-    { html: 'C<span class="modifier">+</span>',     cls: 'grade-B' },  // 6
-    { html: 'B<span class="modifier">−</span>',     cls: 'grade-B' },  // 7
-    { html: 'B',                                    cls: 'grade-B' },  // 8
-    { html: 'B<span class="modifier">+</span>',     cls: 'grade-B' },  // 9
-    { html: 'A<span class="modifier">−</span>',     cls: 'grade-A' },  // 10
-    { html: 'A',                                    cls: 'grade-A' },  // 11
-    { html: 'A<span class="modifier">+</span>',     cls: 'grade-A' },  // 12
-  ];
-
-  let submittedReps = [];
-  let commentsExpanded = false;
-  const VISIBLE_LIMIT = 5;
-
-  const repsCountEl      = document.getElementById('repsCount');
-  const commentsCountEl  = document.getElementById('commentsCount');
-  const gradeCircleLetterEl = document.getElementById('gradeCircleLetter');
-  const commentsListEl   = document.getElementById('commentsList');
-  const commentsEmptyEl  = document.getElementById('commentsEmpty');
-  const seeAllWrapEl     = document.getElementById('seeAllWrap');
-  const seeAllBtnEl      = document.getElementById('seeAllBtn');
-
-  function buildCommentRow(rep) {
-    const row = document.createElement('div');
-    row.className = 'comment-row ' + rep.tier;
-    row.innerHTML = `
-      <div>
-        <div class="comment-meta">Just now${rep.author ? ' · ' + rep.author : ''}</div>
-        <div class="comment-text">${rep.comment || '(no comment left)'}</div>
-      </div>
-      <span class="comment-system">${rep.system}</span>
-    `;
-    return row;
+  function updateGradeCircle() {
+    if (!allGrades.length) return;
+    const avg = Math.round(allGrades.reduce((s, g) => s + GRADES.indexOf(g), 0) / allGrades.length);
+    const grade = GRADES[Math.max(0, Math.min(avg, GRADES.length - 1))];
+    const el = document.getElementById('gradeCircleLetter');
+    el.textContent = grade;
+    el.className = 'grade-circle-letter';
+    const tier = TIERS[grade];
+    if (tier === 'neg')     el.classList.add('grade-F');
+    if (tier === 'neutral') el.classList.add('grade-B');
+    if (tier === 'pos')     el.classList.add('grade-A');
   }
 
   function renderComments() {
-    commentsListEl.innerHTML = '';
-    if (submittedReps.length === 0) {
-      commentsListEl.appendChild(commentsEmptyEl);
-      commentsEmptyEl.style.display = 'block';
-      seeAllWrapEl.style.display = 'none';
+    const list  = document.getElementById('commentsList');
+    const empty = document.getElementById('commentsEmpty');
+    const wrap  = document.getElementById('seeAllWrap');
+    const btn   = document.getElementById('seeAllBtn');
+
+    if (!allComments.length) {
+      list.innerHTML = '';
+      list.appendChild(empty);
+      wrap.style.display = 'none';
       return;
     }
-    const visible = commentsExpanded ? submittedReps : submittedReps.slice(0, VISIBLE_LIMIT);
-    visible.forEach(rep => commentsListEl.appendChild(buildCommentRow(rep)));
-    if (submittedReps.length > VISIBLE_LIMIT) {
-      seeAllWrapEl.style.display = 'block';
-      seeAllBtnEl.textContent = commentsExpanded ? '▴ Show Less' : '▾ See All Comments';
-    } else {
-      seeAllWrapEl.style.display = 'none';
+
+    const visible = showingAll ? allComments : allComments.slice(0, PREVIEW);
+    list.innerHTML = '';
+    visible.forEach(c => {
+      const row = document.createElement('div');
+      row.className = 'comment-row ' + c.tier;
+      row.innerHTML = `
+        <div>
+          <div class="comment-meta">${c.date}</div>
+          <div class="comment-text">${c.comment.replace(/</g,'&lt;')}</div>
+        </div>
+        <div class="comment-system">${c.system}</div>
+      `;
+      list.appendChild(row);
+    });
+
+    wrap.style.display = allComments.length > PREVIEW ? '' : 'none';
+    if (allComments.length > PREVIEW) {
+      btn.textContent = showingAll ? '▴ Show Less' : '▾ See All Comments';
     }
   }
 
-  seeAllBtnEl.addEventListener('click', () => {
-    commentsExpanded = !commentsExpanded;
+  document.getElementById('seeAllBtn').addEventListener('click', () => {
+    showingAll = !showingAll;
     renderComments();
   });
 
-  function recalcAndRender() {
-    repsCountEl.textContent    = submittedReps.length;
-    commentsCountEl.textContent = submittedReps.filter(r => r.comment).length;
+  document.getElementById('shareBtn').addEventListener('click', () => {
+    navigator.clipboard.writeText(window.location.href).then(() => showToast('Link Copied!'));
+  });
 
-    if (submittedReps.length === 0) {
-      gradeCircleLetterEl.textContent = '–';
-      gradeCircleLetterEl.className = 'grade-circle-letter';
-    } else {
-      const avg = submittedReps.reduce((sum, r) => sum + r.gradeNum, 0) / submittedReps.length;
-      const idx = Math.min(12, Math.max(0, Math.round(avg)));
-      const grade = GRADE_TABLE[idx];
-      gradeCircleLetterEl.innerHTML = grade.html;
-      gradeCircleLetterEl.className = 'grade-circle-letter ' + grade.cls;
-    }
-    renderComments();
+  function showToast(msg) {
+    const t = document.getElementById('shareToast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
   }
 
-  const submitBtn   = document.querySelector('.submit-btn');
-  const loginPrompt = document.getElementById('loginPrompt');
-
-  submitBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    if (!isLoggedIn()) {
-      loginPrompt.classList.add('show');
-      return;
-    }
-    loginPrompt.classList.remove('show');
-
-    const selectedDot = document.querySelector('#gradeSlider .grade-dot.selected');
-    const selectedSys = document.querySelector('.system-btn.selected');
-
-    if (!selectedDot) { alert('Please select a grade (F through A+) before submitting.'); return; }
-    if (!selectedSys) { alert('Please select a system type before submitting.'); return; }
-
-    const grade = selectedDot.dataset.grade;
-    const rep = {
-      grade,
-      gradeNum: INPUT_TO_NUM[grade],
-      tier: selectedDot.dataset.tier,
-      system: selectedSys.textContent,
-      comment: commentInput.value.trim(),
-      author: anonCheck.checked ? '' : currentUser
-    };
-
-    submittedReps.unshift(rep);
-    recalcAndRender();
-
-    dots.forEach(d => d.classList.remove('selected'));
-    sysButtons.forEach(b => b.classList.remove('selected'));
-    commentInput.value = '';
-    // TODO: replace with real Supabase insert once database is connected.
+  function doSearch() {
+    const q = document.getElementById('searchInput').value.trim();
+    if (q) window.location.href = 'search.html?q=' + encodeURIComponent(q);
+  }
+  document.getElementById('searchInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doSearch();
   });
+
+  // Show login prompt if logged out
+  if (!isLoggedIn()) document.getElementById('loginPrompt').classList.add('show');
 </script>
 </body>
 </html>

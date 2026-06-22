@@ -346,36 +346,24 @@
       padding: 30px 24px 40px;
       text-align: center;
     }
-    .footer-about {
-      font-family: Helvetica, Arial, sans-serif;
-      font-size: 14px;
+    .footer-grid {
+      display: inline-grid;
+      grid-template-columns: repeat(4, auto);
+      gap: 10px 40px;
+      justify-content: center;
+      text-align: center;
+      margin-bottom: 0;
+    }
+    .footer-grid a {
+      font-size: 12px;
       font-weight: 600;
       letter-spacing: 0.1em;
-      color: var(--white);
+      color: var(--muted);
       text-transform: uppercase;
-      margin-bottom: 14px;
-      display: block;
       text-decoration: none;
-    }
-    .footer-about:hover { color: var(--cyan); }
-    .footer-links {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 0;
-      font-size: 12px;
-      color: var(--muted);
-      letter-spacing: 0.05em;
-    }
-    .footer-links a {
-      color: var(--muted);
-      text-decoration: none;
-      padding: 2px 10px;
       transition: color 0.15s;
     }
-    .footer-links a:hover { color: var(--cyan); }
-    .footer-links .sep { color: var(--border); user-select: none; }
+    .footer-grid a:hover { color: var(--cyan); }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 640px) {
@@ -393,8 +381,8 @@
   <!-- TOP NAV -->
   <nav class="topnav">
     <a href="pilot.html">Pilots</a>
-    <a href="corporations.html">Corporations</a>
-    <a href="alliances.html">Alliances</a>
+    <a href="corporation.html">Corporations</a>
+    <a href="alliance.html">Alliances</a>
   </nav>
 
   <!-- HERO -->
@@ -416,7 +404,7 @@
 
     <p class="search-sub">Search New Eden. Rate Encounters.</p>
 
-    <a href="#" class="eve-login">
+    <a href="/.netlify/functions/auth-start" class="eve-login" id="heroLoginBtn">
       <span class="eve-logo">ΞVΞ</span>
       <span class="eve-divider"></span>
       LOG IN with EVE Online
@@ -550,22 +538,40 @@
 
   <!-- LEGAL NOTE -->
   <div class="legal-note">
-    EVE Online and all related materials are property of Fenris Creations. PilotRep is a third-party fan site and is not affiliated with Fenris Creations.
+    EVE Online and all related materials are property of Fenris Creations.<br>PilotRep is a third-party fan site and is not affiliated with Fenris Creations.
   </div>
 
   <!-- FOOTER -->
   <footer class="site-footer">
-    <a href="about.html" class="footer-about">About</a>
-    <nav class="footer-links">
-      <a href="#">Payments</a><span class="sep"> | </span>
-      <a href="#">FAQ</a><span class="sep"> | </span>
-      <a href="#">API / Github</a><span class="sep"> | </span>
-      <a href="#">Features</a><span class="sep"> | </span>
-      <a href="#">Legal</a><span class="sep"> | </span>
-      <a href="#">Direct Login</a>
-    </nav>
+    <div class="footer-grid">
+      <a href="about.html">About</a>
+      <a href="faq.html">FAQ</a>
+      <a href="subscriptions.html">Subscriptions</a>
+      <a href="login.html">Login</a>
+      <a href="search.html">Search New Eden</a>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms Of Service</a>
+      <a href="contact.html">Contact</a>
+    </div>
   </footer>
 
-</div>
+<script>
+  // Session check — swap login button to character name if already logged in
+  (async () => {
+    try {
+      const res = await fetch('/.netlify/functions/auth-me');
+      const data = await res.json();
+      if (data.loggedIn) {
+        const btn = document.getElementById('heroLoginBtn');
+        if (btn) {
+          btn.textContent = data.characterName;
+          btn.href = '#';
+          btn.style.color = 'var(--cyan)';
+          btn.style.borderColor = 'var(--cyan-dim)';
+        }
+      }
+    } catch (e) { /* non-fatal */ }
+  })();
+</script>
 </body>
 </html>
