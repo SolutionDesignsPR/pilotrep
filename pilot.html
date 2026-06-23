@@ -385,6 +385,23 @@
     }
     .share-toast.show { opacity: 1; }
 
+    .validation-toast {
+      display: none;
+      margin: 16px auto 0;
+      max-width: 420px;
+      background: rgba(232,135,26,0.12);
+      border: 1px solid var(--orange);
+      border-radius: 4px;
+      color: var(--orange);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      padding: 11px 16px;
+      text-align: center;
+    }
+    .validation-toast.show { display: block; }
+
     .comments-list {
       border-radius: 4px;
       overflow: hidden;
@@ -817,7 +834,7 @@
       <div class="section-divider"></div>
 
       <div class="anon-row">
-        <span class="anon-submitting">Submitting as: <strong id="submitterName">Adrelia Voss</strong></span>
+        <span class="anon-submitting">Submitting as: <strong id="submitterName">—</strong></span>
         <label class="anon-label">
           <input type="checkbox" id="anonCheck"> Remain Anonymous
         </label>
@@ -825,6 +842,7 @@
 
       <div class="submit-wrap" style="margin-top:24px;">
         <button class="submit-btn">Submit A Rep</button>
+        <div class="validation-toast" id="validationToast"></div>
         <div class="login-prompt" id="loginPrompt">
           <div class="login-prompt-text">You must be logged in to submit a PilotRep.</div>
           <a href="/.netlify/functions/auth-start" class="eve-login-sm">
@@ -852,7 +870,7 @@
       <a href="about.html">About</a>
       <a href="faq.html">FAQ</a>
       <a href="subscriptions.html">Subscriptions</a>
-      <a href="login.html">Login</a>
+      <a href="login.html" id="footerAuthLink">Login</a>
       <a href="search.html">Search New Eden</a>
       <a href="privacy.html">Privacy Policy</a>
       <a href="terms.html">Terms Of Service</a>
@@ -902,6 +920,17 @@
         currentUser = data.characterName;
         const submitterName = document.getElementById('submitterName');
         if (submitterName) submitterName.textContent = currentUser;
+        // Switch footer link to Logout
+        const authLink = document.getElementById('footerAuthLink');
+        if (authLink) {
+          authLink.textContent = 'Logout';
+          authLink.href = '#';
+          authLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.cookie = 'pilotrep_session=; Max-Age=0; path=/';
+            window.location.reload();
+          });
+        }
       }
     } catch (e) {
       console.warn('Session check failed:', e);
@@ -1033,6 +1062,13 @@
   const submitBtn   = document.querySelector('.submit-btn');
   const loginPrompt = document.getElementById('loginPrompt');
 
+  const validationToast = document.getElementById('validationToast');
+  function showValidation(msg) {
+    validationToast.textContent = msg;
+    validationToast.classList.add('show');
+    setTimeout(() => validationToast.classList.remove('show'), 3000);
+  }
+
   submitBtn.addEventListener('click', (e) => {
     e.preventDefault();
     if (!isLoggedIn()) {
@@ -1044,8 +1080,8 @@
     const selectedDot = document.querySelector('#gradeSlider .grade-dot.selected');
     const selectedSys = document.querySelector('.system-btn.selected');
 
-    if (!selectedDot) { alert('Please select a grade (F through A+) before submitting.'); return; }
-    if (!selectedSys) { alert('Please select a system type before submitting.'); return; }
+    if (!selectedDot) { showValidation('Please select a grade (F through A+) before submitting.'); return; }
+    if (!selectedSys) { showValidation('Please select a system type before submitting.'); return; }
 
     const grade = selectedDot.dataset.grade;
     const rep = {
