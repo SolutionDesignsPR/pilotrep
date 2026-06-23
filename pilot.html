@@ -845,7 +845,7 @@
         <div class="validation-toast" id="validationToast"></div>
         <div class="login-prompt" id="loginPrompt">
           <div class="login-prompt-text">You must be logged in to submit a PilotRep.</div>
-          <a href="/.netlify/functions/auth-start" class="eve-login-sm">
+          <a id="eveLoginBtn" href="#" class="eve-login-sm" onclick="this.href='/.netlify/functions/auth-start?state='+encodeURIComponent(window.location.href)">
             <span class="eve-logo-sm">ΞVΞ</span>
             <span class="eve-divider-sm"></span>
             LOG IN with EVE Online
