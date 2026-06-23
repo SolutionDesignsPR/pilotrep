@@ -778,7 +778,7 @@
       <div class="section-divider"></div>
 
       <div class="anon-row">
-        <span class="anon-submitting">Submitting as: <strong id="submitterName">CapsuleerName</strong></span>
+        <span class="anon-submitting">Submitting as: <strong id="submitterName">—</strong></span>
         <label class="anon-label">
           <input type="checkbox" id="anonCheck"> Remain Anonymous
         </label>
@@ -813,7 +813,7 @@
       <a href="about.html">About</a>
       <a href="faq.html">FAQ</a>
       <a href="subscriptions.html">Subscriptions</a>
-      <a href="login.html">Login</a>
+      <a href="login.html" id="footerAuthLink">Login</a>
       <a href="search.html">Search New Eden</a>
       <a href="privacy.html">Privacy Policy</a>
       <a href="terms.html">Terms Of Service</a>
@@ -835,6 +835,16 @@
         currentUser = data.characterName;
         const submitterName = document.getElementById('submitterName');
         if (submitterName) submitterName.textContent = currentUser;
+        const authLink = document.getElementById('footerAuthLink');
+        if (authLink) {
+          authLink.textContent = 'Logout';
+          authLink.href = '#';
+          authLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.cookie = 'pilotrep_session=; Max-Age=0; path=/';
+            window.location.reload();
+          });
+        }
       }
     } catch (e) { console.warn('Session check failed:', e); }
   }
@@ -879,7 +889,7 @@
   });
 
   // Submit
-  document.getElementById('submitBtn').addEventListener('click', () => {
+  document.getElementById('submitBtn').addEventListener('click', async () => {
     if (!isLoggedIn()) {
       document.getElementById('loginPrompt').classList.add('show');
       return;
@@ -889,33 +899,53 @@
 
     const raw   = document.getElementById('commentInput').value.trim();
     const words = raw ? raw.split(/\s+/).slice(0, 5).join(' ') : '';
+    const submitBtn = document.getElementById('submitBtn');
+    const anonymous = document.getElementById('anonCheck').checked;
 
-    allGrades.push(selectedGrade);
-    repsCount++;
-    document.getElementById('repsCount').textContent = repsCount;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting…';
 
-    if (words) {
-      commentsCount++;
-      document.getElementById('commentsCount').textContent = commentsCount;
-      allComments.unshift({
-        grade: selectedGrade,
-        tier:  TIERS[selectedGrade] || 'neutral',
-        system: selectedSystem,
-        comment: words,
-        date: nowLabel()
+    try {
+      const res = await fetch('/.netlify/functions/submit-rep', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetId:   new URLSearchParams(window.location.search).get('id') || 'unknown',
+          targetType: 'alliance',
+          grade:      selectedGrade,
+          gradeIndex: GRADES.indexOf(selectedGrade),
+          systemType: selectedSystem,
+          comment:    words,
+          anonymous
+        })
       });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.error || 'Submission failed.');
+      } else {
+        allGrades.push(selectedGrade);
+        repsCount++;
+        document.getElementById('repsCount').textContent = repsCount;
+        if (words) {
+          commentsCount++;
+          document.getElementById('commentsCount').textContent = commentsCount;
+          allComments.unshift({ grade: selectedGrade, tier: TIERS[selectedGrade] || 'neutral', system: selectedSystem, comment: words, date: nowLabel() });
+        }
+        updateGradeCircle();
+        renderComments();
+        document.querySelectorAll('.grade-dot').forEach(d => d.classList.remove('selected'));
+        document.querySelectorAll('.system-btn').forEach(b => b.classList.remove('selected'));
+        document.getElementById('commentInput').value = '';
+        selectedGrade  = null;
+        selectedSystem = null;
+        showToast('Rep Submitted!');
+      }
+    } catch (err) {
+      showToast('Network error. Please try again.');
     }
 
-    updateGradeCircle();
-    renderComments();
-
-    // Reset
-    document.querySelectorAll('.grade-dot').forEach(d => d.classList.remove('selected'));
-    document.querySelectorAll('.system-btn').forEach(b => b.classList.remove('selected'));
-    document.getElementById('commentInput').value = '';
-    selectedGrade  = null;
-    selectedSystem = null;
-    showToast('Rep Submitted!');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit A Rep';
   });
 
   function nowLabel() {

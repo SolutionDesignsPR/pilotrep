@@ -1069,7 +1069,7 @@
     setTimeout(() => validationToast.classList.remove('show'), 3000);
   }
 
-  submitBtn.addEventListener('click', (e) => {
+  submitBtn.addEventListener('click', async (e) => {
     e.preventDefault();
     if (!isLoggedIn()) {
       loginPrompt.classList.add('show');
@@ -1084,22 +1084,52 @@
     if (!selectedSys) { showValidation('Please select a system type before submitting.'); return; }
 
     const grade = selectedDot.dataset.grade;
-    const rep = {
-      grade,
-      gradeNum: INPUT_TO_NUM[grade],
-      tier: selectedDot.dataset.tier,
-      system: selectedSys.textContent,
-      comment: commentInput.value.trim(),
-      author: anonCheck.checked ? '' : currentUser
-    };
 
-    submittedReps.unshift(rep);
-    recalcAndRender();
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting…';
 
-    dots.forEach(d => d.classList.remove('selected'));
-    sysButtons.forEach(b => b.classList.remove('selected'));
-    commentInput.value = '';
-    // TODO: replace with real Supabase insert once database is connected.
+    try {
+      const res = await fetch('/.netlify/functions/submit-rep', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetId:   new URLSearchParams(window.location.search).get('id') || 'unknown',
+          targetType: 'pilot',
+          grade,
+          gradeIndex: INPUT_TO_NUM[grade],
+          systemType: selectedSys.textContent.trim(),
+          comment:    commentInput.value.trim(),
+          anonymous:  anonCheck.checked
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showValidation(data.error || 'Submission failed. Please try again.');
+      } else {
+        const rep = {
+          grade,
+          gradeNum: INPUT_TO_NUM[grade],
+          tier: selectedDot.dataset.tier,
+          system: selectedSys.textContent,
+          comment: commentInput.value.trim(),
+          author: anonCheck.checked ? '' : currentUser
+        };
+        submittedReps.unshift(rep);
+        recalcAndRender();
+        dots.forEach(d => d.classList.remove('selected'));
+        sysButtons.forEach(b => b.classList.remove('selected'));
+        commentInput.value = '';
+        showValidation('Rep submitted!');
+        validationToast.style.borderColor = 'var(--cyan)';
+        validationToast.style.color = 'var(--cyan)';
+        validationToast.style.background = 'rgba(79,195,247,0.08)';
+      }
+    } catch (err) {
+      showValidation('Network error. Please try again.');
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit A Rep';
   });
 </script>
 </body>
