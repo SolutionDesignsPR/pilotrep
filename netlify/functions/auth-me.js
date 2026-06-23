@@ -7,7 +7,7 @@ exports.handler = async function (event) {
   }
 
   try {
-    const decoded = Buffer.from(match[1], 'base64').toString('utf8');
+    const decoded = Buffer.from(decodeURIComponent(match[1]), 'base64').toString('utf8');
     const session = JSON.parse(decoded);
     return json({ loggedIn: true, ...session });
   } catch {

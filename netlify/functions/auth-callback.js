@@ -104,7 +104,7 @@ exports.handler = async function (event) {
 
   // ── 5. Set session cookie & redirect back to origin page ───────────────────
   const session = JSON.stringify({ characterId, characterName, corpId, allianceId });
-  const encoded = Buffer.from(session).toString('base64');
+  const encoded = encodeURIComponent(Buffer.from(session).toString('base64'));
 
   // Use state as return URL if it looks safe, otherwise fall back to index
   let returnUrl = '/index.html?login=success';
