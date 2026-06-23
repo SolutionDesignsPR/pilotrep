@@ -949,6 +949,13 @@
 
   loadSession();
 
+  // Show login prompt if logged out (matches alliance/corp behaviour)
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      if (!isLoggedIn()) document.getElementById('loginPrompt').classList.add('show');
+    }, 800);
+  });
+
   // ── SHARE BUTTON ──
   const shareBtn = document.getElementById('shareBtn');
   const shareToast = document.getElementById('shareToast');
