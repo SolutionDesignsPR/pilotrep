@@ -102,15 +102,25 @@ exports.handler = async function (event) {
     return redirect('/index.html?login=error');
   }
 
-  // ── 5. Set session cookie & redirect home ──────────────────────────────────
+  // ── 5. Set session cookie & redirect back to origin page ───────────────────
   const session = JSON.stringify({ characterId, characterName, corpId, allianceId });
   const encoded = Buffer.from(session).toString('base64');
+
+  // Use state as return URL if it looks safe, otherwise fall back to index
+  let returnUrl = '/index.html?login=success';
+  try {
+    if (state) {
+      const decoded = decodeURIComponent(state);
+      if (decoded.startsWith('/') || decoded.startsWith('https://curious-chaja-a3235b.netlify.app')) {
+        returnUrl = decoded;
+      }
+    }
+  } catch (e) { /* ignore bad state */ }
 
   return {
     statusCode: 302,
     headers: {
-      Location: '/index.html?login=success',
-      // Session cookie — expires on browser close (no Max-Age / Expires)
+      Location: returnUrl,
       'Set-Cookie': `pilotrep_session=${encoded}; Path=/; HttpOnly; SameSite=Lax`,
     },
     body: '',

@@ -1,13 +1,17 @@
-exports.handler = async function () {
-  const clientId = process.env.EVE_CLIENT_ID;
+exports.handler = async function (event) {
+  const clientId    = process.env.EVE_CLIENT_ID;
   const callbackUrl = 'https://curious-chaja-a3235b.netlify.app/callback.html';
-  const state = Math.random().toString(36).substring(2, 15);
+
+  // Use the return URL passed from the page as state, fallback to index
+  const returnUrl = (event.queryStringParameters && event.queryStringParameters.state)
+    ? event.queryStringParameters.state
+    : '/index.html';
 
   const params = new URLSearchParams({
     response_type: 'code',
-    redirect_uri: callbackUrl,
-    client_id: clientId,
-    state: state,
+    redirect_uri:  callbackUrl,
+    client_id:     clientId,
+    state:         returnUrl,
   });
 
   const eveAuthUrl = `https://login.eveonline.com/v2/oauth/authorize?${params.toString()}`;
@@ -16,7 +20,6 @@ exports.handler = async function () {
     statusCode: 302,
     headers: {
       Location: eveAuthUrl,
-      'Set-Cookie': `eve_state=${state}; Path=/; HttpOnly; SameSite=Lax`,
     },
     body: '',
   };
