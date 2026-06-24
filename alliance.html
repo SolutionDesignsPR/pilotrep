@@ -788,7 +788,7 @@
         <button class="submit-btn" id="submitBtn">Submit A Rep</button>
         <div class="login-prompt" id="loginPrompt">
           <div class="login-prompt-text">You must be logged in to submit a PilotRep.</div>
-          <a id="eveLoginBtn" href="#" class="eve-login-sm" onclick="this.href='/.netlify/functions/auth-start?state='+encodeURIComponent(window.location.href)">
+          <a id="eveLoginBtn" href="#" class="eve-login-sm" onclick="this.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname)">
             <span class="eve-logo-sm">&#926;V&#926;</span>
             <span class="eve-divider-sm"></span>
             LOG IN with EVE Online
