@@ -386,21 +386,24 @@
     .share-toast.show { opacity: 1; }
 
     .validation-toast {
-      display: none;
-      margin: 16px auto 0;
-      max-width: 420px;
-      background: rgba(232,135,26,0.12);
-      border: 1px solid var(--orange);
-      border-radius: 4px;
-      color: var(--orange);
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--cyan);
+      color: var(--bg);
       font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.07em;
+      font-weight: 700;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      padding: 11px 16px;
-      text-align: center;
+      padding: 9px 20px;
+      border-radius: 5px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      z-index: 9999;
     }
-    .validation-toast.show { display: block; }
+    .validation-toast.show { opacity: 1; }
 
     .comments-list {
       border-radius: 4px;
@@ -841,8 +844,7 @@
       </div>
 
       <div class="submit-wrap" style="margin-top:24px;">
-        <button class="submit-btn">Submit A Rep</button>
-        <div class="validation-toast" id="validationToast"></div>
+        <button class="submit-btn" id="submitBtn">Submit A Rep</button>
         <div class="login-prompt" id="loginPrompt">
           <div class="login-prompt-text">You must be logged in to submit a PilotRep.</div>
           <a id="eveLoginBtn" href="#" class="eve-login-sm" onclick="this.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname)">
@@ -858,6 +860,7 @@
 
   <!-- SHARE TOAST -->
   <div class="share-toast" id="shareToast">Link Copied!</div>
+  <div class="validation-toast" id="validationToast"></div>
 
   <!-- LEGAL NOTE -->
   <div class="legal-note">
@@ -910,6 +913,7 @@
 
   // ── AUTH GATE ──
   let currentUser = null;
+
   async function loadSession() {
     try {
       const res = await fetch('/.netlify/functions/auth-me');
@@ -930,13 +934,14 @@
           });
         }
       } else {
-        // Session resolved — user is logged out, show the login prompt
         document.getElementById('loginPrompt').classList.add('show');
       }
     } catch (e) {
       console.warn('Session check failed:', e);
       document.getElementById('loginPrompt').classList.add('show');
     }
+    // Enable submit now that we know the session state
+    document.getElementById('submitBtn').disabled = false;
   }
 
   function isLoggedIn() { return currentUser !== null; }
@@ -1060,14 +1065,19 @@
     renderComments();
   }
 
-  const submitBtn   = document.querySelector('.submit-btn');
+  const submitBtn   = document.getElementById('submitBtn');
   const loginPrompt = document.getElementById('loginPrompt');
+
+  // Disable submit until session check resolves
+  submitBtn.disabled = true;
 
   const validationToast = document.getElementById('validationToast');
   function showValidation(msg) {
     validationToast.textContent = msg;
+    validationToast.style.background = 'var(--cyan)';
+    validationToast.style.color = 'var(--bg)';
     validationToast.classList.add('show');
-    setTimeout(() => validationToast.classList.remove('show'), 3000);
+    setTimeout(() => validationToast.classList.remove('show'), 2200);
   }
 
   submitBtn.addEventListener('click', async (e) => {
@@ -1121,9 +1131,6 @@
         sysButtons.forEach(b => b.classList.remove('selected'));
         commentInput.value = '';
         showValidation('Rep submitted!');
-        validationToast.style.borderColor = 'var(--cyan)';
-        validationToast.style.color = 'var(--cyan)';
-        validationToast.style.background = 'rgba(79,195,247,0.08)';
       }
     } catch (err) {
       showValidation('Network error. Please try again.');

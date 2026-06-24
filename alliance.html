@@ -801,6 +801,7 @@
 
   <!-- SHARE TOAST -->
   <div class="share-toast" id="shareToast">Link Copied!</div>
+  <div class="share-toast" id="validationToast"></div>
 
   <!-- LEGAL NOTE -->
   <div class="legal-note">
@@ -852,10 +853,13 @@
       console.warn('Session check failed:', e);
       document.getElementById('loginPrompt').classList.add('show');
     }
+    document.getElementById('submitBtn').disabled = false;
   }
 
   function isLoggedIn() { return currentUser !== null; }
 
+  // Disable submit until session check resolves
+  document.getElementById('submitBtn').disabled = true;
   loadSession();
 
   const GRADES = ['F','D','C','B','A','A+'];
@@ -1011,16 +1015,20 @@
     renderComments();
   });
 
-  document.getElementById('shareBtn').addEventListener('click', () => {
-    navigator.clipboard.writeText(window.location.href).then(() => showToast('Link Copied!'));
-  });
-
   function showToast(msg) {
-    const t = document.getElementById('shareToast');
+    const t = document.getElementById('validationToast');
     t.textContent = msg;
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2200);
   }
+
+  document.getElementById('shareBtn').addEventListener('click', () => {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      const t = document.getElementById('shareToast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    });
+  });
 
   function doSearch() {
     const q = document.getElementById('searchInput').value.trim();
@@ -1029,6 +1037,9 @@
   document.getElementById('searchInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') doSearch();
   });
+
+  // Show login prompt if logged out
+  if (!isLoggedIn()) document.getElementById('loginPrompt').classList.add('show');
 </script>
 </body>
 </html>
