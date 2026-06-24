@@ -29,7 +29,7 @@ exports.handler = async function (event) {
       body: new URLSearchParams({
         grant_type:   'authorization_code',
         code:         code,
-        redirect_uri: 'https://curious-chaja-a3235b.netlify.app/callback.html',
+        redirect_uri: 'https://curious-chaja-a3235b.netlify.app/.netlify/functions/auth-callback',
       }),
     });
 
@@ -102,25 +102,24 @@ exports.handler = async function (event) {
     return redirect('/index.html?login=error');
   }
 
-  // ── 5. Set session cookie & redirect back to origin page ───────────────────
+  // ── 5. Set session cookie & redirect to origin page ───────────────────────
   const session = JSON.stringify({ characterId, characterName, corpId, allianceId });
-  const encoded = encodeURIComponent(Buffer.from(session).toString('base64'));
+  const encoded = Buffer.from(session).toString('base64');
 
-  // Use state as return URL if it looks safe, otherwise fall back to index
-  let returnUrl = '/index.html?login=success';
+  // Decode the origin page from state so we return the user to where they started
+  let destination = '/index.html?login=success';
   try {
-    if (state) {
-      const decoded = decodeURIComponent(state);
-      if (decoded.startsWith('/') || decoded.startsWith('https://curious-chaja-a3235b.netlify.app')) {
-        returnUrl = decoded;
-      }
-    }
-  } catch (e) { /* ignore bad state */ }
+    const stateData = JSON.parse(Buffer.from(state || '', 'base64').toString('utf8'));
+    if (stateData.origin) destination = stateData.origin + '?login=success';
+  } catch (_) {
+    // state was not our encoded object (e.g. old random string) — fall back to index
+  }
 
   return {
     statusCode: 302,
     headers: {
-      Location: returnUrl,
+      Location: destination,
+      // Session cookie — expires on browser close (no Max-Age / Expires)
       'Set-Cookie': `pilotrep_session=${encoded}; Path=/; HttpOnly; SameSite=Lax`,
     },
     body: '',
