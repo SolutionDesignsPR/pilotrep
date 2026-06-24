@@ -910,8 +910,6 @@
 
   // ── AUTH GATE ──
   let currentUser = null;
-  let sessionLoaded = false;
-
   async function loadSession() {
     try {
       const res = await fetch('/.netlify/functions/auth-me');
@@ -931,11 +929,14 @@
             window.location.reload();
           });
         }
+      } else {
+        // Session resolved — user is logged out, show the login prompt
+        document.getElementById('loginPrompt').classList.add('show');
       }
     } catch (e) {
       console.warn('Session check failed:', e);
+      document.getElementById('loginPrompt').classList.add('show');
     }
-    sessionLoaded = true;
   }
 
   function isLoggedIn() { return currentUser !== null; }
@@ -948,13 +949,6 @@
   });
 
   loadSession();
-
-  // Show login prompt if logged out (matches alliance/corp behaviour)
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      if (!isLoggedIn()) document.getElementById('loginPrompt').classList.add('show');
-    }, 800);
-  });
 
   // ── SHARE BUTTON ──
   const shareBtn = document.getElementById('shareBtn');

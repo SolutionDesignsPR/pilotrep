@@ -845,8 +845,13 @@
             window.location.reload();
           });
         }
+      } else {
+        document.getElementById('loginPrompt').classList.add('show');
       }
-    } catch (e) { console.warn('Session check failed:', e); }
+    } catch (e) {
+      console.warn('Session check failed:', e);
+      document.getElementById('loginPrompt').classList.add('show');
+    }
   }
 
   function isLoggedIn() { return currentUser !== null; }
@@ -1024,9 +1029,6 @@
   document.getElementById('searchInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') doSearch();
   });
-
-  // Show login prompt if logged out
-  if (!isLoggedIn()) document.getElementById('loginPrompt').classList.add('show');
 </script>
 </body>
 </html>
