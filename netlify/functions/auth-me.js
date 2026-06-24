@@ -1,11 +1,9 @@
 exports.handler = async function (event) {
   const cookieHeader = event.headers.cookie || '';
   const match = cookieHeader.match(/pilotrep_session=([^;]+)/);
-
   if (!match) {
     return json({ loggedIn: false });
   }
-
   try {
     const decoded = Buffer.from(match[1], 'base64').toString('utf8');
     const session = JSON.parse(decoded);
@@ -14,7 +12,6 @@ exports.handler = async function (event) {
     return json({ loggedIn: false });
   }
 };
-
 function json(data) {
   return {
     statusCode: 200,
