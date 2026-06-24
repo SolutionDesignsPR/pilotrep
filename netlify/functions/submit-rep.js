@@ -55,6 +55,7 @@ exports.handler = async (event) => {
   }
 
   // 5. Enforce 6-month cooldown
+  // ⚠️ TESTING MODE: cooldown disabled — remove 'false &&' before launch!
   const sixMonthsAgo = new Date();
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
@@ -66,7 +67,7 @@ exports.handler = async (event) => {
     .gte('created_at', sixMonthsAgo.toISOString())
     .maybeSingle();
 
-  if (existing) {
+  if (false && existing) {
     const nextEligible = new Date(existing.created_at);
     nextEligible.setMonth(nextEligible.getMonth() + 6);
     const formatted = nextEligible.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
