@@ -112,14 +112,13 @@ exports.handler = async function (event) {
     const stateData = JSON.parse(Buffer.from(state || '', 'base64').toString('utf8'));
     if (stateData.origin) destination = stateData.origin + '?login=success';
   } catch (_) {
-    // state was not our encoded object (e.g. old random string) — fall back to index
+    // state was not our encoded object — fall back to index
   }
 
   return {
     statusCode: 302,
     headers: {
       Location: destination,
-      // Session cookie — expires on browser close (no Max-Age / Expires)
       'Set-Cookie': `pilotrep_session=${encoded}; Path=/; HttpOnly; SameSite=Lax`,
     },
     body: '',
