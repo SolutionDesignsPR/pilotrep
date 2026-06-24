@@ -13,7 +13,6 @@ exports.handler = async function (event) {
     response_type: 'code',
     redirect_uri:  callbackUrl,
     client_id:     clientId,
-    scope:         'publicData',
     state:         state,
   });
 
