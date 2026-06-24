@@ -825,6 +825,9 @@
 </div><!-- /.page -->
 
 <script>
+  // Disable submit immediately — re-enabled by loadSession() once session is known
+  document.getElementById('submitBtn').disabled = true;
+
   // ── Auth — real EVE SSO session check ──
   let currentUser = null;
 
@@ -858,8 +861,6 @@
 
   function isLoggedIn() { return currentUser !== null; }
 
-  // Disable submit until session check resolves
-  document.getElementById('submitBtn').disabled = true;
   loadSession();
 
   const GRADES = ['F','D','C','B','A','A+'];
@@ -1037,9 +1038,6 @@
   document.getElementById('searchInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') doSearch();
   });
-
-  // Show login prompt if logged out
-  if (!isLoggedIn()) document.getElementById('loginPrompt').classList.add('show');
 </script>
 </body>
 </html>

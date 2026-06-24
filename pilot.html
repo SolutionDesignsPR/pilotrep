@@ -884,6 +884,9 @@
 </div>
 
 <script>
+  // Disable submit immediately — re-enabled by loadSession() once session is known
+  document.getElementById('submitBtn').disabled = true;
+
   // Grade slider: single-select
   const dots = document.querySelectorAll('#gradeSlider .grade-dot');
   dots.forEach(dot => {
@@ -1067,9 +1070,6 @@
 
   const submitBtn   = document.getElementById('submitBtn');
   const loginPrompt = document.getElementById('loginPrompt');
-
-  // Disable submit until session check resolves
-  submitBtn.disabled = true;
 
   const validationToast = document.getElementById('validationToast');
   function showValidation(msg) {
