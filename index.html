@@ -547,7 +547,7 @@
       <a href="about.html">About</a>
       <a href="faq.html">FAQ</a>
       <a href="subscriptions.html">Subscriptions</a>
-      <a href="login.html">Login</a>
+      <a href="login.html" id="footerAuthLink">Login</a>
       <a href="search.html">Search New Eden</a>
       <a href="privacy.html">Privacy Policy</a>
       <a href="terms.html">Terms Of Service</a>
@@ -568,6 +568,11 @@
           btn.href = '#';
           btn.style.color = 'var(--cyan)';
           btn.style.borderColor = 'var(--cyan-dim)';
+        }
+        const authLink = document.getElementById('footerAuthLink');
+        if (authLink) {
+          authLink.textContent = 'Logout';
+          authLink.href = '/.netlify/functions/auth-logout';
         }
       }
     } catch (e) { /* non-fatal */ }

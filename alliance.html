@@ -842,12 +842,7 @@
         const authLink = document.getElementById('footerAuthLink');
         if (authLink) {
           authLink.textContent = 'Logout';
-          authLink.href = '#';
-          authLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            document.cookie = 'pilotrep_session=; Max-Age=0; path=/';
-            window.location.reload();
-          });
+          authLink.href = '/.netlify/functions/auth-logout';
         }
       } else {
         document.getElementById('loginPrompt').classList.add('show');
