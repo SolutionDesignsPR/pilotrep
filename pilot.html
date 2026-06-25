@@ -186,6 +186,35 @@
       align-items: center;
     }
     .nav-search svg { width: 14px; height: 14px; }
+    .search-drop-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--white);
+      border-bottom: 1px solid rgba(79,195,247,0.08);
+      text-decoration: none;
+    }
+    .search-drop-item:last-child { border-bottom: none; }
+    .search-drop-item:hover { background: rgba(79,195,247,0.1); }
+    .search-drop-label {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 8px 14px 4px;
+      border-bottom: 1px solid rgba(79,195,247,0.08);
+    }
+    .search-drop-name { flex: 1; }
+    .search-drop-type {
+      font-size: 10px;
+      color: var(--cyan);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .pilot-portrait img { width: 170px; height: 200px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border); }
     .nav-search-sub {
       font-size: 11px;
       color: var(--muted);
@@ -724,13 +753,14 @@
     </nav>
 
     <div class="nav-right">
-      <div class="nav-search">
-        <input type="text" placeholder="Search Pilots, Corps and Alliances" />
-        <button aria-label="Search">
+      <div class="nav-search" style="position:relative;">
+        <input type="text" id="navSearchInput" placeholder="Search Pilots, Corps and Alliances" autocomplete="off" />
+        <button id="navSearchBtn" aria-label="Search">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
         </button>
+        <div id="searchDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#0e1a2b;border:1px solid var(--cyan-dim);border-radius:0 0 6px 6px;z-index:999;max-height:360px;overflow-y:auto;"></div>
       </div>
       <div class="nav-search-sub">Search New Eden. Rate Encounters.</div>
     </div>
@@ -741,12 +771,13 @@
 
   <!-- PILOT HEADER -->
   <section class="pilot-header">
-    <div class="pilot-portrait"></div>
+    <img class="pilot-portrait" id="pilotPortrait" src="" alt="" style="display:none;" />
+    <div class="pilot-portrait" id="pilotPortraitPlaceholder"></div>
     <div class="pilot-header-info">
-      <div class="pilot-header-name">Fishers Ghost</div>
-      <div class="pilot-header-corp">High Sec Mining Corp</div>
-      <div class="pilot-header-alliance">United Galaxy Alliance</div>
-      <div class="pilot-header-secstatus">Security Status <strong>5.0</strong></div>
+      <div class="pilot-header-name" id="pilotName">—</div>
+      <div class="pilot-header-corp" id="pilotCorp"></div>
+      <div class="pilot-header-alliance" id="pilotAlliance"></div>
+      <div class="pilot-header-secstatus" id="pilotSecStatus" style="display:none;">Security Status <strong id="pilotSecValue">0.0</strong></div>
     </div>
   </section>
 
@@ -1013,9 +1044,10 @@
   function buildCommentRow(rep) {
     const row = document.createElement('div');
     row.className = 'comment-row ' + rep.tier;
+    const dateLabel = rep.date || 'Just now';
     row.innerHTML = `
       <div>
-        <div class="comment-meta">Just now${rep.author ? ' · ' + rep.author : ''}</div>
+        <div class="comment-meta">${dateLabel}${rep.author ? ' · ' + rep.author : ''}</div>
         <div class="comment-text">${rep.comment || '(no comment left)'}</div>
       </div>
       <span class="comment-system">${rep.system}</span>
@@ -1086,8 +1118,8 @@
     const selectedDot = document.querySelector('#gradeSlider .grade-dot.selected');
     const selectedSys = document.querySelector('.system-btn.selected');
 
-    if (!selectedDot) { showValidation('Please select a grade (F through A+) before submitting.'); return; }
-    if (!selectedSys) { showValidation('Please select a system type before submitting.'); return; }
+    if (!selectedDot) { showValidation('Select A Grade'); return; }
+    if (!selectedSys) { showValidation('Select A System'); return; }
 
     const grade = selectedDot.dataset.grade;
 
@@ -1133,6 +1165,148 @@
 
     submitBtn.disabled = false;
     submitBtn.textContent = 'Submit A Rep';
+  });
+
+  // ── LOAD PILOT DATA FROM ESI + SUPABASE ──────────────────────────────────
+  (async () => {
+    const params = new URLSearchParams(window.location.search);
+    const pilotId = params.get('id');
+    if (!pilotId) return; // no ID in URL — leave placeholder
+
+    // Load ESI character data
+    try {
+      const esiRes = await fetch(`/.netlify/functions/esi-proxy?action=character&id=${pilotId}`);
+      const esi = await esiRes.json();
+      if (esi && esi.name) {
+        document.title = `${esi.name} — PilotRep`;
+        document.getElementById('pilotName').textContent = esi.name;
+        document.getElementById('pilotCorp').textContent = esi.corporation_name || '';
+        document.getElementById('pilotAlliance').textContent = esi.alliance_name || '';
+        const secEl = document.getElementById('pilotSecStatus');
+        document.getElementById('pilotSecValue').textContent = esi.security_status ?? '0.0';
+        secEl.style.display = '';
+        if (esi.portrait) {
+          const img = document.getElementById('pilotPortrait');
+          const placeholder = document.getElementById('pilotPortraitPlaceholder');
+          img.src = esi.portrait;
+          img.onload = () => {
+            img.style.display = '';
+            placeholder.style.display = 'none';
+          };
+        }
+      }
+    } catch (e) {
+      console.warn('ESI load failed:', e);
+    }
+
+    // Load reps from Supabase
+    try {
+      const repsRes = await fetch(`/.netlify/functions/get-reps?id=${pilotId}&type=pilot`);
+      const data = await repsRes.json();
+      if (data.repCount > 0) {
+        // Update stats
+        repsCountEl.textContent = data.repCount;
+        commentsCountEl.textContent = data.commentCount;
+        // Update grade circle
+        gradeCircleLetterEl.innerHTML = data.repScoreHtml || '–';
+        const tierCls = data.repScoreTier === 'pos' ? 'grade-A' : data.repScoreTier === 'neg' ? 'grade-F' : 'grade-B';
+        gradeCircleLetterEl.className = 'grade-circle-letter ' + tierCls;
+        // Load comments
+        submittedReps = data.reps.map(r => ({
+          grade:    r.grade,
+          gradeNum: r.gradeIndex,
+          tier:     r.tier,
+          system:   r.system,
+          comment:  r.comment,
+          author:   r.author,
+          date:     r.date
+        }));
+        renderComments();
+      }
+    } catch (e) {
+      console.warn('Reps load failed:', e);
+    }
+  })();
+
+  // ── SEARCH BAR ────────────────────────────────────────────────────────────
+  const searchInput    = document.getElementById('navSearchInput');
+  const searchBtn      = document.getElementById('navSearchBtn');
+  const searchDropdown = document.getElementById('searchDropdown');
+  let searchTimer;
+
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    const q = searchInput.value.trim();
+    if (q.length < 3) { searchDropdown.style.display = 'none'; return; }
+    searchTimer = setTimeout(() => runTypeahead(q), 300);
+  });
+
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') goToSearch();
+  });
+
+  searchBtn.addEventListener('click', goToSearch);
+
+  function goToSearch() {
+    const q = searchInput.value.trim();
+    if (q.length < 1) return;
+    window.location.href = `/search.html?q=${encodeURIComponent(q)}`;
+  }
+
+  async function runTypeahead(q) {
+    try {
+      const res = await fetch(`/.netlify/functions/esi-proxy?action=search&query=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      renderDropdown(data, q);
+    } catch (e) {
+      searchDropdown.style.display = 'none';
+    }
+  }
+
+  function renderDropdown(data, q) {
+    const { characters = [], corporations = [], alliances = [] } = data;
+    const total = characters.length + corporations.length + alliances.length;
+    if (total === 0) { searchDropdown.style.display = 'none'; return; }
+
+    let html = '';
+    if (characters.length) {
+      html += `<div class="search-drop-label">Pilots</div>`;
+      characters.forEach(c => {
+        html += `<a class="search-drop-item" href="/pilot.html?id=${c.id}">
+          <span class="search-drop-name">${c.name}</span>
+          <span class="search-drop-type">Pilot</span>
+        </a>`;
+      });
+    }
+    if (corporations.length) {
+      html += `<div class="search-drop-label">Corporations</div>`;
+      corporations.forEach(c => {
+        html += `<a class="search-drop-item" href="/corporation.html?id=${c.id}">
+          <span class="search-drop-name">${c.name}</span>
+          <span class="search-drop-type">Corp</span>
+        </a>`;
+      });
+    }
+    if (alliances.length) {
+      html += `<div class="search-drop-label">Alliances</div>`;
+      alliances.forEach(a => {
+        html += `<a class="search-drop-item" href="/alliance.html?id=${a.id}">
+          <span class="search-drop-name">${a.name}</span>
+          <span class="search-drop-type">Alliance</span>
+        </a>`;
+      });
+    }
+    html += `<a class="search-drop-item" href="/search.html?q=${encodeURIComponent(q)}" style="color:var(--cyan);justify-content:center;">
+      See all results for "${q}" →
+    </a>`;
+
+    searchDropdown.innerHTML = html;
+    searchDropdown.style.display = 'block';
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.nav-search')) searchDropdown.style.display = 'none';
   });
 </script>
 </body>
