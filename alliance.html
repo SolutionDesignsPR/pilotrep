@@ -384,7 +384,7 @@
     }
     .comment-row:last-child { border-bottom: none; }
     .comment-row.neg     { background: var(--grade-d); }
-    .comment-row.pos     { background: #00598b; }
+    .comment-row.pos     { background: var(--grade-a); }
     .comment-row.neutral { background: var(--grade-b); }
 
     .comment-meta { font-size: 11px; opacity: 0.85; letter-spacing: 0.05em; text-transform: uppercase; }
@@ -646,6 +646,34 @@
       .nav-links { order: 3; width: 100%; }
       .nav-right { align-items: center; width: 100%; }
     }
+    .search-drop-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--white);
+      border-bottom: 1px solid rgba(79,195,247,0.08);
+      text-decoration: none;
+    }
+    .search-drop-item:last-child { border-bottom: none; }
+    .search-drop-item:hover { background: rgba(79,195,247,0.1); }
+    .search-drop-label {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 8px 14px 4px;
+      border-bottom: 1px solid rgba(79,195,247,0.08);
+    }
+    .search-drop-name { flex: 1; }
+    .search-drop-type {
+      font-size: 10px;
+      color: var(--cyan);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
   </style>
 </head>
 <body>
@@ -664,13 +692,14 @@
     </nav>
 
     <div class="nav-right">
-      <div class="nav-search">
-        <input type="text" placeholder="Search Pilots, Corps and Alliances" id="searchInput" />
-        <button aria-label="Search" onclick="doSearch()">
+      <div class="nav-search" style="position:relative;">
+        <input type="text" placeholder="Search Pilots, Corps and Alliances" id="navSearchInput" />
+        <button aria-label="Search" id="navSearchBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
         </button>
+        <div id="searchDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#0e1a2b;border:1px solid var(--cyan-dim);border-radius:0 0 6px 6px;z-index:999;max-height:360px;overflow-y:auto;"></div>
       </div>
       <div class="nav-search-sub">Search New Eden. Rate Encounters.</div>
     </div>
@@ -681,13 +710,11 @@
 
   <!-- ALLIANCE IDENTITY -->
   <div class="alliance-header">
-    <div class="alliance-logo">Alliance<br>Logo</div>
+    <img id="allianceLogo" src="" alt="Alliance Logo" style="display:none;width:128px;height:128px;border-radius:4px;">
+    <div class="alliance-logo" id="allianceLogoPlaceholder">Alliance<br>Logo</div>
     <div class="alliance-info">
-      <div class="alliance-name">Brave Collective</div>
-      <div class="alliance-corps">
-        BRAVE EMPIRE &bull; BRAVE OPERATIONS - LOLLIPOP DIVISION &bull; BRAVE UNITED &bull; BRAVE PROVISIONS<br>
-        BRAVE INDUSTRIAL INITIATIVE &bull; BRAVE NEWBIES INC. &bull; BRAVE DOJO
-      </div>
+      <div class="alliance-name" id="allianceName">—</div>
+      <div class="alliance-corps" id="allianceTicker"></div>
     </div>
   </div>
 
@@ -1026,13 +1053,127 @@
     });
   });
 
-  function doSearch() {
-    const q = document.getElementById('searchInput').value.trim();
-    if (q) window.location.href = 'search.html?q=' + encodeURIComponent(q);
-  }
-  document.getElementById('searchInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') doSearch();
+  // ── SEARCH BAR ────────────────────────────────────────────────────────────
+  const searchInput    = document.getElementById('navSearchInput');
+  const searchBtn      = document.getElementById('navSearchBtn');
+  const searchDropdown = document.getElementById('searchDropdown');
+  let searchTimer;
+
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    const q = searchInput.value.trim();
+    if (q.length < 3) { searchDropdown.style.display = 'none'; return; }
+    searchTimer = setTimeout(() => runSearch(), 300);
   });
+
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') runSearch();
+  });
+
+  searchBtn.addEventListener('click', runSearch);
+
+  async function runSearch() {
+    const q = searchInput.value.trim();
+    if (q.length < 3) { searchDropdown.style.display = 'none'; return; }
+    try {
+      const res = await fetch(`/.netlify/functions/esi-proxy?action=search&query=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      renderDropdown(data, q);
+    } catch (e) {
+      searchDropdown.style.display = 'none';
+    }
+  }
+
+  function renderDropdown(data, q) {
+    const { characters = [], corporations = [], alliances = [] } = data;
+    const total = characters.length + corporations.length + alliances.length;
+    if (total === 0) { searchDropdown.style.display = 'none'; return; }
+    let html = '';
+    if (characters.length) {
+      html += `<div class="search-drop-label">Pilots</div>`;
+      characters.forEach(c => {
+        html += `<a class="search-drop-item" href="/pilot.html?id=${c.id}">
+          <span class="search-drop-name">${c.name}</span>
+          <span class="search-drop-type">Pilot</span>
+        </a>`;
+      });
+    }
+    if (corporations.length) {
+      html += `<div class="search-drop-label">Corporations</div>`;
+      corporations.forEach(c => {
+        html += `<a class="search-drop-item" href="/corporation.html?id=${c.id}">
+          <span class="search-drop-name">${c.name}</span>
+          <span class="search-drop-type">Corp</span>
+        </a>`;
+      });
+    }
+    if (alliances.length) {
+      html += `<div class="search-drop-label">Alliances</div>`;
+      alliances.forEach(a => {
+        html += `<a class="search-drop-item" href="/alliance.html?id=${a.id}">
+          <span class="search-drop-name">${a.name}</span>
+          <span class="search-drop-type">Alliance</span>
+        </a>`;
+      });
+    }
+    html += `<a class="search-drop-item" href="/search.html?q=${encodeURIComponent(q)}" style="color:var(--cyan);justify-content:center;">
+      See all results for "${q}" →
+    </a>`;
+    searchDropdown.innerHTML = html;
+    searchDropdown.style.display = 'block';
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.nav-search')) searchDropdown.style.display = 'none';
+  });
+
+  // ── LOAD ALLIANCE DATA FROM ESI + SUPABASE ────────────────────────────────
+  (async () => {
+    const params   = new URLSearchParams(window.location.search);
+    const allianceId = params.get('id');
+    if (!allianceId) return;
+
+    // Load ESI identity
+    try {
+      const res  = await fetch(`/.netlify/functions/esi-proxy?action=alliance&id=${allianceId}`);
+      const esi  = await res.json();
+      document.getElementById('allianceName').textContent = esi.name || '—';
+      document.getElementById('allianceTicker').textContent = esi.ticker ? `[${esi.ticker}]` : '';
+      const img  = document.getElementById('allianceLogo');
+      const placeholder = document.getElementById('allianceLogoPlaceholder');
+      img.onload = () => { img.style.display = ''; placeholder.style.display = 'none'; };
+      img.onerror = () => { img.style.display = 'none'; };
+      img.src = esi.logo || '';
+    } catch (e) {
+      console.warn('ESI alliance load failed:', e);
+    }
+
+    // Load reps from Supabase
+    try {
+      const repsRes = await fetch(`/.netlify/functions/get-reps?id=${allianceId}&type=alliance`);
+      const data    = await repsRes.json();
+      if (data.repCount > 0) {
+        document.getElementById('repsCount').textContent     = data.repCount;
+        document.getElementById('commentsCount').textContent = data.commentCount;
+        const gradeEl = document.getElementById('gradeCircleLetter');
+        gradeEl.innerHTML   = data.repScoreHtml || '–';
+        const tierCls = data.repScoreTier === 'pos' ? 'grade-A' : data.repScoreTier === 'neg' ? 'grade-F' : 'grade-B';
+        gradeEl.className   = 'grade-circle-letter ' + tierCls;
+        allComments = data.reps.map(r => ({
+          grade:    r.grade,
+          gradeNum: r.grade_index,
+          tier:     r.tier,
+          system:   r.system,
+          comment:  r.comment,
+          author:   r.author,
+          date:     r.date
+        }));
+        renderComments();
+      }
+    } catch (e) {
+      console.warn('Reps load failed:', e);
+    }
+  })();
 </script>
 </body>
 </html>
