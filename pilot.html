@@ -454,9 +454,9 @@
       border-bottom: 1px solid rgba(0,0,0,0.2);
     }
     .comment-row:last-child { border-bottom: none; }
-    .comment-row.neg    { background: var(--grade-d); }
-    .comment-row.pos    { background: #00598b; }
-    .comment-row.neutral{ background: var(--grade-b); }
+    .comment-row.neg     { background: var(--grade-d); }
+    .comment-row.pos     { background: var(--grade-a); }
+    .comment-row.neutral { background: var(--grade-b); }
 
     .comment-meta { font-size: 11px; opacity: 0.85; letter-spacing: 0.05em; text-transform: uppercase; }
     .comment-text { font-size: 14px; font-weight: 600; text-transform: uppercase; margin-top: 2px; }
@@ -1140,7 +1140,8 @@
           anonymous:  anonCheck.checked
         })
       });
-      const data = await res.json();
+      let data = {};
+      try { data = await res.json(); } catch (_) {}
       if (!res.ok) {
         showValidation(data.error || 'Submission failed. Please try again.');
       } else {
@@ -1215,7 +1216,7 @@
         // Load comments
         submittedReps = data.reps.map(r => ({
           grade:    r.grade,
-          gradeNum: r.gradeIndex,
+          gradeNum: r.grade_index,
           tier:     r.tier,
           system:   r.system,
           comment:  r.comment,
@@ -1254,7 +1255,9 @@
     window.location.href = `/search.html?q=${encodeURIComponent(q)}`;
   }
 
-  async function runTypeahead(q) {
+  async function runSearch() {
+    const q = searchInput.value.trim();
+    if (q.length < 3) { searchDropdown.style.display = 'none'; return; }
     try {
       const res = await fetch(`/.netlify/functions/esi-proxy?action=search&query=${encodeURIComponent(q)}`);
       const data = await res.json();
