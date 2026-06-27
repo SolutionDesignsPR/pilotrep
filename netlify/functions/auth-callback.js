@@ -3,14 +3,8 @@ const { createClient } = require('@supabase/supabase-js');
 exports.handler = async function (event) {
   const { code, state, error } = event.queryStringParameters || {};
 
-  // EVE returned an error
-  if (error) {
-    return redirect('/index.html?login=error');
-  }
-
-  if (!code) {
-    return redirect('/index.html?login=error');
-  }
+  if (error) return redirect('/index.html?login=error');
+  if (!code)  return redirect('/index.html?login=error');
 
   // ── 1. Exchange code for access token ──────────────────────────────────────
   const clientId     = process.env.EVE_CLIENT_ID;
@@ -32,12 +26,10 @@ exports.handler = async function (event) {
         redirect_uri: 'https://curious-chaja-a3235b.netlify.app/.netlify/functions/auth-callback',
       }),
     });
-
     if (!tokenRes.ok) {
       console.error('Token exchange failed:', await tokenRes.text());
       return redirect('/index.html?login=error');
     }
-
     tokenData = await tokenRes.json();
   } catch (err) {
     console.error('Token fetch error:', err);
@@ -50,12 +42,10 @@ exports.handler = async function (event) {
     const verifyRes = await fetch('https://login.eveonline.com/oauth/verify', {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
     });
-
     if (!verifyRes.ok) {
       console.error('Verify failed:', await verifyRes.text());
       return redirect('/index.html?login=error');
     }
-
     characterData = await verifyRes.json();
   } catch (err) {
     console.error('Verify fetch error:', err);
@@ -102,18 +92,22 @@ exports.handler = async function (event) {
     return redirect('/index.html?login=error');
   }
 
-  // ── 5. Set session cookie & redirect to origin page ───────────────────────
-  const session = JSON.stringify({ characterId, characterName, corpId, allianceId });
+  // ── 5. Set session cookie & redirect ─────────────────────────────────────
+  // Store access token in session so esi-proxy can use it for authenticated search
+  const session = JSON.stringify({
+    characterId,
+    characterName,
+    corpId,
+    allianceId,
+    accessToken: tokenData.access_token
+  });
   const encoded = Buffer.from(session).toString('base64');
 
-  // Decode the origin page from state so we return the user to where they started
   let destination = '/index.html?login=success';
   try {
     const stateData = JSON.parse(Buffer.from(state || '', 'base64').toString('utf8'));
     if (stateData.origin) destination = stateData.origin + '?login=success';
-  } catch (_) {
-    // state was not our encoded object — fall back to index
-  }
+  } catch (_) {}
 
   return {
     statusCode: 302,

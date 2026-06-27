@@ -12,6 +12,7 @@ exports.handler = async function (event) {
     return json({ loggedIn: false });
   }
 };
+
 function json(data) {
   return {
     statusCode: 200,

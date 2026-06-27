@@ -11,6 +11,55 @@ exports.handler = async (event) => {
       if (!query || query.length < 3) {
         return { statusCode: 400, headers, body: JSON.stringify({ error: 'Query must be at least 3 characters' }) };
       }
+
+      // Try authenticated search first (requires logged-in user's token via cookie)
+      const cookieHeader = event.headers.cookie || '';
+      const match = cookieHeader.match(/pilotrep_session=([^;]+)/);
+      let accessToken = null;
+      if (match) {
+        try {
+          const session = JSON.parse(Buffer.from(match[1], 'base64').toString('utf8'));
+          accessToken = session.accessToken || null;
+        } catch (_) {}
+      }
+
+      if (accessToken) {
+        // Authenticated ESI search — supports partial name matching
+        const esiUrl = `https://esi.evetech.net/latest/characters/search/?categories=character,corporation,alliance&search=${encodeURIComponent(query)}&strict=false&datasource=tranquility`;
+        const searchRes = await fetch(esiUrl, {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        if (searchRes.ok) {
+          const searchData = await searchRes.json();
+          const allIds = [
+            ...(searchData.character   || []).slice(0, 10),
+            ...(searchData.corporation || []).slice(0, 10),
+            ...(searchData.alliance    || []).slice(0, 10)
+          ];
+          if (allIds.length === 0) {
+            return { statusCode: 200, headers, body: JSON.stringify({ characters: [], corporations: [], alliances: [] }) };
+          }
+          const namesRes = await fetch('https://esi.evetech.net/latest/universe/names/?datasource=tranquility', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(allIds)
+          });
+          if (namesRes.ok) {
+            const namesData = await namesRes.json();
+            return {
+              statusCode: 200,
+              headers,
+              body: JSON.stringify({
+                characters:   namesData.filter(n => n.category === 'character'),
+                corporations: namesData.filter(n => n.category === 'corporation'),
+                alliances:    namesData.filter(n => n.category === 'alliance')
+              })
+            };
+          }
+        }
+      }
+
+      // Fallback — unauthenticated exact-name match via /universe/ids/
       const idsRes = await fetch('https://esi.evetech.net/latest/universe/ids/?datasource=tranquility&language=en', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
