@@ -372,6 +372,34 @@
       }
       .hero { padding: 60px 16px 40px; }
     }
+    .search-drop-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--white);
+      border-bottom: 1px solid rgba(79,195,247,0.08);
+      text-decoration: none;
+    }
+    .search-drop-item:last-child { border-bottom: none; }
+    .search-drop-item:hover { background: rgba(79,195,247,0.1); }
+    .search-drop-label {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 8px 14px 4px;
+      border-bottom: 1px solid rgba(79,195,247,0.08);
+    }
+    .search-drop-name { flex: 1; }
+    .search-drop-type {
+      font-size: 10px;
+      color: var(--cyan);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
   </style>
 </head>
 <body>
@@ -393,13 +421,14 @@
 
     <p class="tagline">Reputation Precedes You</p>
 
-    <div class="search-wrap">
-      <input class="search-input" type="text" placeholder="Search Pilots, Corps and Alliances" />
-      <button class="search-btn" aria-label="Search">
+    <div class="search-wrap" style="position:relative;">
+      <input class="search-input" type="text" id="heroSearchInput" placeholder="Search Pilots, Corps and Alliances" />
+      <button class="search-btn" aria-label="Search" id="heroSearchBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
       </button>
+      <div id="heroSearchDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#0e1a2b;border:1px solid var(--cyan-dim);border-radius:0 0 6px 6px;z-index:999;max-height:360px;overflow-y:auto;text-align:left;"></div>
     </div>
 
     <p class="search-sub">Search New Eden. Rate Encounters.</p>
@@ -577,6 +606,80 @@
       }
     } catch (e) { /* non-fatal */ }
   })();
+
+  // ── HERO SEARCH BAR ───────────────────────────────────────────────────────
+  const searchInput    = document.getElementById('heroSearchInput');
+  const searchBtn      = document.getElementById('heroSearchBtn');
+  const searchDropdown = document.getElementById('heroSearchDropdown');
+  let searchTimer;
+
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    const q = searchInput.value.trim();
+    if (q.length < 3) { searchDropdown.style.display = 'none'; return; }
+    searchTimer = setTimeout(() => runSearch(), 300);
+  });
+
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') runSearch();
+  });
+
+  searchBtn.addEventListener('click', runSearch);
+
+  async function runSearch() {
+    const q = searchInput.value.trim();
+    if (q.length < 3) { searchDropdown.style.display = 'none'; return; }
+    try {
+      const res = await fetch(`/.netlify/functions/esi-proxy?action=search&query=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      renderDropdown(data, q);
+    } catch (e) {
+      searchDropdown.style.display = 'none';
+    }
+  }
+
+  function renderDropdown(data, q) {
+    const { characters = [], corporations = [], alliances = [] } = data;
+    const total = characters.length + corporations.length + alliances.length;
+    if (total === 0) { searchDropdown.style.display = 'none'; return; }
+    let html = '';
+    if (characters.length) {
+      html += `<div class="search-drop-label">Pilots</div>`;
+      characters.forEach(c => {
+        html += `<a class="search-drop-item" href="/pilot.html?id=${c.id}">
+          <span class="search-drop-name">${c.name}</span>
+          <span class="search-drop-type">Pilot</span>
+        </a>`;
+      });
+    }
+    if (corporations.length) {
+      html += `<div class="search-drop-label">Corporations</div>`;
+      corporations.forEach(c => {
+        html += `<a class="search-drop-item" href="/corporation.html?id=${c.id}">
+          <span class="search-drop-name">${c.name}</span>
+          <span class="search-drop-type">Corp</span>
+        </a>`;
+      });
+    }
+    if (alliances.length) {
+      html += `<div class="search-drop-label">Alliances</div>`;
+      alliances.forEach(a => {
+        html += `<a class="search-drop-item" href="/alliance.html?id=${a.id}">
+          <span class="search-drop-name">${a.name}</span>
+          <span class="search-drop-type">Alliance</span>
+        </a>`;
+      });
+    }
+    html += `<a class="search-drop-item" href="/search.html?q=${encodeURIComponent(q)}" style="color:var(--cyan);justify-content:center;">
+      See all results for "${q}" →
+    </a>`;
+    searchDropdown.innerHTML = html;
+    searchDropdown.style.display = 'block';
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-wrap')) searchDropdown.style.display = 'none';
+  });
 </script>
 </body>
 </html>
