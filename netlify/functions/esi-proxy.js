@@ -16,16 +16,17 @@ exports.handler = async (event) => {
       const cookieHeader = event.headers.cookie || '';
       const match = cookieHeader.match(/pilotrep_session=([^;]+)/);
       let accessToken = null;
+      let session = null;
       if (match) {
         try {
-          const session = JSON.parse(Buffer.from(match[1], 'base64').toString('utf8'));
+          session = JSON.parse(Buffer.from(match[1], 'base64').toString('utf8'));
           accessToken = session.accessToken || null;
         } catch (_) {}
       }
 
-      if (accessToken) {
+      if (accessToken && session && session.characterId) {
         // Authenticated ESI search — supports partial name matching
-        const esiUrl = `https://esi.evetech.net/latest/characters/search/?categories=character,corporation,alliance&search=${encodeURIComponent(query)}&strict=false&datasource=tranquility`;
+        const esiUrl = `https://esi.evetech.net/latest/characters/${session.characterId}/search/?categories=character,corporation,alliance&search=${encodeURIComponent(query)}&strict=false&datasource=tranquility`;
         const searchRes = await fetch(esiUrl, {
           headers: { Authorization: `Bearer ${accessToken}` }
         });
