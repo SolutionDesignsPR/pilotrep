@@ -28,15 +28,15 @@ exports.handler = async (event) => {
     if (action === 'character') {
       if (!id) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing id' }) };
       const [charRes, portRes] = await Promise.all([
-        fetch(`https://esi.evetech.net/latest/characters/${id}/`),
-        fetch(`https://esi.evetech.net/latest/characters/${id}/portrait/`)
+        fetch(`https://esi.evetech.net/latest/characters/${id}/?datasource=tranquility`),
+        fetch(`https://esi.evetech.net/latest/characters/${id}/portrait/?datasource=tranquility`)
       ]);
       if (!charRes.ok) throw new Error(`ESI character failed: ${charRes.status}`);
       const char = await charRes.json();
       const portrait = portRes.ok ? await portRes.json() : {};
       const idsToResolve = [char.corporation_id];
       if (char.alliance_id) idsToResolve.push(char.alliance_id);
-      const namesRes = await fetch('https://esi.evetech.net/latest/universe/names/', {
+      const namesRes = await fetch('https://esi.evetech.net/latest/universe/names/?datasource=tranquility', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(idsToResolve)
@@ -63,13 +63,13 @@ exports.handler = async (event) => {
     // ── CORPORATION LOOKUP ───────────────────────────────────────────────────
     if (action === 'corporation') {
       if (!id) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing id' }) };
-      const corpRes = await fetch(`https://esi.evetech.net/latest/corporations/${id}/`);
+      const corpRes = await fetch(`https://esi.evetech.net/latest/corporations/${id}/?datasource=tranquility`);
       if (!corpRes.ok) throw new Error(`ESI corporation failed: ${corpRes.status}`);
       const corp = await corpRes.json();
       const logoUrl = `https://images.evetech.net/corporations/${id}/logo?size=256`;
       let allianceName = '';
       if (corp.alliance_id) {
-        const namesRes = await fetch('https://esi.evetech.net/latest/universe/names/', {
+        const namesRes = await fetch('https://esi.evetech.net/latest/universe/names/?datasource=tranquility', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify([corp.alliance_id])
@@ -95,7 +95,7 @@ exports.handler = async (event) => {
     // ── ALLIANCE LOOKUP ──────────────────────────────────────────────────────
     if (action === 'alliance') {
       if (!id) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing id' }) };
-      const allianceRes = await fetch(`https://esi.evetech.net/latest/alliances/${id}/`);
+      const allianceRes = await fetch(`https://esi.evetech.net/latest/alliances/${id}/?datasource=tranquility`);
       if (!allianceRes.ok) throw new Error(`ESI alliance failed: ${allianceRes.status}`);
       const alliance = await allianceRes.json();
       const logoUrl = `https://images.evetech.net/alliances/${id}/logo?size=256`;
