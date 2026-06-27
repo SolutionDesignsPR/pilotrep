@@ -88,4 +88,55 @@ exports.handler = async (event) => {
       const corpRes = await fetch(`https://esi.evetech.net/latest/corporations/${id}/`);
       if (!corpRes.ok) throw new Error(`ESI corporation failed: ${corpRes.status}`);
       const corp = await corpRes.json();
-      const logoUrl =  
+      const logoUrl = `https://images.evetech.net/corporations/${id}/logo?size=256`;
+      let allianceName = '';
+      if (corp.alliance_id) {
+        const namesRes = await fetch('https://esi.evetech.net/latest/universe/names/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify([corp.alliance_id])
+        });
+        const names = namesRes.ok ? await namesRes.json() : [];
+        allianceName = names.find(n => n.id === corp.alliance_id)?.name || '';
+      }
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          id:            Number(id),
+          name:          corp.name,
+          ticker:        corp.ticker,
+          member_count:  corp.member_count,
+          alliance_id:   corp.alliance_id || null,
+          alliance_name: allianceName,
+          logo:          logoUrl
+        })
+      };
+    }
+
+    // ── ALLIANCE LOOKUP ──────────────────────────────────────────────────────
+    if (action === 'alliance') {
+      if (!id) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing id' }) };
+      const allianceRes = await fetch(`https://esi.evetech.net/latest/alliances/${id}/`);
+      if (!allianceRes.ok) throw new Error(`ESI alliance failed: ${allianceRes.status}`);
+      const alliance = await allianceRes.json();
+      const logoUrl = `https://images.evetech.net/alliances/${id}/logo?size=256`;
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          id:     Number(id),
+          name:   alliance.name,
+          ticker: alliance.ticker,
+          logo:   logoUrl
+        })
+      };
+    }
+
+    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid action' }) };
+
+  } catch (err) {
+    console.error('ESI proxy error:', err);
+    return { statusCode: 500, headers, body: JSON.stringify({ error: 'ESI request failed', detail: err.message }) };
+  }
+};
