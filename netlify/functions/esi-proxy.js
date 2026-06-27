@@ -27,13 +27,9 @@ exports.handler = async (event) => {
     // ── CHARACTER LOOKUP ─────────────────────────────────────────────────────
     if (action === 'character') {
       if (!id) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing id' }) };
-      const [charRes, portRes] = await Promise.all([
-        fetch(`https://esi.evetech.net/latest/characters/${id}/?datasource=tranquility`),
-        fetch(`https://esi.evetech.net/latest/characters/${id}/portrait/?datasource=tranquility`)
-      ]);
+      const charRes = await fetch(`https://esi.evetech.net/latest/characters/${id}/?datasource=tranquility`);
       if (!charRes.ok) throw new Error(`ESI character failed: ${charRes.status}`);
       const char = await charRes.json();
-      const portrait = portRes.ok ? await portRes.json() : {};
       const idsToResolve = [char.corporation_id];
       if (char.alliance_id) idsToResolve.push(char.alliance_id);
       const namesRes = await fetch('https://esi.evetech.net/latest/universe/names/?datasource=tranquility', {
@@ -55,7 +51,7 @@ exports.handler = async (event) => {
           corporation_name: corpName,
           alliance_id:      char.alliance_id || null,
           alliance_name:    allianceName,
-          portrait:         portrait.px256_url || portrait.px128_url || ''
+          portrait:         `https://images.evetech.net/characters/${id}/portrait?size=256`
         })
       };
     }
