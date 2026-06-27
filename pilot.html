@@ -1236,6 +1236,15 @@
   const searchDropdown = document.getElementById('searchDropdown');
 
 
+  let searchTimer;
+
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    const q = searchInput.value.trim();
+    if (q.length < 3) { searchDropdown.style.display = 'none'; return; }
+    searchTimer = setTimeout(() => runSearch(), 300);
+  });
+
   searchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') runSearch();
   });
