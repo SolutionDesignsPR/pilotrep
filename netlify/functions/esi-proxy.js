@@ -11,39 +11,17 @@ exports.handler = async (event) => {
       if (!query || query.length < 3) {
         return { statusCode: 400, headers, body: JSON.stringify({ error: 'Query must be at least 3 characters' }) };
       }
-      const esiUrl = `https://esi.evetech.net/latest/search/?categories=character,corporation,alliance&search=${encodeURIComponent(query)}&strict=false&datasource=tranquility`;
-      const searchRes = await fetch(esiUrl, {
-        headers: { 'User-Agent': 'PilotRep/1.0 (https://pilotrep.com; contact@pilotrep.com)' }
-      });
-      if (!searchRes.ok) throw new Error(`ESI search failed: ${searchRes.status}`);
-      const searchData = await searchRes.json();
-      const allIds = [
-        ...(searchData.character   || []).slice(0, 10),
-        ...(searchData.corporation || []).slice(0, 10),
-        ...(searchData.alliance    || []).slice(0, 10)
-      ];
-      if (allIds.length === 0) {
-        return { statusCode: 200, headers, body: JSON.stringify({ characters: [], corporations: [], alliances: [] }) };
-      }
-      const namesRes = await fetch('https://esi.evetech.net/latest/universe/names/', {
+      const idsRes = await fetch('https://esi.evetech.net/latest/universe/ids/?datasource=tranquility&language=en', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'PilotRep/1.0 (https://pilotrep.com; contact@pilotrep.com)'
-        },
-        body: JSON.stringify(allIds)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify([query])
       });
-      if (!namesRes.ok) throw new Error(`ESI names failed: ${namesRes.status}`);
-      const namesData = await namesRes.json();
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          characters:   namesData.filter(n => n.category === 'character'),
-          corporations: namesData.filter(n => n.category === 'corporation'),
-          alliances:    namesData.filter(n => n.category === 'alliance')
-        })
-      };
+      if (!idsRes.ok) throw new Error(`ESI universe/ids failed: ${idsRes.status}`);
+      const idsData = await idsRes.json();
+      const characters   = (idsData.characters   || []).slice(0, 10);
+      const corporations = (idsData.corporations  || []).slice(0, 10);
+      const alliances    = (idsData.alliances     || []).slice(0, 10);
+      return { statusCode: 200, headers, body: JSON.stringify({ characters, corporations, alliances }) };
     }
 
     // ── CHARACTER LOOKUP ─────────────────────────────────────────────────────
