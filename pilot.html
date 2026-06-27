@@ -1234,26 +1234,14 @@
   const searchInput    = document.getElementById('navSearchInput');
   const searchBtn      = document.getElementById('navSearchBtn');
   const searchDropdown = document.getElementById('searchDropdown');
-  let searchTimer;
 
-  searchInput.addEventListener('input', () => {
-    clearTimeout(searchTimer);
-    const q = searchInput.value.trim();
-    if (q.length < 3) { searchDropdown.style.display = 'none'; return; }
-    searchTimer = setTimeout(() => runTypeahead(q), 300);
-  });
 
   searchInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') goToSearch();
+    if (e.key === 'Enter') runSearch();
   });
 
-  searchBtn.addEventListener('click', goToSearch);
+  searchBtn.addEventListener('click', runSearch);
 
-  function goToSearch() {
-    const q = searchInput.value.trim();
-    if (q.length < 1) return;
-    window.location.href = `/search.html?q=${encodeURIComponent(q)}`;
-  }
 
   async function runSearch() {
     const q = searchInput.value.trim();
