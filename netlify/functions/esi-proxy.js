@@ -11,17 +11,39 @@ exports.handler = async (event) => {
       if (!query || query.length < 3) {
         return { statusCode: 400, headers, body: JSON.stringify({ error: 'Query must be at least 3 characters' }) };
       }
-      const idsRes = await fetch('https://esi.evetech.net/latest/universe/ids/?datasource=tranquility&language=en', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify([query])
+      const esiUrl = `https://esi.evetech.net/latest/search/?categories=character,corporation,alliance&search=${encodeURIComponent(query)}&strict=false&datasource=tranquility`;
+      const searchRes = await fetch(esiUrl, {
+        headers: { 'User-Agent': 'PilotRep/1.0 (https://pilotrep.com; contact@pilotrep.com)' }
       });
-      if (!idsRes.ok) throw new Error(`ESI universe/ids failed: ${idsRes.status}`);
-      const idsData = await idsRes.json();
-      const characters   = (idsData.characters   || []).slice(0, 10);
-      const corporations = (idsData.corporations  || []).slice(0, 10);
-      const alliances    = (idsData.alliances     || []).slice(0, 10);
-      return { statusCode: 200, headers, body: JSON.stringify({ characters, corporations, alliances }) };
+      if (!searchRes.ok) throw new Error(`ESI search failed: ${searchRes.status}`);
+      const searchData = await searchRes.json();
+      const allIds = [
+        ...(searchData.character   || []).slice(0, 10),
+        ...(searchData.corporation || []).slice(0, 10),
+        ...(searchData.alliance    || []).slice(0, 10)
+      ];
+      if (allIds.length === 0) {
+        return { statusCode: 200, headers, body: JSON.stringify({ characters: [], corporations: [], alliances: [] }) };
+      }
+      const namesRes = await fetch('https://esi.evetech.net/latest/universe/names/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'PilotRep/1.0 (https://pilotrep.com; contact@pilotrep.com)'
+        },
+        body: JSON.stringify(allIds)
+      });
+      if (!namesRes.ok) throw new Error(`ESI names failed: ${namesRes.status}`);
+      const namesData = await namesRes.json();
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          characters:   namesData.filter(n => n.category === 'character'),
+          corporations: namesData.filter(n => n.category === 'corporation'),
+          alliances:    namesData.filter(n => n.category === 'alliance')
+        })
+      };
     }
 
     // ── CHARACTER LOOKUP ─────────────────────────────────────────────────────
@@ -66,55 +88,4 @@ exports.handler = async (event) => {
       const corpRes = await fetch(`https://esi.evetech.net/latest/corporations/${id}/`);
       if (!corpRes.ok) throw new Error(`ESI corporation failed: ${corpRes.status}`);
       const corp = await corpRes.json();
-      const logoUrl = `https://images.evetech.net/corporations/${id}/logo?size=256`;
-      let allianceName = '';
-      if (corp.alliance_id) {
-        const namesRes = await fetch('https://esi.evetech.net/latest/universe/names/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify([corp.alliance_id])
-        });
-        const names = namesRes.ok ? await namesRes.json() : [];
-        allianceName = names.find(n => n.id === corp.alliance_id)?.name || '';
-      }
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          id:            Number(id),
-          name:          corp.name,
-          ticker:        corp.ticker,
-          member_count:  corp.member_count,
-          alliance_id:   corp.alliance_id || null,
-          alliance_name: allianceName,
-          logo:          logoUrl
-        })
-      };
-    }
-
-    // ── ALLIANCE LOOKUP ──────────────────────────────────────────────────────
-    if (action === 'alliance') {
-      if (!id) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing id' }) };
-      const allianceRes = await fetch(`https://esi.evetech.net/latest/alliances/${id}/`);
-      if (!allianceRes.ok) throw new Error(`ESI alliance failed: ${allianceRes.status}`);
-      const alliance = await allianceRes.json();
-      const logoUrl = `https://images.evetech.net/alliances/${id}/logo?size=256`;
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          id:     Number(id),
-          name:   alliance.name,
-          ticker: alliance.ticker,
-          logo:   logoUrl
-        })
-      };
-    }
-
-    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid action' }) };
-
-  } catch (err) {
-    console.error('ESI proxy error:', err);
-    return { statusCode: 500, headers, body: JSON.stringify({ error: 'ESI request failed', detail: err.message }) };
-  }
-};
+      const logoUrl =  
