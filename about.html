@@ -67,6 +67,7 @@
       gap: 24px;
       padding: 22px 32px;
       flex-wrap: wrap;
+      position: relative;
     }
     .nav-logo {
       font-size: 24px;
@@ -77,35 +78,59 @@
       text-decoration: none;
       white-space: nowrap;
     }
-    .nav-logo .o-ring {
-      display: inline-block;
-      width: 0.62em;
-      height: 0.62em;
-      border: 0.13em solid var(--white);
-      border-radius: 50%;
-      vertical-align: middle;
-      margin: 0 0.01em;
-      position: relative;
-      top: -0.07em;
-    }
-    .nav-links {
+    .nav-left {
       display: flex;
-      gap: 36px;
-      flex: 1;
-      justify-content: center;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 6px;
     }
-    .nav-links a {
-      font-size: 15px;
+    .nav-logged-in {
+      display: none;
+      font-size: 10px;
       font-weight: 600;
       letter-spacing: 0.12em;
-      color: var(--white);
+      color: var(--muted);
       text-transform: uppercase;
+      padding-left: 2px;
+    }
+    .nav-logged-in a {
+      color: var(--cyan);
       text-decoration: none;
       transition: color 0.15s;
     }
-    .nav-links a.active { color: var(--muted); pointer-events: none; }
-    .nav-links a:hover:not(.active) { color: var(--cyan); }
+    .nav-logged-in a:hover { color: var(--white); }
+    .nav-links {
+      display: inline-flex;
+      gap: 0;
+      flex: 1;
+      justify-content: center;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .nav-links a {
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      color: var(--white);
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1.5px solid var(--border);
+      padding: 8px 18px;
+      margin-left: -1.5px;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .nav-links a:first-child { border-radius: 4px 0 0 4px; margin-left: 0; }
+    .nav-links a:last-child  { border-radius: 0 4px 4px 0; }
+    .nav-links a.active {
+      color: var(--cyan);
+      border-color: var(--cyan);
+      background: rgba(79,195,247,0.08);
+      pointer-events: none;
+    }
+    .nav-links a:hover:not(.active) { color: var(--cyan); border-color: var(--cyan-dim); }
+
 
     .nav-right {
       display: flex;
@@ -147,6 +172,8 @@
       font-size: 11px;
       color: var(--muted);
       letter-spacing: 0.03em;
+      align-self: flex-start;
+      padding-left: 12px;
     }
 
     /* ── PAGE TITLE — matches pilot.html scale/weight ── */
@@ -248,6 +275,7 @@
       gap: 10px 40px;
       justify-content: center;
       text-align: center;
+      margin-bottom: 40px;
     }
     .footer-grid a {
       font-size: 12px;
@@ -260,6 +288,22 @@
     }
     .footer-grid a:hover { color: var(--cyan); }
     .footer-grid a.active { color: var(--cyan); }
+    .eve-time {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      color: var(--cyan-dim);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .footer-copy {
+      margin-top: 16px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
   </style>
 </head>
 <body>
@@ -270,7 +314,10 @@
 
     <!-- TOP NAV -->
     <header class="topnav">
-      <a href="index.html" class="nav-logo">PIL<span class="o-ring"></span>T REP</a>
+      <div class="nav-left">
+      <a href="index.html" class="nav-logo"><img src="/assets/images/PilotRep_Logo_NavBar.svg" alt="Pilot Rep" style="height:38px;width:auto;display:block;" /></a>
+      <div class="nav-logged-in" id="navLoggedInAs">LOGGED IN AS &nbsp;<a href="pilot.html" id="navLoggedInLink">—</a></div>
+    </div>
 
       <nav class="nav-links">
         <a href="pilot.html">Pilots</a>
@@ -319,23 +366,23 @@
       </div>
     </main>
 
-    <!-- LEGAL NOTE -->
-    <div class="legal-note">
-      EVE Online and all related materials are property of Fenris Creations.<br>PilotRep is a third-party fan site and is not affiliated with Fenris Creations.
-    </div>
-
     <!-- FOOTER -->
     <footer class="site-footer">
       <div class="footer-grid">
         <a href="about.html" class="active">About</a>
-        <a href="faq.html">FAQ</a>
         <a href="subscriptions.html">Subscriptions</a>
         <a href="login.html">Login</a>
-        <a href="search.html">Search New Eden</a>
+        <a href="pilot.html" id="myPilotRepLink">My PilotRep</a>
+        <a href="faq.html">FAQ</a>
         <a href="privacy.html">Privacy Policy</a>
         <a href="terms.html">Terms Of Service</a>
         <a href="contact.html">Contact</a>
       </div>
+      <div class="eve-time" id="eveTime" style="margin-top:28px;">EVE TIME 00:00:00</div>
+      <div class="legal-note" style="margin-top:10px;">
+        EVE Online and all related materials are property of Fenris Creations.<br>PilotRep is a third-party fan site and is not affiliated with Fenris Creations.
+      </div>
+      <div class="footer-copy">&copy; 2026 PilotRep. All rights reserved.</div>
     </footer>
 
   </div>
@@ -348,6 +395,17 @@
   document.getElementById('searchInput').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') doSearch();
   });
+
+  // ── EVE TIME CLOCK ──
+  function updateEveTime() {
+    const now = new Date();
+    const h = String(now.getUTCHours()).padStart(2, '0');
+    const m = String(now.getUTCMinutes()).padStart(2, '0');
+    const s = String(now.getUTCSeconds()).padStart(2, '0');
+    document.getElementById('eveTime').textContent = `EVE TIME  ${h}:${m}:${s}`;
+  }
+  updateEveTime();
+  setInterval(updateEveTime, 1000);
 </script>
 </body>
 </html>
