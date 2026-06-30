@@ -960,7 +960,7 @@
     <div class="footer-grid">
       <a href="about.html">About</a>
       <a href="subscriptions.html">Subscriptions</a>
-      <a href="login.html" id="footerAuthLink">Login</a>
+      <a href="/.netlify/functions/auth-start" id="footerAuthLink">Login</a>
       <a href="pilot.html" id="myPilotRepLink">My PilotRep</a>
       <a href="faq.html">FAQ</a>
       <a href="privacy.html">Privacy Policy</a>
@@ -1035,7 +1035,7 @@
           navLoggedInLink.href = `pilot.html?id=${data.characterId}`;
           navLoggedIn.style.display = 'block';
         }
-      } else {
+        // Logged in: hide the EVE login button, it's no longer needed
         document.getElementById('loginPrompt').classList.add('hide');
       }
     } catch (e) {
@@ -1082,9 +1082,9 @@
   // Averaging then rounds to the nearest of 13 slots:
   //   0=F  1=D−  2=D  3=D+  4=C−  5=C  6=C+  7=B−  8=B  9=B+  10=A−  11=A  12=A+
   // Anchors: F and A+ sit at the extremes; middle grades evenly spaced.
-  // A+ is set to 11.5 (not 12) so Math.round tips to index 12 with a
-  // realistic A+ majority — e.g. 5× A+ and 1× B already reaches A+.
-  const INPUT_TO_NUM = { 'F': 0, 'D': 2.4, 'C': 4.8, 'B': 7.2, 'A': 9.6, 'A+': 11.5 };
+  // Each grade maps to its exact anchor position on the 13-point scale,
+  // so a single submitted grade always displays as that exact letter.
+  const INPUT_TO_NUM = { 'F': 0, 'D': 2, 'C': 5, 'B': 8, 'A': 11, 'A+': 12 };
   const GRADE_TABLE = [
     { html: 'F',                                    cls: 'grade-F' },  // 0
     { html: 'D<span class="modifier">−</span>',     cls: 'grade-F' },  // 1
