@@ -76,6 +76,7 @@ exports.handler = async (event) => {
       return {
         id:          r.id,
         grade:       r.grade,
+        gradeIndex:  r.grade_index,
         gradeHtml:   gradeEntry.html || r.grade,
         tier:        gradeEntry.tier || 'neutral',
         system:      r.system_type || '',
