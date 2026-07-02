@@ -48,14 +48,15 @@ exports.handler = async (event) => {
           if (namesRes.ok) {
             const namesData = await namesRes.json();
             const byName = (a, b) => a.name.localeCompare(b.name);
+            const startsWithQuery = n => n.name.toLowerCase().startsWith(query.toLowerCase());
             return {
               statusCode: 200,
               headers,
               body: JSON.stringify({
                 mode:         'authenticated',
-                characters:   namesData.filter(n => n.category === 'character').sort(byName).slice(0, 10),
-                corporations: namesData.filter(n => n.category === 'corporation').sort(byName).slice(0, 10),
-                alliances:    namesData.filter(n => n.category === 'alliance').sort(byName).slice(0, 10)
+                characters:   namesData.filter(n => n.category === 'character').filter(startsWithQuery).sort(byName).slice(0, 10),
+                corporations: namesData.filter(n => n.category === 'corporation').filter(startsWithQuery).sort(byName).slice(0, 10),
+                alliances:    namesData.filter(n => n.category === 'alliance').filter(startsWithQuery).sort(byName).slice(0, 10)
               })
             };
           }
