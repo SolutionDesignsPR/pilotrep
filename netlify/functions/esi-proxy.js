@@ -38,7 +38,7 @@ exports.handler = async (event) => {
             ...(searchData.alliance    || []).slice(0, 10)
           ];
           if (allIds.length === 0) {
-            return { statusCode: 200, headers, body: JSON.stringify({ characters: [], corporations: [], alliances: [] }) };
+            return { statusCode: 200, headers, body: JSON.stringify({ mode: 'authenticated', characters: [], corporations: [], alliances: [] }) };
           }
           const namesRes = await fetch('https://esi.evetech.net/latest/universe/names/?datasource=tranquility', {
             method: 'POST',
@@ -47,13 +47,15 @@ exports.handler = async (event) => {
           });
           if (namesRes.ok) {
             const namesData = await namesRes.json();
+            const byName = (a, b) => a.name.localeCompare(b.name);
             return {
               statusCode: 200,
               headers,
               body: JSON.stringify({
-                characters:   namesData.filter(n => n.category === 'character'),
-                corporations: namesData.filter(n => n.category === 'corporation'),
-                alliances:    namesData.filter(n => n.category === 'alliance')
+                mode:         'authenticated',
+                characters:   namesData.filter(n => n.category === 'character').sort(byName),
+                corporations: namesData.filter(n => n.category === 'corporation').sort(byName),
+                alliances:    namesData.filter(n => n.category === 'alliance').sort(byName)
               })
             };
           }
@@ -68,10 +70,11 @@ exports.handler = async (event) => {
       });
       if (!idsRes.ok) throw new Error(`ESI universe/ids failed: ${idsRes.status}`);
       const idsData = await idsRes.json();
-      const characters   = (idsData.characters   || []).slice(0, 10);
-      const corporations = (idsData.corporations  || []).slice(0, 10);
-      const alliances    = (idsData.alliances     || []).slice(0, 10);
-      return { statusCode: 200, headers, body: JSON.stringify({ characters, corporations, alliances }) };
+      const byName = (a, b) => a.name.localeCompare(b.name);
+      const characters   = (idsData.characters   || []).slice(0, 10).sort(byName);
+      const corporations = (idsData.corporations  || []).slice(0, 10).sort(byName);
+      const alliances    = (idsData.alliances     || []).slice(0, 10).sort(byName);
+      return { statusCode: 200, headers, body: JSON.stringify({ mode: 'fallback', characters, corporations, alliances }) };
     }
 
     // ── CHARACTER LOOKUP ─────────────────────────────────────────────────────

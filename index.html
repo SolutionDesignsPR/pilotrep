@@ -421,6 +421,17 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
+    .search-drop-note {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      padding: 10px 14px;
+      text-align: center;
+      border-top: 1px solid rgba(79,195,247,0.08);
+      line-height: 1.5;
+    }
+    .search-drop-note a { color: var(--cyan-dim); text-decoration: none; }
+    .search-drop-note a:hover { color: var(--cyan); }
   </style>
 </head>
 <body>
@@ -443,7 +454,7 @@
     <p class="tagline">Reputation Precedes You</p>
 
     <div class="search-wrap" style="position:relative;">
-      <input class="search-input" type="text" id="heroSearchInput" placeholder="Search Pilots, Corps and Alliances" />
+      <input class="search-input" type="text" id="heroSearchInput" placeholder="Search for Pilots, Corporations and Alliances" />
       <button class="search-btn" aria-label="Search" id="heroSearchBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -591,8 +602,8 @@
     <div class="footer-grid">
       <a href="about.html">About</a>
       <a href="subscriptions.html">Subscriptions</a>
-      <a href="login.html" id="footerAuthLink">Login</a>
       <a href="pilot.html" id="myPilotRepLink">My PilotRep</a>
+      <a href="/.netlify/functions/auth-start" id="footerAuthLink">Login</a>
       <a href="faq.html">FAQ</a>
       <a href="privacy.html">Privacy Policy</a>
       <a href="terms.html">Terms Of Service</a>
@@ -664,9 +675,20 @@
   }
 
   function renderDropdown(data, q) {
-    const { characters = [], corporations = [], alliances = [] } = data;
+    const { characters = [], corporations = [], alliances = [], mode = 'authenticated' } = data;
     const total = characters.length + corporations.length + alliances.length;
-    if (total === 0) { searchDropdown.style.display = 'none'; return; }
+    const fallbackNote = `<div class="search-drop-note">
+      Showing exact-name matches only. <a href="/.netlify/functions/auth-start">Log in with EVE Online</a> for live predictive search.
+    </div>`;
+    if (total === 0) {
+      if (mode === 'fallback') {
+        searchDropdown.innerHTML = `<div class="search-drop-note">No exact match for "${q}". Try the full pilot, corporation, or alliance name, or ${`<a href="/.netlify/functions/auth-start">log in</a>`} for live predictive search.</div>`;
+        searchDropdown.style.display = 'block';
+      } else {
+        searchDropdown.style.display = 'none';
+      }
+      return;
+    }
     let html = '';
     if (characters.length) {
       html += `<div class="search-drop-label">Pilots</div>`;
@@ -695,6 +717,7 @@
         </a>`;
       });
     }
+    if (mode === 'fallback') html += fallbackNote;
     html += `<a class="search-drop-item" href="/search.html?q=${encodeURIComponent(q)}" style="color:var(--cyan);justify-content:center;">
       See all results for "${q}" →
     </a>`;

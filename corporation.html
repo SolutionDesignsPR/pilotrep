@@ -889,8 +889,8 @@
     <div class="footer-grid">
       <a href="about.html">About</a>
       <a href="subscriptions.html">Subscriptions</a>
-      <a href="login.html" id="footerAuthLink">Login</a>
       <a href="pilot.html" id="myPilotRepLink">My PilotRep</a>
+      <a href="/.netlify/functions/auth-start" id="footerAuthLink">Login</a>
       <a href="faq.html">FAQ</a>
       <a href="privacy.html">Privacy Policy</a>
       <a href="terms.html">Terms Of Service</a>
@@ -936,7 +936,7 @@
           navLoggedInLink.href = `pilot.html?id=${data.characterId}`;
           navLoggedIn.style.display = 'block';
         }
-      } else {
+        // Logged in: hide the EVE login button, it's no longer needed
         document.getElementById('loginPrompt').classList.add('hide');
       }
     } catch (e) {
@@ -949,53 +949,148 @@
 
   loadSession();
 
-  const GRADES = ['F','D','C','B','A','A+'];
-  const TIERS  = { 'F':'neg','D':'neg','C':'neutral','B':'neutral','A':'pos','A+':'pos' };
+  // ── 13-POINT GRADE SCALE ──
+  // Input dots map to these anchor values on a 0–12 scale:
+  //   F=0  D=2  C=5  B=8  A=11  A+=12
+  // Averaging then rounds to the nearest of 13 slots:
+  //   0=F  1=D−  2=D  3=D+  4=C−  5=C  6=C+  7=B−  8=B  9=B+  10=A−  11=A  12=A+
+  const INPUT_TO_NUM = { 'F': 0, 'D': 2, 'C': 5, 'B': 8, 'A': 11, 'A+': 12 };
+  const GRADE_TABLE = [
+    { html: 'F',                                    cls: 'grade-F' },  // 0
+    { html: 'D<span class="modifier">−</span>',     cls: 'grade-F' },  // 1
+    { html: 'D',                                    cls: 'grade-F' },  // 2
+    { html: 'D<span class="modifier">+</span>',     cls: 'grade-F' },  // 3
+    { html: 'C<span class="modifier">−</span>',     cls: 'grade-B' },  // 4
+    { html: 'C',                                    cls: 'grade-B' },  // 5
+    { html: 'C<span class="modifier">+</span>',     cls: 'grade-B' },  // 6
+    { html: 'B<span class="modifier">−</span>',     cls: 'grade-B' },  // 7
+    { html: 'B',                                    cls: 'grade-B' },  // 8
+    { html: 'B<span class="modifier">+</span>',     cls: 'grade-B' },  // 9
+    { html: 'A<span class="modifier">−</span>',     cls: 'grade-A' },  // 10
+    { html: 'A',                                    cls: 'grade-A' },  // 11
+    { html: 'A<span class="modifier">+</span>',     cls: 'grade-A' },  // 12
+  ];
 
-  let selectedGrade  = null;
-  let selectedSystem = null;
-  let allGrades      = [];
-  let allComments    = [];
-  let repsCount      = 0;
-  let commentsCount  = 0;
-  let showingAll     = false;
-  const PREVIEW      = 5;
+  let submittedReps    = [];
+  let commentsExpanded = false;
+  const VISIBLE_LIMIT  = 5;
 
-  // Grade dots
-  document.querySelectorAll('.grade-dot').forEach(dot => {
+  const repsCountEl        = document.getElementById('repsCount');
+  const commentsCountEl    = document.getElementById('commentsCount');
+  const gradeCircleLetterEl = document.getElementById('gradeCircleLetter');
+  const commentsListEl     = document.getElementById('commentsList');
+  const commentsEmptyEl    = document.getElementById('commentsEmpty');
+  const seeAllWrapEl       = document.getElementById('seeAllWrap');
+  const seeAllBtnEl        = document.getElementById('seeAllBtn');
+
+  function buildCommentRow(rep) {
+    const row = document.createElement('div');
+    row.className = 'comment-row ' + rep.tier;
+    const dateLabel = rep.date || 'Just now';
+    row.innerHTML = `
+      <div>
+        <div class="comment-meta">${dateLabel}${rep.author ? ' · ' + rep.author : ''}</div>
+        <div class="comment-text">${rep.comment || '(no comment left)'}</div>
+      </div>
+      <span class="comment-system">${rep.system}</span>
+    `;
+    return row;
+  }
+
+  function renderComments() {
+    commentsListEl.innerHTML = '';
+    if (submittedReps.length === 0) {
+      commentsListEl.appendChild(commentsEmptyEl);
+      commentsEmptyEl.style.display = 'block';
+      seeAllWrapEl.style.display = 'none';
+      return;
+    }
+    const visible = commentsExpanded ? submittedReps : submittedReps.slice(0, VISIBLE_LIMIT);
+    visible.forEach(rep => commentsListEl.appendChild(buildCommentRow(rep)));
+    if (submittedReps.length > VISIBLE_LIMIT) {
+      seeAllWrapEl.style.display = 'block';
+      seeAllBtnEl.textContent = commentsExpanded ? '▴ Show Less' : '▾ See All Comments';
+    } else {
+      seeAllWrapEl.style.display = 'none';
+    }
+  }
+
+  seeAllBtnEl.addEventListener('click', () => {
+    commentsExpanded = !commentsExpanded;
+    renderComments();
+  });
+
+  function recalcAndRender() {
+    repsCountEl.textContent     = submittedReps.length;
+    commentsCountEl.textContent = submittedReps.filter(r => r.comment).length;
+
+    if (submittedReps.length === 0) {
+      gradeCircleLetterEl.textContent = '–';
+      gradeCircleLetterEl.className = 'grade-circle-letter';
+    } else {
+      const avg = submittedReps.reduce((sum, r) => sum + r.gradeNum, 0) / submittedReps.length;
+      const idx = Math.min(12, Math.max(0, Math.round(avg)));
+      const grade = GRADE_TABLE[idx];
+      gradeCircleLetterEl.innerHTML = grade.html;
+      gradeCircleLetterEl.className = 'grade-circle-letter ' + grade.cls;
+    }
+    renderComments();
+  }
+
+  const submitBtn = document.getElementById('submitBtn');
+
+  const validationToast = document.getElementById('validationToast');
+  function showValidation(msg) {
+    validationToast.textContent = msg;
+    validationToast.style.background = 'var(--cyan)';
+    validationToast.style.color = 'var(--bg)';
+    validationToast.classList.add('show');
+    setTimeout(() => validationToast.classList.remove('show'), 2200);
+  }
+
+  // Grade slider: single-select
+  const dots = document.querySelectorAll('#gradeSlider .grade-dot');
+  dots.forEach(dot => {
     dot.addEventListener('click', () => {
-      document.querySelectorAll('.grade-dot').forEach(d => d.classList.remove('selected'));
+      dots.forEach(d => d.classList.remove('selected'));
       dot.classList.add('selected');
-      selectedGrade = dot.dataset.grade;
     });
   });
 
-  // System buttons
-  document.querySelectorAll('.system-btn').forEach(btn => {
+  // System buttons: single-select
+  const sysButtons = document.querySelectorAll('.system-btn');
+  sysButtons.forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.system-btn').forEach(b => b.classList.remove('selected'));
+      sysButtons.forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
-      selectedSystem = btn.textContent.trim();
     });
+  });
+
+  // Comment field: enforce 5 word / 30 letter limit
+  const commentInput = document.getElementById('commentInput');
+  commentInput.addEventListener('input', () => {
+    let words = commentInput.value.trim().split(/\s+/).filter(Boolean);
+    if (words.length > 5) {
+      commentInput.value = words.slice(0, 5).join(' ');
+    }
   });
 
   // Anon toggle
   document.getElementById('anonCheck').addEventListener('change', function() {
-    document.getElementById('submitterName').textContent = this.checked ? 'Anonymous' : (currentUser || 'CapsuleerName');
+    document.getElementById('submitterName').textContent = this.checked ? 'Anonymous' : (currentUser || 'Unknown');
   });
 
-  // Submit
-  document.getElementById('submitBtn').addEventListener('click', async () => {
-    if (!isLoggedIn()) {
-      document.getElementById('loginPrompt').classList.add('show');
-      return;
-    }
-    if (!selectedGrade)  { showToast('Select A Grade');  return; }
-    if (!selectedSystem) { showToast('Select A System'); return; }
+  submitBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    if (!isLoggedIn()) { showValidation('Log In With EVE Online To Submit A Rep'); return; }
 
-    const raw   = document.getElementById('commentInput').value.trim();
-    const words = raw ? raw.split(/\s+/).slice(0, 5).join(' ') : '';
-    const submitBtn = document.getElementById('submitBtn');
+    const selectedDot = document.querySelector('#gradeSlider .grade-dot.selected');
+    const selectedSys = document.querySelector('.system-btn.selected');
+
+    if (!selectedDot) { showValidation('Select A Grade'); return; }
+    if (!selectedSys) { showValidation('Select A System'); return; }
+
+    const grade = selectedDot.dataset.grade;
     const anonymous = document.getElementById('anonCheck').checked;
 
     submitBtn.disabled = true;
@@ -1008,114 +1103,59 @@
         body: JSON.stringify({
           targetId:   new URLSearchParams(window.location.search).get('id') || 'unknown',
           targetType: 'corporation',
-          grade:      selectedGrade,
-          gradeIndex: GRADES.indexOf(selectedGrade),
-          systemType: selectedSystem,
-          comment:    words,
+          grade,
+          gradeIndex: INPUT_TO_NUM[grade],
+          systemType: selectedSys.textContent.trim(),
+          comment:    commentInput.value.trim(),
           anonymous
         })
       });
-      const data = await res.json();
+      let data = {};
+      try { data = await res.json(); } catch (_) {}
       if (!res.ok) {
-        showToast(data.error || 'Submission failed.');
+        showValidation(data.error || 'Submission failed. Please try again.');
       } else {
-        allGrades.push(selectedGrade);
-        repsCount++;
-        document.getElementById('repsCount').textContent = repsCount;
-        if (words) {
-          commentsCount++;
-          document.getElementById('commentsCount').textContent = commentsCount;
-          allComments.unshift({ grade: selectedGrade, tier: TIERS[selectedGrade] || 'neutral', system: selectedSystem, comment: words, date: nowLabel() });
-        }
-        updateGradeCircle();
-        renderComments();
-        document.querySelectorAll('.grade-dot').forEach(d => d.classList.remove('selected'));
-        document.querySelectorAll('.system-btn').forEach(b => b.classList.remove('selected'));
-        document.getElementById('commentInput').value = '';
-        selectedGrade  = null;
-        selectedSystem = null;
-        showToast('Rep Submitted!');
+        const rep = {
+          grade,
+          gradeNum: INPUT_TO_NUM[grade],
+          tier: selectedDot.dataset.tier,
+          system: selectedSys.textContent,
+          comment: commentInput.value.trim(),
+          author: anonymous ? '' : currentUser
+        };
+        submittedReps.unshift(rep);
+        recalcAndRender();
+        dots.forEach(d => d.classList.remove('selected'));
+        sysButtons.forEach(b => b.classList.remove('selected'));
+        commentInput.value = '';
+        showValidation('Rep submitted!');
       }
     } catch (err) {
-      showToast('Network error. Please try again.');
+      console.error('Submit rep error:', err);
+      showValidation('Network error. Please try again.');
     }
 
     submitBtn.disabled = false;
     submitBtn.textContent = 'Submit A Rep';
   });
 
-  function nowLabel() {
-    const m = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    const d = new Date();
-    return m[d.getMonth()] + ' ' + d.getFullYear();
-  }
-
-  function updateGradeCircle() {
-    if (!allGrades.length) return;
-    const avg = Math.round(allGrades.reduce((s, g) => s + GRADES.indexOf(g), 0) / allGrades.length);
-    const grade = GRADES[Math.max(0, Math.min(avg, GRADES.length - 1))];
-    const el = document.getElementById('gradeCircleLetter');
-    el.textContent = grade;
-    el.className = 'grade-circle-letter';
-    const tier = TIERS[grade];
-    if (tier === 'neg')     el.classList.add('grade-F');
-    if (tier === 'neutral') el.classList.add('grade-B');
-    if (tier === 'pos')     el.classList.add('grade-A');
-  }
-
-  function renderComments() {
-    const list  = document.getElementById('commentsList');
-    const empty = document.getElementById('commentsEmpty');
-    const wrap  = document.getElementById('seeAllWrap');
-    const btn   = document.getElementById('seeAllBtn');
-
-    if (!allComments.length) {
-      list.innerHTML = '';
-      list.appendChild(empty);
-      wrap.style.display = 'none';
-      return;
-    }
-
-    const visible = showingAll ? allComments : allComments.slice(0, PREVIEW);
-    list.innerHTML = '';
-    visible.forEach(c => {
-      const row = document.createElement('div');
-      row.className = 'comment-row ' + c.tier;
-      row.innerHTML = `
-        <div>
-          <div class="comment-meta">${c.date}</div>
-          <div class="comment-text">${c.comment.replace(/</g,'&lt;')}</div>
-        </div>
-        <div class="comment-system">${c.system}</div>
-      `;
-      list.appendChild(row);
-    });
-
-    wrap.style.display = allComments.length > PREVIEW ? '' : 'none';
-    if (allComments.length > PREVIEW) {
-      btn.textContent = showingAll ? '▴ Show Less' : '▾ See All Comments';
-    }
-  }
-
-  document.getElementById('seeAllBtn').addEventListener('click', () => {
-    showingAll = !showingAll;
-    renderComments();
-  });
-
   document.getElementById('shareBtn').addEventListener('click', () => {
-    navigator.clipboard.writeText(window.location.href).then(() => {
-      const t = document.getElementById('shareToast');
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2200);
-    });
+    const url = window.location.href;
+    const shareToast = document.getElementById('shareToast');
+    function showShareToast() {
+      shareToast.classList.add('show');
+      setTimeout(() => shareToast.classList.remove('show'), 2200);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(showShareToast);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = url; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy');
+      document.body.removeChild(ta);
+      showShareToast();
+    }
   });
-
-  function showToast(msg) {
-    const t = document.getElementById('validationToast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2200);
-  }
 
   // ── SEARCH BAR ────────────────────────────────────────────────────────────
   const searchInput    = document.getElementById('navSearchInput');
@@ -1235,9 +1275,9 @@
         gradeEl.innerHTML = data.repScoreHtml || '–';
         const tierCls = data.repScoreTier === 'pos' ? 'grade-A' : data.repScoreTier === 'neg' ? 'grade-F' : 'grade-B';
         gradeEl.className = 'grade-circle-letter ' + tierCls;
-        allComments = data.reps.map(r => ({
+        submittedReps = data.reps.map(r => ({
           grade:    r.grade,
-          gradeNum: r.grade_index,
+          gradeNum: r.gradeIndex,
           tier:     r.tier,
           system:   r.system,
           comment:  r.comment,
