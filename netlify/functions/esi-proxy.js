@@ -33,9 +33,9 @@ exports.handler = async (event) => {
         if (searchRes.ok) {
           const searchData = await searchRes.json();
           const allIds = [
-            ...(searchData.character   || []).slice(0, 10),
-            ...(searchData.corporation || []).slice(0, 10),
-            ...(searchData.alliance    || []).slice(0, 10)
+            ...(searchData.character   || []).slice(0, 50),
+            ...(searchData.corporation || []).slice(0, 50),
+            ...(searchData.alliance    || []).slice(0, 50)
           ];
           if (allIds.length === 0) {
             return { statusCode: 200, headers, body: JSON.stringify({ mode: 'authenticated', characters: [], corporations: [], alliances: [] }) };
@@ -53,9 +53,9 @@ exports.handler = async (event) => {
               headers,
               body: JSON.stringify({
                 mode:         'authenticated',
-                characters:   namesData.filter(n => n.category === 'character').sort(byName),
-                corporations: namesData.filter(n => n.category === 'corporation').sort(byName),
-                alliances:    namesData.filter(n => n.category === 'alliance').sort(byName)
+                characters:   namesData.filter(n => n.category === 'character').sort(byName).slice(0, 10),
+                corporations: namesData.filter(n => n.category === 'corporation').sort(byName).slice(0, 10),
+                alliances:    namesData.filter(n => n.category === 'alliance').sort(byName).slice(0, 10)
               })
             };
           }
