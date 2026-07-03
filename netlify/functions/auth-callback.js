@@ -99,7 +99,8 @@ exports.handler = async function (event) {
     characterName,
     corpId,
     allianceId,
-    accessToken: tokenData.access_token
+    accessToken: tokenData.access_token,
+    createdAt: Date.now()
   });
   const encoded = Buffer.from(session).toString('base64');
 
@@ -113,7 +114,7 @@ exports.handler = async function (event) {
     statusCode: 302,
     headers: {
       Location: destination,
-      'Set-Cookie': `pilotrep_session=${encoded}; Path=/; HttpOnly; SameSite=Lax`,
+      'Set-Cookie': `pilotrep_session=${encoded}; Path=/; HttpOnly; SameSite=Lax; Max-Age=28800`,
     },
     body: '',
   };

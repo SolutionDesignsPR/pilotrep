@@ -4,13 +4,17 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
+const SESSION_MAX_AGE_MS = 8 * 60 * 60 * 1000; // 8 hours
+
 // Simple session cookie parser
 function getSession(cookieHeader) {
   if (!cookieHeader) return null;
   const match = cookieHeader.match(/pilotrep_session=([^;]+)/);
   if (!match) return null;
   try {
-    return JSON.parse(Buffer.from(match[1], 'base64').toString('utf8'));
+    const session = JSON.parse(Buffer.from(match[1], 'base64').toString('utf8'));
+    if (!session.createdAt || Date.now() - session.createdAt > SESSION_MAX_AGE_MS) return null;
+    return session;
   } catch {
     return null;
   }

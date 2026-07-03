@@ -105,6 +105,7 @@ exports.handler = async (event) => {
           corporation_name: corpName,
           alliance_id:      char.alliance_id || null,
           alliance_name:    allianceName,
+          birthday:         char.birthday || null,
           portrait:         `https://images.evetech.net/characters/${id}/portrait?size=256`
         })
       };

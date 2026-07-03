@@ -100,7 +100,7 @@
       letter-spacing: 0.12em;
       color: var(--muted);
       text-transform: uppercase;
-      padding-left: 2px;
+      padding-left: 5.6px;
     }
     .nav-logged-in a {
       color: var(--cyan);
@@ -592,6 +592,8 @@
     }
     .anon-submitting { font-size: 12px; color: var(--muted); letter-spacing: 0.04em; }
     .anon-submitting strong { color: var(--cyan); font-weight: 600; }
+    .submitter-link { color: var(--cyan); font-weight: 600; text-decoration: none; transition: color 0.15s; }
+    .submitter-link:hover { color: var(--white); text-decoration: underline; }
     .anon-label {
       display: flex;
       align-items: center;
@@ -623,7 +625,7 @@
 
     .login-prompt {
       display: block;
-      margin-top: 20px;
+      margin-top: 40px;
       text-align: center;
     }
     .login-prompt.hide { display: none; }
@@ -746,7 +748,7 @@
 
     <div class="nav-right">
       <div class="nav-search" style="position:relative;">
-        <input type="text" placeholder="Search Pilots, Corps and Alliances" id="navSearchInput" />
+        <input type="text" placeholder="Search for Pilots, Corporations and Alliances" id="navSearchInput" />
         <button aria-label="Search" id="navSearchBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -859,7 +861,7 @@
       <div class="section-divider"></div>
 
       <div class="anon-row">
-        <span class="anon-submitting">Submitting as: <strong id="submitterName">—</strong></span>
+        <span class="anon-submitting">Submitting as: <a id="submitterName" href="#" class="submitter-link">—</a></span>
         <label class="anon-label">
           <input type="checkbox" id="anonCheck"> Remain Anonymous
         </label>
@@ -919,7 +921,10 @@
       if (data.loggedIn) {
         currentUser = data.characterName;
         const submitterName = document.getElementById('submitterName');
-        if (submitterName) submitterName.textContent = currentUser;
+        if (submitterName) {
+          submitterName.textContent = currentUser;
+          if (data.characterId) submitterName.href = `pilot.html?id=${data.characterId}`;
+        }
         const authLink = document.getElementById('footerAuthLink');
         if (authLink) {
           authLink.textContent = 'Logout';
@@ -989,7 +994,7 @@
     const dateLabel = rep.date || 'Just now';
     row.innerHTML = `
       <div>
-        <div class="comment-meta">${dateLabel}${rep.author ? ' · ' + rep.author : ''}</div>
+        <div class="comment-meta">${dateLabel} · ${rep.author || 'Anonymous'}</div>
         <div class="comment-text">${rep.comment || '(no comment left)'}</div>
       </div>
       <span class="comment-system">${rep.system}</span>
@@ -1076,6 +1081,7 @@
   });
 
   // Anon toggle
+  document.getElementById('submitterName').addEventListener('click', function(e) { if (!currentUser) e.preventDefault(); });
   document.getElementById('anonCheck').addEventListener('change', function() {
     document.getElementById('submitterName').textContent = this.checked ? 'Anonymous' : (currentUser || 'Unknown');
   });
