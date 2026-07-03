@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PilotRep - Corporations</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="alternate icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -261,6 +264,12 @@
       text-transform: uppercase;
       line-height: 1.8;
     }
+    .corp-alliance-link {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .corp-alliance-link:hover { color: var(--cyan); text-decoration: underline; }
 
     /* ── PANELS — exact copy from pilot.html ── */
     .panels-section {
@@ -416,6 +425,7 @@
 
     .comment-meta { font-size: 11px; opacity: 0.85; letter-spacing: 0.05em; text-transform: uppercase; }
     .comment-text { font-size: 14px; font-weight: 600; text-transform: uppercase; margin-top: 2px; }
+    .no-comment-line { display: inline-block; width: 48px; height: 2px; background: var(--muted); margin-top: 6px; opacity: 0.5; }
     .comment-system {
       font-size: 11px;
       font-weight: 700;
@@ -995,7 +1005,7 @@
     row.innerHTML = `
       <div>
         <div class="comment-meta">${dateLabel} · ${rep.author || 'Anonymous'}</div>
-        <div class="comment-text">${rep.comment || '(no comment left)'}</div>
+        <div class="comment-text">${rep.comment ? rep.comment : '<span class="no-comment-line"></span>'}</div>
       </div>
       <span class="comment-system">${rep.system}</span>
     `;
@@ -1256,9 +1266,15 @@
       const res  = await fetch(`/.netlify/functions/esi-proxy?action=corporation&id=${corpId}`);
       const esi  = await res.json();
       document.getElementById('corpName').textContent = esi.name || '—';
+      const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
       let details = '';
-      if (esi.ticker)        details += `[${esi.ticker}]`;
-      if (esi.alliance_name) details += `${details ? ' &bull; ' : ''}ALLIANCE &bull; ${esi.alliance_name}`;
+      if (esi.ticker) details += `[${escapeHtml(esi.ticker)}]`;
+      if (esi.alliance_name) {
+        const allianceLabel = esi.alliance_id
+          ? `<a href="alliance.html?id=${esi.alliance_id}" class="corp-alliance-link">${escapeHtml(esi.alliance_name)}</a>`
+          : escapeHtml(esi.alliance_name);
+        details += `${details ? ' &bull; ' : ''}ALLIANCE &bull; ${allianceLabel}`;
+      }
       if (esi.member_count)  details += `${details ? '<br>' : ''}MEMBERS &bull; ${esi.member_count.toLocaleString()}`;
       document.getElementById('corpDetails').innerHTML = details;
       const img = document.getElementById('corpLogo');

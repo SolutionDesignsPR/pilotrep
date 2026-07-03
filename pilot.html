@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PilotRep - Pilots</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="alternate icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -306,6 +309,17 @@
       color: var(--white);
       text-transform: uppercase;
     }
+    .pilot-header-corp a,
+    .pilot-header-alliance a {
+      color: var(--white);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .pilot-header-corp a:hover,
+    .pilot-header-alliance a:hover {
+      color: var(--cyan);
+      text-decoration: underline;
+    }
     .pilot-header-secstatus {
       margin-top: 18px;
       font-size: 14px;
@@ -512,6 +526,7 @@
 
     .comment-meta { font-size: 11px; opacity: 0.85; letter-spacing: 0.05em; text-transform: uppercase; }
     .comment-text { font-size: 14px; font-weight: 600; text-transform: uppercase; margin-top: 2px; }
+    .no-comment-line { display: inline-block; width: 48px; height: 2px; background: var(--muted); margin-top: 6px; opacity: 0.5; }
     .comment-system {
       font-size: 11px;
       font-weight: 700;
@@ -862,7 +877,7 @@
       <div class="pilot-header-corp" id="pilotCorp"></div>
       <div class="pilot-header-alliance" id="pilotAlliance"></div>
       <div class="pilot-header-secstatus" id="pilotSecStatus" style="display:none;">Security Status <strong id="pilotSecValue">0.0</strong></div>
-      <div class="pilot-header-birthday" id="pilotBirthday" style="display:none;">Born <strong id="pilotBirthdayValue">—</strong></div>
+      <div class="pilot-header-birthday" id="pilotBirthday" style="display:none;">Birthday <strong id="pilotBirthdayValue">—</strong></div>
     </div>
   </section>
 
@@ -1147,7 +1162,7 @@
     row.innerHTML = `
       <div>
         <div class="comment-meta">${dateLabel} · ${rep.author || 'Anonymous'}</div>
-        <div class="comment-text">${rep.comment || '(no comment left)'}</div>
+        <div class="comment-text">${rep.comment ? rep.comment : '<span class="no-comment-line"></span>'}</div>
       </div>
       <span class="comment-system">${rep.system}</span>
     `;
@@ -1277,15 +1292,27 @@
       if (esi && esi.name) {
         document.title = `${esi.name} — PilotRep`;
         document.getElementById('pilotName').textContent = esi.name;
-        document.getElementById('pilotCorp').textContent = esi.corporation_name || '';
-        document.getElementById('pilotAlliance').textContent = esi.alliance_name || '';
+        const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        document.getElementById('pilotCorp').innerHTML = esi.corporation_name
+          ? (esi.corporation_id ? `<a href="corporation.html?id=${esi.corporation_id}">${escapeHtml(esi.corporation_name)}</a>` : escapeHtml(esi.corporation_name))
+          : '';
+        document.getElementById('pilotAlliance').innerHTML = esi.alliance_name
+          ? (esi.alliance_id ? `<a href="alliance.html?id=${esi.alliance_id}">${escapeHtml(esi.alliance_name)}</a>` : escapeHtml(esi.alliance_name))
+          : '';
         const secEl = document.getElementById('pilotSecStatus');
         document.getElementById('pilotSecValue').textContent = esi.security_status ?? '0.0';
         secEl.style.display = '';
         if (esi.birthday) {
           const bdayEl = document.getElementById('pilotBirthday');
           const bdayDate = new Date(esi.birthday);
-          document.getElementById('pilotBirthdayValue').textContent = bdayDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+          const ordinal = n => {
+            const s = ['th', 'st', 'nd', 'rd'], v = n % 100;
+            return n + (s[(v - 20) % 10] || s[v] || s[0]);
+          };
+          const year = bdayDate.getFullYear();
+          const month = bdayDate.toLocaleDateString('en-GB', { month: 'long' });
+          const day = ordinal(bdayDate.getDate());
+          document.getElementById('pilotBirthdayValue').textContent = `${year} ${month} ${day}`;
           bdayEl.style.display = '';
         }
         if (esi.portrait) {
