@@ -223,6 +223,12 @@
       transition: border-color 0.2s, background 0.2s;
     }
     .eve-login:hover { border-color: var(--cyan); background: rgba(79,195,247,0.08); }
+    .eve-login.is-logged-in {
+      font-size: 11.9px;
+      padding: 8.5px 17px;
+      gap: 8.5px;
+    }
+    .eve-login.is-logged-in .eve-logo { font-size: 12.75px; }
     .eve-logo {
       font-family: Helvetica, Arial, sans-serif;
       font-weight: 700;
@@ -323,6 +329,13 @@
       font-weight: 700;
       min-width: 38px;
       text-align: center;
+    }
+    .grade .modifier {
+      font-size: 0.55em;
+      font-weight: 700;
+      vertical-align: super;
+      line-height: 0;
+      letter-spacing: 0;
     }
     .grade-Ap { color: var(--grade-ap); }
     .grade-A  { color: var(--grade-a);  }
@@ -435,6 +448,25 @@
     }
     .search-drop-note a { color: var(--cyan-dim); text-decoration: none; }
     .search-drop-note a:hover { color: var(--cyan); }
+    .validation-toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--cyan);
+      color: var(--bg);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 9px 20px;
+      border-radius: 5px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      z-index: 9999;
+    }
+    .validation-toast.show { opacity: 1; }
   </style>
 </head>
 <body>
@@ -501,7 +533,7 @@
           <div class="pilot-name">Fishers Ghost</div>
           <div class="pilot-corp">High Sec Mining Corp</div>
         </div>
-        <span class="grade grade-Cp">C+</span>
+        <span class="grade grade-Cp">C<span class="modifier">+</span></span>
       </a>
 
       <a href="#" class="pilot-row">
@@ -512,7 +544,7 @@
           <div class="pilot-name">Fishers Ghost</div>
           <div class="pilot-corp">High Sec Mining Corp</div>
         </div>
-        <span class="grade grade-Dp">D+</span>
+        <span class="grade grade-Dp">D<span class="modifier">+</span></span>
       </a>
 
       <a href="#" class="pilot-row">
@@ -523,7 +555,7 @@
           <div class="pilot-name">Fishers Ghost</div>
           <div class="pilot-corp">High Sec Mining Corp</div>
         </div>
-        <span class="grade grade-Bm">B-</span>
+        <span class="grade grade-Bm">B<span class="modifier">−</span></span>
       </a>
 
       <a href="#" class="pilot-row">
@@ -561,7 +593,7 @@
           <div class="pilot-name">Fishers Ghost</div>
           <div class="pilot-corp">High Sec Mining Corp</div>
         </div>
-        <span class="grade grade-Cp">C+</span>
+        <span class="grade grade-Cp">C<span class="modifier">+</span></span>
       </a>
 
       <a href="#" class="pilot-row">
@@ -572,7 +604,7 @@
           <div class="pilot-name">Fishers Ghost</div>
           <div class="pilot-corp">High Sec Mining Corp</div>
         </div>
-        <span class="grade grade-Dp">D+</span>
+        <span class="grade grade-Dp">D<span class="modifier">+</span></span>
       </a>
 
       <a href="#" class="pilot-row">
@@ -583,7 +615,7 @@
           <div class="pilot-name">Fishers Ghost</div>
           <div class="pilot-corp">High Sec Mining Corp</div>
         </div>
-        <span class="grade grade-Bm">B-</span>
+        <span class="grade grade-Bm">B<span class="modifier">−</span></span>
       </a>
 
       <a href="#" class="pilot-row">
@@ -619,19 +651,31 @@
     <div class="footer-copy">&copy; 2026 PilotRep. All rights reserved.</div>
   </footer>
 
+  <div class="validation-toast" id="validationToast"></div>
+
 <script>
+  function showValidation(msg) {
+    const validationToast = document.getElementById('validationToast');
+    validationToast.textContent = msg;
+    validationToast.classList.add('show');
+    setTimeout(() => validationToast.classList.remove('show'), 2200);
+  }
+
   // Session check — swap login button to character name if already logged in
+  let isLoggedIn = false;
   (async () => {
     try {
       const res = await fetch('/.netlify/functions/auth-me');
       const data = await res.json();
       if (data.loggedIn) {
+        isLoggedIn = true;
         const btn = document.getElementById('heroLoginBtn');
         if (btn) {
           btn.textContent = data.characterName;
-          btn.href = '#';
+          btn.href = data.characterId ? `pilot.html?id=${data.characterId}` : '#';
           btn.style.color = 'var(--cyan)';
           btn.style.borderColor = 'var(--cyan-dim)';
+          btn.classList.add('is-logged-in');
         }
         const authLink = document.getElementById('footerAuthLink');
         if (authLink) {
@@ -645,6 +689,17 @@
       }
     } catch (e) { /* non-fatal */ }
   })();
+
+  // Footer "My PilotRep" — if not logged in, prompt instead of landing on a blank profile
+  const myPilotRepLink = document.getElementById('myPilotRepLink');
+  if (myPilotRepLink) {
+    myPilotRepLink.addEventListener('click', (e) => {
+      if (!isLoggedIn) {
+        e.preventDefault();
+        showValidation('Log In With EVE Online To View Your PilotRep');
+      }
+    });
+  }
 
   // ── HERO SEARCH BAR ───────────────────────────────────────────────────────
   const searchInput    = document.getElementById('heroSearchInput');

@@ -526,7 +526,7 @@
 
     .comment-meta { font-size: 11px; opacity: 0.85; letter-spacing: 0.05em; text-transform: uppercase; }
     .comment-text { font-size: 14px; font-weight: 600; text-transform: uppercase; margin-top: 2px; }
-    .no-comment-line { display: inline-block; width: 48px; height: 2px; background: var(--muted); margin-top: 6px; opacity: 0.5; }
+    .no-comment-line { display: inline-block; width: 72px; height: 2px; background: var(--white); margin-top: 6px; opacity: 0.6; }
     .comment-system {
       font-size: 11px;
       font-weight: 700;
@@ -866,7 +866,7 @@
   </header>
 
   <!-- PAGE TITLE -->
-  <h1 class="page-title">Pilot RepScore</h1>
+  <h1 class="page-title" id="pageTitle">Pilot RepScore</h1>
 
   <!-- PILOT HEADER -->
   <section class="pilot-header">
@@ -1069,6 +1069,12 @@
         if (myLink && data.characterId) {
           myLink.href = `pilot.html?id=${data.characterId}`;
         }
+        // If viewing own profile, swap the page headline
+        const urlPilotId = new URLSearchParams(window.location.search).get('id');
+        if (data.characterId && urlPilotId && String(urlPilotId) === String(data.characterId)) {
+          const titleEl = document.getElementById('pageTitle');
+          if (titleEl) titleEl.textContent = 'My PilotRep';
+        }
         const navLoggedIn = document.getElementById('navLoggedInAs');
         const navLoggedInLink = document.getElementById('navLoggedInLink');
         if (navLoggedIn && navLoggedInLink && data.characterId) {
@@ -1087,6 +1093,17 @@
   }
 
   function isLoggedIn() { return currentUser !== null; }
+
+  // Footer "My PilotRep" — if not logged in, prompt instead of landing on a blank profile
+  const myPilotRepLink = document.getElementById('myPilotRepLink');
+  if (myPilotRepLink) {
+    myPilotRepLink.addEventListener('click', (e) => {
+      if (!isLoggedIn()) {
+        e.preventDefault();
+        showValidation('Log In With EVE Online To View Your PilotRep');
+      }
+    });
+  }
 
   // ── ANONYMOUS CHECKBOX ──
   const anonCheck = document.getElementById('anonCheck');

@@ -307,6 +307,25 @@
       color: var(--muted);
       letter-spacing: 0.05em;
     }
+    .validation-toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--cyan);
+      color: var(--bg);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 9px 20px;
+      border-radius: 5px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      z-index: 9999;
+    }
+    .validation-toast.show { opacity: 1; }
   </style>
 </head>
 <body>
@@ -390,7 +409,48 @@
 
   </div>
 
+  <div class="validation-toast" id="validationToast"></div>
+
 <script>
+  function showValidation(msg) {
+    const validationToast = document.getElementById('validationToast');
+    validationToast.textContent = msg;
+    validationToast.classList.add('show');
+    setTimeout(() => validationToast.classList.remove('show'), 2200);
+  }
+
+  // Session check — swap footer login state, same as index.html
+  let isLoggedIn = false;
+  (async () => {
+    try {
+      const res = await fetch('/.netlify/functions/auth-me');
+      const data = await res.json();
+      if (data.loggedIn) {
+        isLoggedIn = true;
+        const authLink = document.getElementById('footerAuthLink');
+        if (authLink) {
+          authLink.textContent = 'Logout';
+          authLink.href = '/.netlify/functions/auth-logout';
+        }
+        const myLink = document.getElementById('myPilotRepLink');
+        if (myLink && data.characterId) {
+          myLink.href = `pilot.html?id=${data.characterId}`;
+        }
+      }
+    } catch (e) { /* non-fatal */ }
+  })();
+
+  // Footer "My PilotRep" — if not logged in, prompt instead of landing on a blank profile
+  const myPilotRepLink = document.getElementById('myPilotRepLink');
+  if (myPilotRepLink) {
+    myPilotRepLink.addEventListener('click', (e) => {
+      if (!isLoggedIn) {
+        e.preventDefault();
+        showValidation('Log In With EVE Online To View Your PilotRep');
+      }
+    });
+  }
+
   function doSearch() {
     const q = document.getElementById('searchInput').value.trim();
     if (q) window.location.href = 'search.html?q=' + encodeURIComponent(q);
