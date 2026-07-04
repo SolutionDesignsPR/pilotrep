@@ -93,13 +93,17 @@ exports.handler = async function (event) {
   }
 
   // ── 5. Set session cookie & redirect ─────────────────────────────────────
-  // Store access token in session so esi-proxy can use it for authenticated search
+  // Store access token + refresh token in session so esi-proxy can use them for
+  // authenticated search. EVE SSO access tokens expire in ~20 min (tokenData.expires_in);
+  // the refresh_token lets esi-proxy silently mint a new one without re-login.
   const session = JSON.stringify({
     characterId,
     characterName,
     corpId,
     allianceId,
     accessToken: tokenData.access_token,
+    refreshToken: tokenData.refresh_token,
+    accessTokenExpiresAt: Date.now() + (tokenData.expires_in || 1200) * 1000,
     createdAt: Date.now()
   });
   const encoded = Buffer.from(session).toString('base64');
@@ -114,7 +118,7 @@ exports.handler = async function (event) {
     statusCode: 302,
     headers: {
       Location: destination,
-      'Set-Cookie': `pilotrep_session=${encoded}; Path=/; HttpOnly; SameSite=Lax; Max-Age=28800`,
+      'Set-Cookie': `pilotrep_session=${encoded}; Path=/; HttpOnly; SameSite=Lax; Max-Age=7200`,
     },
     body: '',
   };

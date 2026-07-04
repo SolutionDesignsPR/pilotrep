@@ -1,3 +1,52 @@
+// Refresh an expired EVE SSO access token using the stored refresh_token.
+// Returns { accessToken, refreshToken, accessTokenExpiresAt } on success, or null
+// if the refresh itself fails (dead/revoked refresh token, network error, etc).
+// Per CCP's rotation behavior, the refresh_token returned here MUST replace the
+// old one — it may differ from the one that was sent.
+async function refreshAccessToken(refreshToken) {
+  try {
+    const clientId     = process.env.EVE_CLIENT_ID;
+    const clientSecret = process.env.EVE_CLIENT_SECRET;
+    const credentials  = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+
+    const tokenRes = await fetch('https://login.eveonline.com/v2/oauth/token', {
+      method: 'POST',
+      headers: {
+        Authorization: `Basic ${credentials}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Host: 'login.eveonline.com',
+      },
+      body: new URLSearchParams({
+        grant_type:    'refresh_token',
+        refresh_token: refreshToken,
+      }),
+    });
+    if (!tokenRes.ok) {
+      console.warn('Token refresh failed:', await tokenRes.text());
+      return null;
+    }
+    const tokenData = await tokenRes.json();
+    return {
+      accessToken:          tokenData.access_token,
+      refreshToken:         tokenData.refresh_token,
+      accessTokenExpiresAt: Date.now() + (tokenData.expires_in || 1200) * 1000,
+    };
+  } catch (err) {
+    console.warn('Token refresh error (non-fatal):', err);
+    return null;
+  }
+}
+
+// If we minted a fresh token this request, forward the updated session cookie
+// so the browser's stored cookie stays in sync with what CCP issued.
+function withRefreshedCookie(headers, refreshedCookie) {
+  if (!refreshedCookie) return headers;
+  return {
+    ...headers,
+    'Set-Cookie': `pilotrep_session=${refreshedCookie}; Path=/; HttpOnly; SameSite=Lax; Max-Age=7200`,
+  };
+}
+
 exports.handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -17,10 +66,30 @@ exports.handler = async (event) => {
       const match = cookieHeader.match(/pilotrep_session=([^;]+)/);
       let accessToken = null;
       let session = null;
+      let refreshedCookie = null; // set if we mint a new token; forwarded via Set-Cookie
       if (match) {
         try {
           session = JSON.parse(Buffer.from(match[1], 'base64').toString('utf8'));
           accessToken = session.accessToken || null;
+
+          // Access tokens live ~20 min; the 8hr site session outlives that easily.
+          // If it's expired (with a 60s buffer) and we have a refresh token, mint a new one.
+          const isExpired = session.accessTokenExpiresAt && Date.now() > (session.accessTokenExpiresAt - 60000);
+          if (isExpired && session.refreshToken) {
+            const refreshed = await refreshAccessToken(session.refreshToken);
+            if (refreshed) {
+              accessToken = refreshed.accessToken;
+              session.accessToken          = refreshed.accessToken;
+              session.refreshToken         = refreshed.refreshToken;
+              session.accessTokenExpiresAt = refreshed.accessTokenExpiresAt;
+              refreshedCookie = Buffer.from(JSON.stringify(session)).toString('base64');
+            } else {
+              // Refresh token itself is dead/revoked — fail gracefully into the
+              // unauthenticated fallback below rather than erroring. Do NOT touch
+              // the 8hr site session cookie; that's a separate, unrelated concern.
+              accessToken = null;
+            }
+          }
         } catch (_) {}
       }
 
@@ -38,7 +107,7 @@ exports.handler = async (event) => {
             ...(searchData.alliance    || []).slice(0, 50)
           ];
           if (allIds.length === 0) {
-            return { statusCode: 200, headers, body: JSON.stringify({ mode: 'authenticated', characters: [], corporations: [], alliances: [] }) };
+            return { statusCode: 200, headers: withRefreshedCookie(headers, refreshedCookie), body: JSON.stringify({ mode: 'authenticated', characters: [], corporations: [], alliances: [] }) };
           }
           const namesRes = await fetch('https://esi.evetech.net/latest/universe/names/?datasource=tranquility', {
             method: 'POST',
@@ -51,7 +120,7 @@ exports.handler = async (event) => {
             const startsWithQuery = n => n.name.toLowerCase().startsWith(query.toLowerCase());
             return {
               statusCode: 200,
-              headers,
+              headers: withRefreshedCookie(headers, refreshedCookie),
               body: JSON.stringify({
                 mode:         'authenticated',
                 characters:   namesData.filter(n => n.category === 'character').filter(startsWithQuery).sort(byName).slice(0, 10),
