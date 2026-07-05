@@ -90,7 +90,7 @@ exports.handler = async (event) => {
     grade,
     grade_index:   gradeIndex,
     system_type:   systemType || null,
-    comment:       comment || null,
+    comment:       (comment && comment.trim()) ? comment.trim() : null,
     anonymous:     anonymous || false
   });
 

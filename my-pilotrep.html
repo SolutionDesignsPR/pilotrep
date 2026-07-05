@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PilotRep - Corporations</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PilotRep - My PilotRep</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="alternate icon" href="/favicon.ico" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -14,15 +14,26 @@
     :root {
       --bg:        #04080f;
       --bg2:       #0b1220;
+      --bg3:       #101b2e;
       --panel:     #0e1a2b;
+      --panel2:    #121f33;
       --border:    rgba(100,180,255,0.10);
       --cyan:      #4fc3f7;
       --cyan-dim:  #2a8bbf;
+      --orange:    #e8871a;
       --white:     #e8eef5;
       --muted:     #5a7490;
+      --grade-ap: #008bd1;
       --grade-a:  #008bd1;
       --grade-b:  #00af10;
+      --grade-bp: #00af10;
+      --grade-bm: #00af10;
+      --grade-c:  #00af10;
+      --grade-cp: #00af10;
+      --grade-cm: #00af10;
       --grade-d:  #610b0f;
+      --grade-dp: #610b0f;
+      --grade-dm: #610b0f;
       --grade-f:  #610b0f;
     }
 
@@ -71,7 +82,7 @@
 
     .page { position: relative; z-index: 1; }
 
-    /* ── TOP NAV — exact match to pilot.html ── */
+    /* ── TOP NAV ── */
     .topnav {
       display: flex;
       align-items: center;
@@ -90,6 +101,17 @@
       text-transform: uppercase;
       text-decoration: none;
       white-space: nowrap;
+    }
+    .nav-logo .o-ring {
+      display: inline-block;
+      width: 0.62em;
+      height: 0.62em;
+      border: 0.13em solid var(--white);
+      border-radius: 50%;
+      vertical-align: middle;
+      margin: 0 0.01em;
+      position: relative;
+      top: -0.07em;
     }
     .nav-left {
       display: flex;
@@ -202,6 +224,35 @@
       align-items: center;
     }
     .nav-search svg { width: 14px; height: 14px; }
+    .search-drop-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--white);
+      border-bottom: 1px solid rgba(79,195,247,0.08);
+      text-decoration: none;
+    }
+    .search-drop-item:last-child { border-bottom: none; }
+    .search-drop-item:hover { background: rgba(79,195,247,0.1); }
+    .search-drop-label {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 8px 14px 4px;
+      border-bottom: 1px solid rgba(79,195,247,0.08);
+    }
+    .search-drop-name { flex: 1; }
+    .search-drop-type {
+      font-size: 10px;
+      color: var(--cyan);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .pilot-portrait img { width: 170px; height: 200px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border); }
     .nav-search-sub {
       font-size: 11px;
       color: var(--muted);
@@ -221,8 +272,8 @@
       margin: 36px 0 50px;
     }
 
-    /* ── ALLIANCE IDENTITY ── */
-    .alliance-header {
+    /* ── PILOT HEADER ── */
+    .pilot-header {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -232,46 +283,73 @@
       padding: 0 24px;
       flex-wrap: wrap;
     }
-    .alliance-logo {
-      width: 130px;
-      height: 130px;
-      flex-shrink: 0;
-      background: var(--panel);
-      border: 1px solid var(--border);
+    .pilot-portrait {
+      width: 170px;
+      height: 200px;
       border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      text-align: center;
+      object-fit: cover;
+      background: linear-gradient(135deg, #0e1a2b 0%, #1a2a40 100%);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
     }
-    .alliance-info { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; text-align: left; }
-    .alliance-name {
-      font-size: clamp(22px, 3vw, 32px);
+    .pilot-header-info { text-align: left; }
+    .pilot-header-name {
+      font-size: clamp(26px, 4vw, 36px);
       font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      letter-spacing: 0.06em;
       color: var(--cyan);
-      line-height: 1.1;
-    }
-    .alliance-corps {
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: 0.07em;
       text-transform: uppercase;
-      line-height: 1.8;
+      margin-bottom: 10px;
     }
-    .corp-alliance-link {
-      color: var(--muted);
+    .pilot-header-corp,
+    .pilot-header-alliance {
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: var(--white);
+      text-transform: uppercase;
+    }
+    .pilot-header-corp a,
+    .pilot-header-alliance a {
+      color: var(--white);
       text-decoration: none;
       transition: color 0.15s;
     }
-    .corp-alliance-link:hover { color: var(--cyan); text-decoration: underline; }
+    .pilot-header-corp a:hover,
+    .pilot-header-alliance a:hover {
+      color: var(--cyan);
+      text-decoration: underline;
+    }
+    .pilot-header-secstatus {
+      margin-top: 18px;
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .pilot-header-secstatus strong {
+      color: var(--white);
+      font-weight: 700;
+      font-size: 18px;
+      margin-left: 8px;
+    }
+    .pilot-header-birthday {
+      margin-top: 6px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .pilot-header-birthday strong {
+      color: var(--white);
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      text-transform: none;
+      margin-left: 6px;
+    }
 
-    /* ── PANELS — exact copy from pilot.html ── */
+    /* ── PANELS ── */
     .panels-section {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -315,7 +393,7 @@
       border: 2px solid var(--white);
     }
     .grade-circle::before { top: -3px; left: 50%; transform: translate(-50%, -2px); }
-    .grade-circle::after  { bottom: -3px; left: 50%; transform: translate(-50%, 2px); }
+    .grade-circle::after { bottom: -3px; left: 50%; transform: translate(-50%, 2px); }
     .grade-circle-letter {
       font-size: 56px;
       font-weight: 700;
@@ -364,6 +442,14 @@
       color: var(--white);
       text-transform: uppercase;
     }
+    .comments-headrow .comments-count-inline {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0;
+      color: var(--cyan);
+      text-transform: none;
+      margin-left: 10px;
+    }
     .share-btn {
       background: transparent;
       border: 1px solid var(--border);
@@ -402,7 +488,30 @@
     }
     .share-toast.show { opacity: 1; }
 
-    .comments-list { border-radius: 4px; overflow: hidden; }
+    .validation-toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--cyan);
+      color: var(--bg);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 9px 20px;
+      border-radius: 5px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      z-index: 9999;
+    }
+    .validation-toast.show { opacity: 1; }
+
+    .comments-list {
+      border-radius: 4px;
+      overflow: hidden;
+    }
     .comments-empty {
       text-align: center;
       font-size: 13px;
@@ -479,6 +588,7 @@
       margin-bottom: 28px;
     }
 
+    /* slider */
     .grade-slider {
       position: relative;
       display: flex;
@@ -514,9 +624,9 @@
       cursor: pointer;
       transition: all 0.15s;
     }
-    .grade-dot[data-tier="neg"]     { border-color: var(--grade-d); background: var(--grade-d); color: var(--white); }
-    .grade-dot[data-tier="neutral"] { border-color: var(--grade-b); background: var(--grade-b); color: var(--white); }
-    .grade-dot[data-tier="pos"]     { border-color: var(--grade-a); background: var(--grade-a); color: var(--white); }
+    .grade-dot[data-tier="neg"]      { border-color: var(--grade-d); background: var(--grade-d); color: var(--white); }
+    .grade-dot[data-tier="neutral"]  { border-color: var(--grade-b); background: var(--grade-b); color: var(--white); }
+    .grade-dot[data-tier="pos"]      { border-color: var(--grade-a); background: var(--grade-a); color: var(--white); }
 
     .grade-dot.selected[data-tier="neg"]     { background: var(--grade-d); color: var(--white); box-shadow: 0 0 0 3px rgba(255,255,255,0.4); }
     .grade-dot.selected[data-tier="neutral"] { background: var(--grade-b); color: var(--white); box-shadow: 0 0 0 3px rgba(255,255,255,0.4); }
@@ -539,9 +649,10 @@
       border-radius: 3px;
       color: var(--white);
     }
-    .tier-tag.neg     { background: var(--grade-d); }
+    .tier-tag.neg { background: var(--grade-d); }
     .tier-tag.neutral { background: var(--grade-b); }
-    .tier-tag.pos     { background: var(--grade-a); }
+    .tier-tag.pos { background: var(--grade-a); }
+    .tier-tag.spacer { visibility: hidden; }
 
     .system-grid {
       display: grid;
@@ -596,12 +707,24 @@
       align-items: center;
       gap: 10px;
       max-width: 420px;
-      margin: 0 auto;
+      margin: 0 auto 0;
       flex-wrap: wrap;
     }
-    .anon-submitting { font-size: 12px; color: var(--muted); letter-spacing: 0.04em; }
-    .anon-submitting strong { color: var(--cyan); font-weight: 600; }
-    .submitter-link { color: var(--cyan); font-weight: 600; text-decoration: none; transition: color 0.15s; }
+    .anon-submitting {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+    .anon-submitting strong {
+      color: var(--cyan);
+      font-weight: 600;
+    }
+    .submitter-link {
+      color: var(--cyan);
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
     .submitter-link:hover { color: var(--white); text-decoration: underline; }
     .anon-label {
       display: flex;
@@ -614,7 +737,12 @@
       cursor: pointer;
       white-space: nowrap;
     }
-    .anon-label input[type="checkbox"] { accent-color: var(--cyan); width: 13px; height: 13px; cursor: pointer; }
+    .anon-label input[type="checkbox"] {
+      accent-color: var(--cyan);
+      width: 13px;
+      height: 13px;
+      cursor: pointer;
+    }
 
     .submit-wrap { text-align: center; }
     .submit-btn {
@@ -634,7 +762,7 @@
 
     .login-prompt {
       display: block;
-      margin-top: 40px;
+      margin-top: 20px;
       text-align: center;
     }
     .login-prompt.hide { display: none; }
@@ -652,7 +780,7 @@
     }
     .hint-link:hover { color: var(--cyan); }
 
-    /* ── LEGAL + FOOTER — exact match to pilot.html ── */
+    /* ── LEGAL + FOOTER (shared) ── */
     .legal-note {
       max-width: 480px;
       margin: 10px auto 0;
@@ -661,6 +789,8 @@
       font-size: 12px;
       color: var(--muted);
     }
+    .legal-note a { color: var(--cyan); text-decoration: none; }
+
     .site-footer {
       margin-top: 60px;
       padding: 30px 24px 40px;
@@ -701,44 +831,17 @@
       letter-spacing: 0.05em;
     }
 
+    /* ── RESPONSIVE ── */
     @media (max-width: 760px) {
       .panels-section { grid-template-columns: 1fr; }
-      .alliance-header { justify-content: center; text-align: center; }
+      .pilot-header { text-align: center; justify-content: center; }
+      .pilot-header-info { text-align: center; }
       .nav-links { order: 3; width: 100%; }
       .nav-right { align-items: center; width: 100%; }
-    }
-    .search-drop-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 9px 14px;
-      cursor: pointer;
-      font-size: 13px;
-      color: var(--white);
-      border-bottom: 1px solid rgba(79,195,247,0.08);
-      text-decoration: none;
-    }
-    .search-drop-item:last-child { border-bottom: none; }
-    .search-drop-item:hover { background: rgba(79,195,247,0.1); }
-    .search-drop-label {
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      padding: 8px 14px 4px;
-      border-bottom: 1px solid rgba(79,195,247,0.08);
-    }
-    .search-drop-name { flex: 1; }
-    .search-drop-type {
-      font-size: 10px;
-      color: var(--cyan);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
     }
   </style>
 </head>
 <body>
-
 <div class="starfield"></div>
 <div class="page">
 
@@ -750,15 +853,15 @@
     </div>
 
     <nav class="nav-links">
-      <a href="pilot.html">Pilots</a>
-      <a href="corporation.html" class="active">Corporations</a>
+      <a href="pilot.html" class="active">Pilots</a>
+      <a href="corporation.html">Corporations</a>
       <a href="alliance.html">Alliances</a>
     </nav>
 
     <div class="nav-right">
       <div class="nav-search" style="position:relative;">
-        <input type="text" placeholder="Search for Pilots, Corporations and Alliances" id="navSearchInput" />
-        <button aria-label="Search" id="navSearchBtn">
+        <input type="text" id="navSearchInput" placeholder="Search for Pilots, Corporations and Alliances" autocomplete="off" />
+        <button id="navSearchBtn" aria-label="Search">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
@@ -770,17 +873,32 @@
   </header>
 
   <!-- PAGE TITLE -->
-  <h1 class="page-title">Corporation RepScore</h1>
+  <h1 class="page-title" id="pageTitle">My PilotRep</h1>
 
-  <!-- CORPORATION IDENTITY -->
-  <div class="alliance-header">
-    <img id="corpLogo" src="" alt="Corp Logo" style="display:none;width:128px;height:128px;border-radius:4px;">
-    <div class="alliance-logo" id="corpLogoPlaceholder">Corp<br>Logo</div>
-    <div class="alliance-info">
-      <div class="alliance-name" id="corpName">—</div>
-      <div class="alliance-corps" id="corpDetails"></div>
+  <!-- LOGGED OUT GATE -->
+  <section id="loggedOutGate" style="display:none; max-width:500px; margin:0 auto; padding:60px 24px 80px; text-align:center;">
+    <div style="font-size:14px; letter-spacing:0.06em; color:var(--muted); text-transform:uppercase; margin-bottom:24px;">
+      Log In With EVE Online To View Your PilotRep
     </div>
-  </div>
+    <a href="#" class="eve-login-sm" onclick="this.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname)">
+      <span class="eve-logo-sm">ΞVΞ</span>
+      <span class="eve-divider-sm"></span>
+      LOG IN with EVE Online
+    </a>
+  </section>
+
+  <!-- PILOT HEADER -->
+  <section class="pilot-header">
+    <img class="pilot-portrait" id="pilotPortrait" src="" alt="" style="display:none;" />
+    <div class="pilot-portrait" id="pilotPortraitPlaceholder"></div>
+    <div class="pilot-header-info">
+      <div class="pilot-header-name" id="pilotName">—</div>
+      <div class="pilot-header-corp" id="pilotCorp"></div>
+      <div class="pilot-header-alliance" id="pilotAlliance"></div>
+      <div class="pilot-header-secstatus" id="pilotSecStatus" style="display:none;">Security Status <strong id="pilotSecValue">0.0</strong></div>
+      <div class="pilot-header-birthday" id="pilotBirthday" style="display:none;">Birthday <strong id="pilotBirthdayValue">—</strong></div>
+    </div>
+  </section>
 
   <!-- PANELS -->
   <section class="panels-section">
@@ -798,14 +916,13 @@
           <div class="stat-num" id="repsCount">0</div>
           <div class="stat-label">Reps</div>
         </div>
-        <div>
-          <div class="stat-num" id="commentsCount">0</div>
-          <div class="stat-label">Comments</div>
-        </div>
       </div>
+    </div>
 
+    <!-- Comments Panel -->
+    <div class="panel">
       <div class="comments-headrow">
-        <span>Comments</span>
+        <span>Comments<span class="comments-count-inline" id="commentsCount">0</span></span>
         <button class="share-btn" id="shareBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
@@ -821,71 +938,7 @@
       </div>
 
       <div class="see-all-wrap" id="seeAllWrap" style="display:none;">
-        <button class="see-all-btn" id="seeAllBtn">&#9662; See All Comments</button>
-      </div>
-    </div>
-
-    <!-- Leave A Rep Panel -->
-    <div class="panel">
-      <div style="font-size:11px;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;text-align:center;margin-bottom:8px;"><a href="#eveLoginBtn" class="hint-link">Login With EVE Online To</a></div>
-      <h2 class="panel-title">Submit A Rep</h2>
-      <div class="panel-divider"></div>
-
-      <div class="subsection-label">Rate Your Encounter</div>
-
-      <div class="grade-slider" id="gradeSlider">
-        <div class="grade-dot" data-grade="F"  data-tier="neg">F</div>
-        <div class="grade-dot" data-grade="D"  data-tier="neg">D</div>
-        <div class="grade-dot" data-grade="C"  data-tier="neutral">C</div>
-        <div class="grade-dot" data-grade="B"  data-tier="neutral">B</div>
-        <div class="grade-dot" data-grade="A"  data-tier="pos">A</div>
-        <div class="grade-dot" data-grade="A+" data-tier="pos">A+</div>
-      </div>
-      <div class="slider-labels">
-        <span class="tier-tag neg">Negative</span>
-        <span class="tier-tag neutral">Neutral</span>
-        <span class="tier-tag pos">Positive</span>
-      </div>
-
-      <div class="section-divider"></div>
-
-      <div class="subsection-label">System Encountered In</div>
-      <div class="system-grid">
-        <button class="system-btn">Nullsec</button>
-        <button class="system-btn">Lowsec</button>
-        <button class="system-btn">Highsec</button>
-        <button class="system-btn">Wormhole</button>
-        <button class="system-btn">Pochven</button>
-        <button class="system-btn">N/A</button>
-      </div>
-
-      <div class="section-divider"></div>
-
-      <div class="subsection-label">Comment On Your Encounter</div>
-      <div class="comment-field-wrap">
-        <input type="text" class="comment-input" id="commentInput" maxlength="30" placeholder="MAXIMUM 5 WORDS OR 30 LETTERS" />
-        <div class="comment-hint">No Spam &bull; No Profanity &bull; Keep It Professional &bull; Comments Are Moderated</div>
-      </div>
-
-      <div class="section-divider"></div>
-
-      <div class="anon-row">
-        <span class="anon-submitting">Submitting as: <a id="submitterName" href="#" class="submitter-link">—</a></span>
-        <label class="anon-label">
-          <input type="checkbox" id="anonCheck"> Remain Anonymous
-        </label>
-      </div>
-
-      <div class="submit-wrap" style="margin-top:24px;">
-        <button class="submit-btn" id="submitBtn">Submit A Rep</button>
-        <div class="login-prompt" id="loginPrompt">
-          <div class="login-prompt-text">You must be logged in to submit a PilotRep.</div>
-          <a id="eveLoginBtn" href="#" class="eve-login-sm" onclick="this.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname)">
-            <span class="eve-logo-sm">&#926;V&#926;</span>
-            <span class="eve-divider-sm"></span>
-            LOG IN with EVE Online
-          </a>
-        </div>
+        <button class="see-all-btn" id="seeAllBtn">▾ See All Comments</button>
       </div>
     </div>
 
@@ -893,14 +946,14 @@
 
   <!-- SHARE TOAST -->
   <div class="share-toast" id="shareToast">Link Copied!</div>
-  <div class="share-toast" id="validationToast"></div>
+  <div class="validation-toast" id="validationToast"></div>
 
   <!-- FOOTER -->
   <footer class="site-footer">
     <div class="footer-grid">
       <a href="about.html">About</a>
       <a href="subscriptions.html">Subscriptions</a>
-      <a href="pilot.html" id="myPilotRepLink">My PilotRep</a>
+      <a href="my-pilotrep.html" id="myPilotRepLink">My PilotRep</a>
       <a href="/.netlify/functions/auth-start" id="footerAuthLink">Login</a>
       <a href="faq.html">FAQ</a>
       <a href="privacy.html">Privacy Policy</a>
@@ -914,13 +967,10 @@
     <div class="footer-copy">&copy; 2026 PilotRep. All rights reserved.</div>
   </footer>
 
-</div><!-- /.page -->
+</div>
 
 <script>
-  // Disable submit immediately — re-enabled by loadSession() once session is known
-  document.getElementById('submitBtn').disabled = true;
-
-  // ── Auth — real EVE SSO session check ──
+  // ── AUTH GATE ──
   let currentUser = null;
 
   async function loadSession() {
@@ -929,19 +979,11 @@
       const data = await res.json();
       if (data.loggedIn) {
         currentUser = data.characterName;
-        const submitterName = document.getElementById('submitterName');
-        if (submitterName) {
-          submitterName.textContent = currentUser;
-          if (data.characterId) submitterName.href = `pilot.html?id=${data.characterId}`;
-        }
+        // Switch footer link to Logout
         const authLink = document.getElementById('footerAuthLink');
         if (authLink) {
           authLink.textContent = 'Logout';
           authLink.href = '/.netlify/functions/auth-logout';
-        }
-        const myLink = document.getElementById('myPilotRepLink');
-        if (myLink && data.characterId) {
-          myLink.href = `pilot.html?id=${data.characterId}`;
         }
         const navLoggedIn = document.getElementById('navLoggedInAs');
         const navLoggedInLink = document.getElementById('navLoggedInLink');
@@ -950,36 +992,59 @@
           navLoggedInLink.href = `pilot.html?id=${data.characterId}`;
           navLoggedIn.style.display = 'block';
         }
-        // Logged in: hide the EVE login button, it's no longer needed
-        document.getElementById('loginPrompt').classList.add('hide');
+        if (data.characterId) {
+          loadOwnPilotData(data.characterId);
+        }
+      } else {
+        showLoggedOutGate();
       }
     } catch (e) {
       console.warn('Session check failed:', e);
+      showLoggedOutGate();
     }
-    document.getElementById('submitBtn').disabled = false;
   }
 
   function isLoggedIn() { return currentUser !== null; }
 
-  // Footer "My PilotRep" — if not logged in, prompt instead of landing on a blank profile
-  const myPilotRepLink = document.getElementById('myPilotRepLink');
-  if (myPilotRepLink) {
-    myPilotRepLink.addEventListener('click', (e) => {
-      if (!isLoggedIn()) {
-        e.preventDefault();
-        showValidation('Log In With EVE Online To View Your PilotRep');
-      }
-    });
+  function showLoggedOutGate() {
+    const header = document.querySelector('.pilot-header');
+    const panels = document.querySelector('.panels-section');
+    const gate = document.getElementById('loggedOutGate');
+    if (header) header.style.display = 'none';
+    if (panels) panels.style.display = 'none';
+    if (gate) gate.style.display = '';
   }
 
-
   loadSession();
+
+  // ── SHARE BUTTON ──
+  const shareBtn = document.getElementById('shareBtn');
+  const shareToast = document.getElementById('shareToast');
+  shareBtn.addEventListener('click', () => {
+    const url = window.location.href;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(showToast);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = url; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast();
+    }
+  });
+  function showToast() {
+    shareToast.classList.add('show');
+    setTimeout(() => shareToast.classList.remove('show'), 2200);
+  }
 
   // ── 13-POINT GRADE SCALE ──
   // Input dots map to these anchor values on a 0–12 scale:
   //   F=0  D=2  C=5  B=8  A=11  A+=12
   // Averaging then rounds to the nearest of 13 slots:
   //   0=F  1=D−  2=D  3=D+  4=C−  5=C  6=C+  7=B−  8=B  9=B+  10=A−  11=A  12=A+
+  // Anchors: F and A+ sit at the extremes; middle grades evenly spaced.
+  // Each grade maps to its exact anchor position on the 13-point scale,
+  // so a single submitted grade always displays as that exact letter.
   const INPUT_TO_NUM = { 'F': 0, 'D': 2, 'C': 5, 'B': 8, 'A': 11, 'A+': 12 };
   const GRADE_TABLE = [
     { html: 'F',                                    cls: 'grade-F' },  // 0
@@ -997,17 +1062,17 @@
     { html: 'A<span class="modifier">+</span>',     cls: 'grade-A' },  // 12
   ];
 
-  let submittedReps    = [];
+  let submittedReps = [];
   let commentsExpanded = false;
-  const VISIBLE_LIMIT  = 5;
+  const VISIBLE_LIMIT = 5;
 
-  const repsCountEl        = document.getElementById('repsCount');
-  const commentsCountEl    = document.getElementById('commentsCount');
+  const repsCountEl      = document.getElementById('repsCount');
+  const commentsCountEl  = document.getElementById('commentsCount');
   const gradeCircleLetterEl = document.getElementById('gradeCircleLetter');
-  const commentsListEl     = document.getElementById('commentsList');
-  const commentsEmptyEl    = document.getElementById('commentsEmpty');
-  const seeAllWrapEl       = document.getElementById('seeAllWrap');
-  const seeAllBtnEl        = document.getElementById('seeAllBtn');
+  const commentsListEl   = document.getElementById('commentsList');
+  const commentsEmptyEl  = document.getElementById('commentsEmpty');
+  const seeAllWrapEl     = document.getElementById('seeAllWrap');
+  const seeAllBtnEl      = document.getElementById('seeAllBtn');
 
   function escapeHtml(str) {
     if (!str) return '';
@@ -1057,7 +1122,7 @@
   });
 
   function recalcAndRender() {
-    repsCountEl.textContent     = submittedReps.length;
+    repsCountEl.textContent    = submittedReps.length;
     commentsCountEl.textContent = submittedReps.filter(r => r.comment && r.comment.trim()).length;
 
     if (submittedReps.length === 0) {
@@ -1073,131 +1138,88 @@
     renderComments();
   }
 
-  const submitBtn = document.getElementById('submitBtn');
-
-  const validationToast = document.getElementById('validationToast');
-  function showValidation(msg) {
-    validationToast.textContent = msg;
-    validationToast.style.background = 'var(--cyan)';
-    validationToast.style.color = 'var(--bg)';
-    validationToast.classList.add('show');
-    setTimeout(() => validationToast.classList.remove('show'), 2200);
-  }
-
-  // Grade slider: single-select
-  const dots = document.querySelectorAll('#gradeSlider .grade-dot');
-  dots.forEach(dot => {
-    dot.addEventListener('click', () => {
-      dots.forEach(d => d.classList.remove('selected'));
-      dot.classList.add('selected');
-    });
-  });
-
-  // System buttons: single-select
-  const sysButtons = document.querySelectorAll('.system-btn');
-  sysButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      sysButtons.forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-    });
-  });
-
-  // Comment field: enforce 5 word / 30 letter limit
-  const commentInput = document.getElementById('commentInput');
-  commentInput.addEventListener('input', () => {
-    let words = commentInput.value.trim().split(/\s+/).filter(Boolean);
-    if (words.length > 5) {
-      commentInput.value = words.slice(0, 5).join(' ');
-    }
-  });
-
-  // Anon toggle
-  document.getElementById('submitterName').addEventListener('click', function(e) { if (!currentUser) e.preventDefault(); });
-  document.getElementById('anonCheck').addEventListener('change', function() {
-    document.getElementById('submitterName').textContent = this.checked ? 'Anonymous' : (currentUser || 'Unknown');
-  });
-
-  submitBtn.addEventListener('click', async (e) => {
-    e.preventDefault();
-    if (!isLoggedIn()) { showValidation('Log In With EVE Online To Submit A Rep'); return; }
-
-    const selectedDot = document.querySelector('#gradeSlider .grade-dot.selected');
-    const selectedSys = document.querySelector('.system-btn.selected');
-
-    if (!selectedDot) { showValidation('Select A Grade'); return; }
-    if (!selectedSys) { showValidation('Select A System'); return; }
-
-    const grade = selectedDot.dataset.grade;
-    const anonymous = document.getElementById('anonCheck').checked;
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Submitting…';
-
+  // ── LOAD OWN PILOT DATA FROM ESI + SUPABASE ──────────────────────────────
+  async function loadOwnPilotData(pilotId) {
+    // Load ESI character data
     try {
-      const res = await fetch('/.netlify/functions/submit-rep', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          targetId:   new URLSearchParams(window.location.search).get('id') || 'unknown',
-          targetType: 'corporation',
-          grade,
-          gradeIndex: INPUT_TO_NUM[grade],
-          systemType: selectedSys.textContent.trim(),
-          comment:    commentInput.value.trim(),
-          anonymous
-        })
-      });
-      let data = {};
-      try { data = await res.json(); } catch (_) {}
-      if (!res.ok) {
-        showValidation(data.error || 'Submission failed. Please try again.');
-      } else {
-        const rep = {
-          grade,
-          gradeNum: INPUT_TO_NUM[grade],
-          tier: selectedDot.dataset.tier,
-          system: selectedSys.textContent,
-          comment: commentInput.value.trim(),
-          author: anonymous ? '' : currentUser
-        };
-        submittedReps.unshift(rep);
-        recalcAndRender();
-        dots.forEach(d => d.classList.remove('selected'));
-        sysButtons.forEach(b => b.classList.remove('selected'));
-        commentInput.value = '';
-        showValidation('Rep submitted!');
+      const esiRes = await fetch(`/.netlify/functions/esi-proxy?action=character&id=${pilotId}`);
+      const esi = await esiRes.json();
+      if (esi && esi.name) {
+        document.title = `${esi.name} — PilotRep`;
+        document.getElementById('pilotName').textContent = esi.name;
+        const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        document.getElementById('pilotCorp').innerHTML = esi.corporation_name
+          ? (esi.corporation_id ? `<a href="corporation.html?id=${esi.corporation_id}">${escapeHtml(esi.corporation_name)}</a>` : escapeHtml(esi.corporation_name))
+          : '';
+        document.getElementById('pilotAlliance').innerHTML = esi.alliance_name
+          ? (esi.alliance_id ? `<a href="alliance.html?id=${esi.alliance_id}">${escapeHtml(esi.alliance_name)}</a>` : escapeHtml(esi.alliance_name))
+          : '';
+        const secEl = document.getElementById('pilotSecStatus');
+        document.getElementById('pilotSecValue').textContent = esi.security_status ?? '0.0';
+        secEl.style.display = '';
+        if (esi.birthday) {
+          const bdayEl = document.getElementById('pilotBirthday');
+          const bdayDate = new Date(esi.birthday);
+          const ordinal = n => {
+            const s = ['th', 'st', 'nd', 'rd'], v = n % 100;
+            return n + (s[(v - 20) % 10] || s[v] || s[0]);
+          };
+          const year = bdayDate.getFullYear();
+          const month = bdayDate.toLocaleDateString('en-GB', { month: 'long' });
+          const day = ordinal(bdayDate.getDate());
+          document.getElementById('pilotBirthdayValue').textContent = `${year} ${month} ${day}`;
+          bdayEl.style.display = '';
+        }
+        if (esi.portrait) {
+          const img = document.getElementById('pilotPortrait');
+          const placeholder = document.getElementById('pilotPortraitPlaceholder');
+          img.onload = () => {
+            img.style.display = '';
+            placeholder.style.display = 'none';
+          };
+          img.onerror = () => { img.style.display = 'none'; };
+          img.src = esi.portrait;
+        }
       }
-    } catch (err) {
-      console.error('Submit rep error:', err);
-      showValidation('Network error. Please try again.');
+    } catch (e) {
+      console.warn('ESI load failed:', e);
     }
 
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Submit A Rep';
-  });
-
-  document.getElementById('shareBtn').addEventListener('click', () => {
-    const url = window.location.href;
-    const shareToast = document.getElementById('shareToast');
-    function showShareToast() {
-      shareToast.classList.add('show');
-      setTimeout(() => shareToast.classList.remove('show'), 2200);
+    // Load reps from Supabase
+    try {
+      const repsRes = await fetch(`/.netlify/functions/get-reps?id=${pilotId}&type=pilot`);
+      const data = await repsRes.json();
+      if (data.repCount > 0) {
+        // Update stats
+        repsCountEl.textContent = data.repCount;
+        commentsCountEl.textContent = data.commentCount;
+        // Update grade circle
+        gradeCircleLetterEl.innerHTML = data.repScoreHtml || '–';
+        const tierCls = data.repScoreTier === 'pos' ? 'grade-A' : data.repScoreTier === 'neg' ? 'grade-F' : 'grade-B';
+        gradeCircleLetterEl.className = 'grade-circle-letter ' + tierCls;
+        // Load comments
+        submittedReps = data.reps.map(r => ({
+          grade:    r.grade,
+          gradeNum: r.gradeIndex,
+          tier:     r.tier,
+          system:   r.system,
+          comment:  r.comment,
+          author:   r.author,
+          date:     r.date
+        }));
+        renderComments();
+      }
+    } catch (e) {
+      console.warn('Reps load failed:', e);
     }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(url).then(showShareToast);
-    } else {
-      const ta = document.createElement('textarea');
-      ta.value = url; document.body.appendChild(ta);
-      ta.select(); document.execCommand('copy');
-      document.body.removeChild(ta);
-      showShareToast();
-    }
-  });
+  }
 
   // ── SEARCH BAR ────────────────────────────────────────────────────────────
   const searchInput    = document.getElementById('navSearchInput');
   const searchBtn      = document.getElementById('navSearchBtn');
   const searchDropdown = document.getElementById('searchDropdown');
+
+
   let searchTimer;
 
   searchInput.addEventListener('input', () => {
@@ -1212,6 +1234,7 @@
   });
 
   searchBtn.addEventListener('click', runSearch);
+
 
   async function runSearch() {
     const q = searchInput.value.trim();
@@ -1237,6 +1260,7 @@
       }
       return;
     }
+
     let html = '';
     if (characters.length) {
       html += `<div class="search-drop-label">Pilots</div>`;
@@ -1268,84 +1292,15 @@
     html += `<a class="search-drop-item" href="/search.html?q=${encodeURIComponent(q)}" style="color:var(--cyan);justify-content:center;">
       See all results for "${q}" →
     </a>`;
+
     searchDropdown.innerHTML = html;
     searchDropdown.style.display = 'block';
   }
 
+  // Close dropdown when clicking outside
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.nav-search')) searchDropdown.style.display = 'none';
   });
-
-  // ── LOAD CORPORATION DATA FROM ESI + SUPABASE ─────────────────────────────
-  (async () => {
-    const params = new URLSearchParams(window.location.search);
-    const corpId = params.get('id');
-    if (!corpId) return;
-
-    // Load ESI identity
-    try {
-      const res  = await fetch(`/.netlify/functions/esi-proxy?action=corporation&id=${corpId}`);
-      const esi  = await res.json();
-      document.getElementById('corpName').textContent = esi.name || '—';
-      const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-      const lines = [];
-      if (esi.ticker) lines.push(`[${escapeHtml(esi.ticker)}]`);
-      if (esi.ceo_name) lines.push(`CEO &bull; ${escapeHtml(esi.ceo_name)}`);
-      if (esi.alliance_name) {
-        const tickerSuffix = esi.alliance_ticker ? ` [${escapeHtml(esi.alliance_ticker)}]` : '';
-        const allianceLabel = esi.alliance_id
-          ? `<a href="alliance.html?id=${esi.alliance_id}" class="corp-alliance-link">${escapeHtml(esi.alliance_name)}${tickerSuffix}</a>`
-          : `${escapeHtml(esi.alliance_name)}${tickerSuffix}`;
-        lines.push(`ALLIANCE &bull; ${allianceLabel}`);
-      }
-      if (esi.date_founded) {
-        const foundedDate = new Date(esi.date_founded);
-        const ordinal = n => {
-          const s = ['th', 'st', 'nd', 'rd'], v = n % 100;
-          return n + (s[(v - 20) % 10] || s[v] || s[0]);
-        };
-        const year  = foundedDate.getFullYear();
-        const month = foundedDate.toLocaleDateString('en-GB', { month: 'long' });
-        const day   = ordinal(foundedDate.getDate());
-        lines.push(`FOUNDED &bull; ${year} ${month} ${day}`);
-      }
-      if (esi.member_count) lines.push(`MEMBERS &bull; ${esi.member_count.toLocaleString()}`);
-      document.getElementById('corpDetails').innerHTML = lines.join('<br>');
-      const img = document.getElementById('corpLogo');
-      const placeholder = document.getElementById('corpLogoPlaceholder');
-      img.onload  = () => { img.style.display = ''; placeholder.style.display = 'none'; };
-      img.onerror = () => { img.style.display = 'none'; };
-      img.src = esi.logo || '';
-    } catch (e) {
-      console.warn('ESI corporation load failed:', e);
-    }
-
-    // Load reps from Supabase
-    try {
-      const repsRes = await fetch(`/.netlify/functions/get-reps?id=${corpId}&type=corporation`);
-      const data    = await repsRes.json();
-      if (data.repCount > 0) {
-        document.getElementById('repsCount').textContent     = data.repCount;
-        document.getElementById('commentsCount').textContent = data.commentCount;
-        const gradeEl = document.getElementById('gradeCircleLetter');
-        gradeEl.innerHTML = data.repScoreHtml || '–';
-        const tierCls = data.repScoreTier === 'pos' ? 'grade-A' : data.repScoreTier === 'neg' ? 'grade-F' : 'grade-B';
-        gradeEl.className = 'grade-circle-letter ' + tierCls;
-        submittedReps = data.reps.map(r => ({
-          grade:    r.grade,
-          gradeNum: r.gradeIndex,
-          tier:     r.tier,
-          system:   r.system,
-          comment:  r.comment,
-          author:   r.author,
-          date:     r.date
-        }));
-        renderComments();
-      }
-    } catch (e) {
-      console.warn('Reps load failed:', e);
-    }
-  })();
 
   // ── EVE TIME CLOCK ──
   function updateEveTime() {

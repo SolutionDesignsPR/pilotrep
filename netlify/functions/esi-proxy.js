@@ -187,27 +187,52 @@ exports.handler = async (event) => {
       if (!corpRes.ok) throw new Error(`ESI corporation failed: ${corpRes.status}`);
       const corp = await corpRes.json();
       const logoUrl = `https://images.evetech.net/corporations/${id}/logo?size=256`;
+
+      // Alliance name + ticker — fetched directly from the alliance endpoint (gives both in one call)
       let allianceName = '';
+      let allianceTicker = '';
       if (corp.alliance_id) {
-        const namesRes = await fetch('https://esi.evetech.net/latest/universe/names/?datasource=tranquility', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify([corp.alliance_id])
-        });
-        const names = namesRes.ok ? await namesRes.json() : [];
-        allianceName = names.find(n => n.id === corp.alliance_id)?.name || '';
+        try {
+          const allianceRes = await fetch(`https://esi.evetech.net/latest/alliances/${corp.alliance_id}/?datasource=tranquility`);
+          if (allianceRes.ok) {
+            const alliance = await allianceRes.json();
+            allianceName = alliance.name || '';
+            allianceTicker = alliance.ticker || '';
+          }
+        } catch (_) { /* non-fatal — falls back to blank alliance info */ }
       }
+
+      // CEO name — resolved via universe/names (public, no auth required)
+      let ceoName = '';
+      if (corp.ceo_id) {
+        try {
+          const namesRes = await fetch('https://esi.evetech.net/latest/universe/names/?datasource=tranquility', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify([corp.ceo_id])
+          });
+          if (namesRes.ok) {
+            const names = await namesRes.json();
+            ceoName = names.find(n => n.id === corp.ceo_id)?.name || '';
+          }
+        } catch (_) { /* non-fatal — falls back to blank CEO name */ }
+      }
+
       return {
         statusCode: 200,
         headers,
         body: JSON.stringify({
-          id:            Number(id),
-          name:          corp.name,
-          ticker:        corp.ticker,
-          member_count:  corp.member_count,
-          alliance_id:   corp.alliance_id || null,
-          alliance_name: allianceName,
-          logo:          logoUrl
+          id:              Number(id),
+          name:            corp.name,
+          ticker:          corp.ticker,
+          member_count:    corp.member_count,
+          alliance_id:     corp.alliance_id || null,
+          alliance_name:   allianceName,
+          alliance_ticker: allianceTicker,
+          ceo_id:          corp.ceo_id || null,
+          ceo_name:        ceoName,
+          date_founded:    corp.date_founded || null,
+          logo:            logoUrl
         })
       };
     }

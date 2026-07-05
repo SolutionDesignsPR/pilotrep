@@ -1003,14 +1003,24 @@
   const seeAllWrapEl       = document.getElementById('seeAllWrap');
   const seeAllBtnEl        = document.getElementById('seeAllBtn');
 
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function buildCommentRow(rep) {
     const row = document.createElement('div');
     row.className = 'comment-row ' + rep.tier;
     const dateLabel = rep.date || 'Just now';
     row.innerHTML = `
       <div>
-        <div class="comment-meta">${dateLabel} · ${rep.author || 'Anonymous'}</div>
-        ${rep.comment ? `<div class="comment-text">${rep.comment}</div>` : ''}
+        <div class="comment-meta">${dateLabel} · ${escapeHtml(rep.author) || 'Anonymous'}</div>
+        ${rep.comment && rep.comment.trim() ? `<div class="comment-text">${escapeHtml(rep.comment)}</div>` : ''}
       </div>
       <span class="comment-system">${rep.system}</span>
     `;
@@ -1042,7 +1052,7 @@
 
   function recalcAndRender() {
     repsCountEl.textContent     = submittedReps.length;
-    commentsCountEl.textContent = submittedReps.filter(r => r.comment).length;
+    commentsCountEl.textContent = submittedReps.filter(r => r.comment && r.comment.trim()).length;
 
     if (submittedReps.length === 0) {
       gradeCircleLetterEl.textContent = '–';

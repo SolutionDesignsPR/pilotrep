@@ -80,7 +80,7 @@ exports.handler = async (event) => {
         gradeHtml:   gradeEntry.html || r.grade,
         tier:        gradeEntry.tier || 'neutral',
         system:      r.system_type || '',
-        comment:     r.comment || '',
+        comment:     (r.comment && r.comment.trim()) ? r.comment.trim() : '',
         anonymous:   r.anonymous,
         author:      r.anonymous ? '' : (r.reviewer_name || ''),
         date:        formatDate(r.created_at)
