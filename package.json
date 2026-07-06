@@ -1,6 +1,7 @@
 {
   "type": "commonjs",
   "dependencies": {
-    "@supabase/supabase-js": "^2.0.0"
+    "@supabase/supabase-js": "^2.0.0",
+    "bad-words": "^3.0.4"
   }
 }

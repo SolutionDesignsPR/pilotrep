@@ -543,7 +543,7 @@
     <div class="footer-grid">
       <a href="about.html">About</a>
       <a href="subscriptions.html">Subscriptions</a>
-      <a href="pilot.html" id="myPilotRepLink">My PilotRep</a>
+      <a href="my-pilotrep.html" id="myPilotRepLink">My PilotRep</a>
       <a href="/.netlify/functions/auth-start" id="footerAuthLink">Login</a>
       <a href="faq.html">FAQ</a>
       <a href="privacy.html">Privacy Policy</a>
@@ -578,7 +578,7 @@
         const btn = document.getElementById('heroLoginBtn');
         if (btn) {
           btn.textContent = data.characterName;
-          btn.href = data.characterId ? `pilot.html?id=${data.characterId}` : '#';
+          btn.href = data.characterId ? `my-pilotrep.html` : '#';
           btn.style.color = 'var(--cyan)';
           btn.style.borderColor = 'var(--cyan-dim)';
           btn.classList.add('is-logged-in');
@@ -590,7 +590,7 @@
         }
         const myLink = document.getElementById('myPilotRepLink');
         if (myLink && data.characterId) {
-          myLink.href = `pilot.html?id=${data.characterId}`;
+          myLink.href = `my-pilotrep.html`;
         }
       }
     } catch (e) { /* non-fatal */ }

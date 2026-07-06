@@ -1,8 +1,12 @@
 const { createClient } = require('@supabase/supabase-js');
+const Filter = require('bad-words');
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
 );
+const profanityFilter = new Filter();
+// To exempt a specific EVE term that gets flagged as a false positive,
+// add it here, e.g.: profanityFilter.removeWords('term1', 'term2');
 
 const SESSION_MAX_AGE_MS = 8 * 60 * 60 * 1000; // 8 hours
 
@@ -50,6 +54,11 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: 'Invalid target type' }) };
   }
 
+  const trimmedComment = (comment && comment.trim()) ? comment.trim() : null;
+  if (trimmedComment && profanityFilter.isProfane(trimmedComment)) {
+    return { statusCode: 400, body: JSON.stringify({ error: 'Profanity Detected : Please Revise Your Rep' }) };
+  }
+
   const reviewerId = session.characterId;
   const reviewerName = session.characterName;
 
@@ -90,7 +99,7 @@ exports.handler = async (event) => {
     grade,
     grade_index:   gradeIndex,
     system_type:   systemType || null,
-    comment:       (comment && comment.trim()) ? comment.trim() : null,
+    comment:       trimmedComment,
     anonymous:     anonymous || false
   });
 

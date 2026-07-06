@@ -997,7 +997,7 @@
     <div class="footer-grid">
       <a href="about.html">About</a>
       <a href="subscriptions.html">Subscriptions</a>
-      <a href="pilot.html" id="myPilotRepLink">My PilotRep</a>
+      <a href="my-pilotrep.html" id="myPilotRepLink">My PilotRep</a>
       <a href="/.netlify/functions/auth-start" id="footerAuthLink">Login</a>
       <a href="faq.html">FAQ</a>
       <a href="privacy.html">Privacy Policy</a>
@@ -1056,7 +1056,7 @@
         const submitterName = document.getElementById('submitterName');
         if (submitterName) {
           submitterName.textContent = currentUser;
-          if (data.characterId) submitterName.href = `pilot.html?id=${data.characterId}`;
+          if (data.characterId) submitterName.href = `my-pilotrep.html`;
         }
         // Switch footer link to Logout
         const authLink = document.getElementById('footerAuthLink');
@@ -1066,7 +1066,7 @@
         }
         const myLink = document.getElementById('myPilotRepLink');
         if (myLink && data.characterId) {
-          myLink.href = `pilot.html?id=${data.characterId}`;
+          myLink.href = `my-pilotrep.html`;
         }
         // If viewing own profile, swap the page headline
         const urlPilotId = new URLSearchParams(window.location.search).get('id');
@@ -1078,7 +1078,7 @@
         const navLoggedInLink = document.getElementById('navLoggedInLink');
         if (navLoggedIn && navLoggedInLink && data.characterId) {
           navLoggedInLink.textContent = data.characterName;
-          navLoggedInLink.href = `pilot.html?id=${data.characterId}`;
+          navLoggedInLink.href = `my-pilotrep.html`;
           navLoggedIn.style.display = 'block';
         }
         // Logged in: hide the EVE login button, it's no longer needed
@@ -1197,15 +1197,16 @@
 
   function renderComments() {
     commentsListEl.innerHTML = '';
-    if (submittedReps.length === 0) {
+    const commented = submittedReps.filter(r => r.comment && r.comment.trim());
+    if (commented.length === 0) {
       commentsListEl.appendChild(commentsEmptyEl);
       commentsEmptyEl.style.display = 'block';
       seeAllWrapEl.style.display = 'none';
       return;
     }
-    const visible = commentsExpanded ? submittedReps : submittedReps.slice(0, VISIBLE_LIMIT);
+    const visible = commentsExpanded ? commented : commented.slice(0, VISIBLE_LIMIT);
     visible.forEach(rep => commentsListEl.appendChild(buildCommentRow(rep)));
-    if (submittedReps.length > VISIBLE_LIMIT) {
+    if (commented.length > VISIBLE_LIMIT) {
       seeAllWrapEl.style.display = 'block';
       seeAllBtnEl.textContent = commentsExpanded ? '▴ Show Less' : '▾ See All Comments';
     } else {
