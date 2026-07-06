@@ -350,6 +350,21 @@
       text-transform: uppercase;
       margin-top: 4px;
     }
+    .stats-row .stat-label-inline {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--white);
+      text-transform: uppercase;
+    }
+    .stats-row .stat-count-inline {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0;
+      color: var(--cyan);
+      text-transform: none;
+      margin-left: 10px;
+    }
 
     .comments-headrow {
       display: flex;
@@ -363,6 +378,14 @@
       letter-spacing: 0.12em;
       color: var(--white);
       text-transform: uppercase;
+    }
+    .comments-headrow .comments-count-inline {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0;
+      color: var(--cyan);
+      text-transform: none;
+      margin-left: 10px;
     }
     .share-btn {
       background: transparent;
@@ -794,18 +817,11 @@
       </div>
 
       <div class="stats-row">
-        <div>
-          <div class="stat-num" id="repsCount">0</div>
-          <div class="stat-label">Reps</div>
-        </div>
-        <div>
-          <div class="stat-num" id="commentsCount">0</div>
-          <div class="stat-label">Comments</div>
-        </div>
+        <span class="stat-label-inline">Reps<span class="stat-count-inline" id="repsCount">0</span></span>
       </div>
 
       <div class="comments-headrow">
-        <span>Comments</span>
+        <span>Comments<span class="comments-count-inline" id="commentsCount">0</span></span>
         <button class="share-btn" id="shareBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>

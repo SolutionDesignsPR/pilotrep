@@ -428,6 +428,21 @@
       text-transform: uppercase;
       margin-top: 4px;
     }
+    .stats-row .stat-label-inline {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--white);
+      text-transform: uppercase;
+    }
+    .stats-row .stat-count-inline {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0;
+      color: var(--cyan);
+      text-transform: none;
+      margin-left: 10px;
+    }
 
     .comments-headrow {
       display: flex;
@@ -443,7 +458,7 @@
       text-transform: uppercase;
     }
     .comments-headrow .comments-count-inline {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
       letter-spacing: 0;
       color: var(--cyan);
@@ -912,10 +927,7 @@
       </div>
 
       <div class="stats-row">
-        <div>
-          <div class="stat-num" id="repsCount">0</div>
-          <div class="stat-label">Reps</div>
-        </div>
+        <span class="stat-label-inline">Reps<span class="stat-count-inline" id="repsCount">0</span></span>
       </div>
     </div>
 
@@ -1100,15 +1112,16 @@
 
   function renderComments() {
     commentsListEl.innerHTML = '';
-    if (submittedReps.length === 0) {
+    const commented = submittedReps.filter(r => r.comment && r.comment.trim());
+    if (commented.length === 0) {
       commentsListEl.appendChild(commentsEmptyEl);
       commentsEmptyEl.style.display = 'block';
       seeAllWrapEl.style.display = 'none';
       return;
     }
-    const visible = commentsExpanded ? submittedReps : submittedReps.slice(0, VISIBLE_LIMIT);
+    const visible = commentsExpanded ? commented : commented.slice(0, VISIBLE_LIMIT);
     visible.forEach(rep => commentsListEl.appendChild(buildCommentRow(rep)));
-    if (submittedReps.length > VISIBLE_LIMIT) {
+    if (commented.length > VISIBLE_LIMIT) {
       seeAllWrapEl.style.display = 'block';
       seeAllBtnEl.textContent = commentsExpanded ? '▴ Show Less' : '▾ See All Comments';
     } else {

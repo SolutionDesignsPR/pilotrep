@@ -264,8 +264,43 @@
       color: var(--cyan-dim);
       text-transform: uppercase;
       text-align: center;
-      padding: 18px 20px 14px;
+      padding: 18px 20px 10px;
       border-bottom: 1px solid var(--border);
+    }
+
+    .tab-row {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      padding: 8px 14px 0;
+      background: var(--panel);
+    }
+    .tab-btn {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-align: center;
+      color: var(--cyan-dim);
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 6px 6px 0 0;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: color 0.15s, background 0.15s;
+    }
+    .tab-btn:hover { color: var(--cyan); }
+    .tab-btn.active {
+      color: var(--white);
+      font-weight: 600;
+      background: var(--panel);
+      border-bottom: 1px solid var(--panel);
+      margin-bottom: -1px;
+    }
+    .tab-row + div {
+      border-top: 1px solid var(--border);
     }
 
     .pilot-list-empty {
@@ -522,7 +557,12 @@
 
     <!-- Recently Rated -->
     <div class="list-panel">
-      <div class="list-header">Recently Rated Pilots</div>
+      <div class="list-header">Recently Rated</div>
+      <div class="tab-row" data-panel="recentlyRated">
+        <button class="tab-btn active" data-type="pilot">Pilots</button>
+        <button class="tab-btn" data-type="corporation">Corporations</button>
+        <button class="tab-btn" data-type="alliance">Alliances</button>
+      </div>
       <div id="recentlyRatedRows">
         <div class="pilot-list-empty">No reps yet. Be the first to leave one.</div>
       </div>
@@ -530,7 +570,12 @@
 
     <!-- Most Reviewed -->
     <div class="list-panel">
-      <div class="list-header">Most Reviewed Pilots</div>
+      <div class="list-header">Most Reviewed</div>
+      <div class="tab-row" data-panel="mostReviewed">
+        <button class="tab-btn active" data-type="pilot">Pilots</button>
+        <button class="tab-btn" data-type="corporation">Corporations</button>
+        <button class="tab-btn" data-type="alliance">Alliances</button>
+      </div>
       <div id="mostReviewedRows">
         <div class="pilot-list-empty">No reps yet. Be the first to leave one.</div>
       </div>
@@ -703,18 +748,25 @@
   updateEveTime();
   setInterval(updateEveTime, 1000);
 
-  // ── PILOT LEADERBOARDS (Recently Rated / Most Reviewed) ────────────────────
+  // ── LEADERBOARDS (Recently Rated / Most Reviewed) — tab-switchable by type ──
   const DEFAULT_AVATAR_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>`;
 
-  function buildPilotRow(entry) {
+  const TYPE_PAGE = {
+    pilot: 'pilot.html',
+    corporation: 'corporation.html',
+    alliance: 'alliance.html'
+  };
+
+  function buildPilotRow(entry, type) {
     const avatarInner = entry.portrait
       ? `<img src="${entry.portrait}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:3px;" />`
       : DEFAULT_AVATAR_SVG;
+    const page = TYPE_PAGE[type] || 'pilot.html';
     return `
-      <a href="/pilot.html?id=${entry.id}" class="pilot-row">
+      <a href="/${page}?id=${entry.id}" class="pilot-row">
         <div class="avatar-placeholder">${avatarInner}</div>
         <div class="pilot-info">
-          <div class="pilot-name">${entry.name || 'Unknown Pilot'}</div>
+          <div class="pilot-name">${entry.name || 'Unknown'}</div>
           <div class="pilot-corp">${entry.subtext || ''}</div>
         </div>
         <span class="grade grade-${entry.gradeClass}">${entry.grade ? entry.grade.replace(/[+−-]/, '') : '—'}${
@@ -723,27 +775,50 @@
       </a>`;
   }
 
-  function renderPilotList(containerId, entries) {
+  function renderPilotList(containerId, entries, type) {
     const container = document.getElementById(containerId);
     if (!container) return;
     if (!entries || entries.length === 0) {
       container.innerHTML = `<div class="pilot-list-empty">No reps yet. Be the first to leave one.</div>`;
       return;
     }
-    container.innerHTML = entries.map(buildPilotRow).join('');
+    container.innerHTML = entries.map(e => buildPilotRow(e, type)).join('');
   }
 
-  (async () => {
+  async function loadPanel(panelKey, containerId, dataKey, type) {
     try {
-      const res = await fetch('/.netlify/functions/get-leaderboard?type=pilot&limit=5');
+      const res = await fetch(`/.netlify/functions/get-leaderboard?type=${type}&limit=5`);
       const data = await res.json();
-      renderPilotList('recentlyRatedRows', data.recentlyReviewed);
-      renderPilotList('mostReviewedRows', data.mostReviewed);
+      renderPilotList(containerId, data[dataKey], type);
     } catch (e) {
       console.warn('Leaderboard fetch failed (non-fatal):', e);
       // Empty-state placeholders already in the HTML cover this case
     }
-  })();
+  }
+
+  // Each panel (Recently Rated / Most Reviewed) tracks and switches its own type independently
+  const PANEL_CONFIG = {
+    recentlyRated: { containerId: 'recentlyRatedRows', dataKey: 'recentlyReviewed' },
+    mostReviewed:  { containerId: 'mostReviewedRows',  dataKey: 'mostReviewed' }
+  };
+
+  document.querySelectorAll('.tab-row').forEach(row => {
+    const panelKey = row.dataset.panel;
+    const config = PANEL_CONFIG[panelKey];
+    if (!config) return;
+
+    row.addEventListener('click', (evt) => {
+      const btn = evt.target.closest('.tab-btn');
+      if (!btn || btn.classList.contains('active')) return;
+      const type = btn.dataset.type;
+
+      row.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+      loadPanel(panelKey, config.containerId, config.dataKey, type);
+    });
+  });
+
+  loadPanel('recentlyRated', 'recentlyRatedRows', 'recentlyReviewed', 'pilot');
+  loadPanel('mostReviewed', 'mostReviewedRows', 'mostReviewed', 'pilot');
 </script>
 </body>
 </html>
