@@ -843,7 +843,7 @@
 
     <!-- Leave A Rep Panel -->
     <div class="panel">
-      <div style="font-size:11px;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;text-align:center;margin-bottom:8px;"><a href="#eveLoginBtn" class="hint-link">Login With EVE Online To</a></div>
+      <div style="font-size:11px;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;text-align:center;margin-bottom:8px;"><a href="#" class="hint-link" onclick="event.preventDefault(); window.location.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname);">Login With EVE Online To</a></div>
       <h2 class="panel-title">Submit A Rep</h2>
       <div class="panel-divider"></div>
 
@@ -885,7 +885,7 @@
 
       <div class="section-divider"></div>
 
-      <div class="anon-row">
+      <div class="anon-row" id="anonRow" style="display:none;">
         <span class="anon-submitting">Submitting as: <a id="submitterName" href="#" class="submitter-link">—</a></span>
         <label class="anon-label">
           <input type="checkbox" id="anonCheck"> Remain Anonymous
@@ -1121,11 +1121,13 @@
 
   // Comment field: enforce 5 word / 30 letter limit
   const commentInput = document.getElementById('commentInput');
+  const anonRow = document.getElementById('anonRow');
   commentInput.addEventListener('input', () => {
     let words = commentInput.value.trim().split(/\s+/).filter(Boolean);
     if (words.length > 5) {
       commentInput.value = words.slice(0, 5).join(' ');
     }
+    anonRow.style.display = commentInput.value.trim().length > 0 ? '' : 'none';
   });
 
   // Anon toggle

@@ -55,8 +55,17 @@ exports.handler = async (event) => {
   }
 
   const trimmedComment = (comment && comment.trim()) ? comment.trim() : null;
-  if (trimmedComment && profanityFilter.isProfane(trimmedComment)) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'Profanity Detected : Please Revise Your Rep' }) };
+  if (trimmedComment) {
+    // Normalize separator characters (underscores, hyphens, dots, etc.) to spaces so
+    // "fuck_shit_ass" is treated the same as "fuck shit ass", then also run a raw
+    // substring check so concatenated bypasses like "FUCKINAWESOMEGUY" are caught too.
+    const normalizedComment = trimmedComment.replace(/[_\-.]+/g, ' ');
+    const isProfaneSubstring = profanityFilter.list.some(word =>
+      trimmedComment.toLowerCase().includes(word) || normalizedComment.toLowerCase().includes(word)
+    );
+    if (isProfaneSubstring || profanityFilter.isProfane(normalizedComment)) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'Profanity Detected : Please Revise Your Rep' }) };
+    }
   }
 
   const reviewerId = session.characterId;

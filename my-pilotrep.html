@@ -370,7 +370,9 @@
     .grade-circle-wrap {
       display: flex;
       justify-content: center;
-      margin-bottom: 28px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
     }
     .grade-circle {
       width: 150px;
@@ -416,9 +418,11 @@
       justify-content: center;
       gap: 60px;
       text-align: center;
-      padding-bottom: 24px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 20px;
+    }
+    .share-btn-wrap {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
     }
     .stat-num { font-size: 30px; font-weight: 700; color: var(--cyan); }
     .stat-label {
@@ -447,7 +451,6 @@
     .comments-headrow {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       margin-bottom: 14px;
     }
     .comments-headrow span {
@@ -893,7 +896,7 @@
   <!-- LOGGED OUT GATE -->
   <section id="loggedOutGate" style="display:none; max-width:500px; margin:0 auto; padding:60px 24px 80px; text-align:center;">
     <div style="font-size:14px; letter-spacing:0.06em; color:var(--muted); text-transform:uppercase; margin-bottom:24px;">
-      Log In With EVE Online To View Your PilotRep
+      Log In With EVE Online To View My PilotRep
     </div>
     <a href="#" class="eve-login-sm" onclick="this.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname)">
       <span class="eve-logo-sm">ΞVΞ</span>
@@ -929,12 +932,8 @@
       <div class="stats-row">
         <span class="stat-label-inline">Reps<span class="stat-count-inline" id="repsCount">0</span></span>
       </div>
-    </div>
 
-    <!-- Comments Panel -->
-    <div class="panel">
-      <div class="comments-headrow">
-        <span>Comments<span class="comments-count-inline" id="commentsCount">0</span></span>
+      <div class="share-btn-wrap">
         <button class="share-btn" id="shareBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
@@ -943,6 +942,13 @@
           </svg>
           Share
         </button>
+      </div>
+    </div>
+
+    <!-- Comments Panel -->
+    <div class="panel">
+      <div class="comments-headrow">
+        <span>Comments<span class="comments-count-inline" id="commentsCount">0</span></span>
       </div>
 
       <div class="comments-list" id="commentsList">

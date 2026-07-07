@@ -261,10 +261,10 @@
       font-size: 15px;
       font-weight: 600;
       letter-spacing: 0.2em;
-      color: var(--cyan-dim);
+      color: #ffffff;
       text-transform: uppercase;
       text-align: center;
-      padding: 18px 20px 10px;
+      padding: 14px 20px;
       border-bottom: 1px solid var(--border);
     }
 
@@ -555,29 +555,29 @@
   <!-- PILOT LISTS -->
   <section class="lists-section">
 
-    <!-- Recently Rated -->
+    <!-- Recent Reps -->
     <div class="list-panel">
-      <div class="list-header">Recently Rated</div>
+      <div class="list-header">Recent Reps</div>
       <div class="tab-row" data-panel="recentlyRated">
         <button class="tab-btn active" data-type="pilot">Pilots</button>
         <button class="tab-btn" data-type="corporation">Corporations</button>
         <button class="tab-btn" data-type="alliance">Alliances</button>
       </div>
       <div id="recentlyRatedRows">
-        <div class="pilot-list-empty">No reps yet. Be the first to leave one.</div>
+        <div class="pilot-list-empty">Loading…</div>
       </div>
     </div>
 
-    <!-- Most Reviewed -->
+    <!-- Most Reps -->
     <div class="list-panel">
-      <div class="list-header">Most Reviewed</div>
+      <div class="list-header">Most Reps</div>
       <div class="tab-row" data-panel="mostReviewed">
         <button class="tab-btn active" data-type="pilot">Pilots</button>
         <button class="tab-btn" data-type="corporation">Corporations</button>
         <button class="tab-btn" data-type="alliance">Alliances</button>
       </div>
       <div id="mostReviewedRows">
-        <div class="pilot-list-empty">No reps yet. Be the first to leave one.</div>
+        <div class="pilot-list-empty">Loading…</div>
       </div>
     </div>
 
@@ -748,7 +748,7 @@
   updateEveTime();
   setInterval(updateEveTime, 1000);
 
-  // ── LEADERBOARDS (Recently Rated / Most Reviewed) — tab-switchable by type ──
+  // ── LEADERBOARDS (Recent Reps / Most Reps) — tab-switchable by type ──
   const DEFAULT_AVATAR_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>`;
 
   const TYPE_PAGE = {
@@ -796,7 +796,7 @@
     }
   }
 
-  // Each panel (Recently Rated / Most Reviewed) tracks and switches its own type independently
+  // Each panel (Recent Reps / Most Reps) tracks and switches its own type independently
   const PANEL_CONFIG = {
     recentlyRated: { containerId: 'recentlyRatedRows', dataKey: 'recentlyReviewed' },
     mostReviewed:  { containerId: 'mostReviewedRows',  dataKey: 'mostReviewed' }
