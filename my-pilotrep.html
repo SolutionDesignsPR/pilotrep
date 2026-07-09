@@ -370,9 +370,7 @@
     .grade-circle-wrap {
       display: flex;
       justify-content: center;
-      padding-bottom: 24px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 20px;
+      margin-bottom: 28px;
     }
     .grade-circle {
       width: 150px;
@@ -418,11 +416,9 @@
       justify-content: center;
       gap: 60px;
       text-align: center;
-    }
-    .share-btn-wrap {
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
     }
     .stat-num { font-size: 30px; font-weight: 700; color: var(--cyan); }
     .stat-label {
@@ -451,6 +447,7 @@
     .comments-headrow {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       margin-bottom: 14px;
     }
     .comments-headrow span {
@@ -577,6 +574,77 @@
       transition: border-color 0.15s, color 0.15s;
     }
     .see-all-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
+
+    /* Reps You've Left panel */
+    .leftrep-title {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--white);
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 18px;
+    }
+    .leftrep-tab-row {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin-bottom: 16px;
+    }
+    .leftrep-tab-row .tab-btn {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--cyan-dim);
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 7px 14px;
+      cursor: pointer;
+      transition: color 0.15s, background 0.15s, border-color 0.15s;
+    }
+    .leftrep-tab-row .tab-btn:hover { color: var(--cyan); }
+    .leftrep-tab-row .tab-btn.active {
+      color: var(--white);
+      font-weight: 600;
+      background: rgba(79,195,247,0.08);
+      border-color: var(--cyan-dim);
+    }
+    .leftrep-list { border-radius: 4px; overflow: hidden; }
+    .leftrep-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .leftrep-row:last-child { border-bottom: none; }
+    .leftrep-row:hover { background: rgba(79,195,247,0.05); }
+    .leftrep-name { font-size: 13px; font-weight: 600; color: var(--cyan); }
+    .leftrep-meta {
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .leftrep-grade { font-size: 18px; font-weight: 700; letter-spacing: 0.02em; }
+    .leftrep-grade .modifier { font-size: 0.5em; font-weight: 700; vertical-align: super; line-height: 0; }
+    .leftrep-grade.grade-F { color: var(--grade-f); }
+    .leftrep-grade.grade-B { color: var(--grade-b); }
+    .leftrep-grade.grade-A { color: var(--grade-a); }
+    .leftrep-empty {
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      padding: 28px 16px;
+    }
 
     /* Leave A Rep panel */
     .panel-title {
@@ -933,7 +1001,8 @@
         <span class="stat-label-inline">Reps<span class="stat-count-inline" id="repsCount">0</span></span>
       </div>
 
-      <div class="share-btn-wrap">
+      <div class="comments-headrow">
+        <span>Comments<span class="comments-count-inline" id="commentsCount">0</span></span>
         <button class="share-btn" id="shareBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
@@ -943,20 +1012,28 @@
           Share
         </button>
       </div>
-    </div>
-
-    <!-- Comments Panel -->
-    <div class="panel">
-      <div class="comments-headrow">
-        <span>Comments<span class="comments-count-inline" id="commentsCount">0</span></span>
-      </div>
 
       <div class="comments-list" id="commentsList">
-        <div class="comments-empty" id="commentsEmpty">No reps yet. Be the first to leave one.</div>
+        <div class="comments-empty" id="commentsEmpty">No Comments Yet</div>
       </div>
 
       <div class="see-all-wrap" id="seeAllWrap" style="display:none;">
         <button class="see-all-btn" id="seeAllBtn">▾ See All Comments</button>
+      </div>
+    </div>
+
+    <!-- Reps You've Left Panel -->
+    <div class="panel">
+      <div class="leftrep-title">Last 10 Submitted Reps</div>
+
+      <div class="leftrep-tab-row" id="leftrepTabRow">
+        <button class="tab-btn active" data-type="pilot">Pilots</button>
+        <button class="tab-btn" data-type="corporation">Corporations</button>
+        <button class="tab-btn" data-type="alliance">Alliances</button>
+      </div>
+
+      <div class="leftrep-list" id="leftrepList">
+        <div class="leftrep-empty" id="leftrepEmpty">No reps left yet.</div>
       </div>
     </div>
 
@@ -1082,7 +1159,7 @@
 
   let submittedReps = [];
   let commentsExpanded = false;
-  const VISIBLE_LIMIT = 5;
+  const VISIBLE_LIMIT = 10;
 
   const repsCountEl      = document.getElementById('repsCount');
   const commentsCountEl  = document.getElementById('commentsCount');
@@ -1230,6 +1307,63 @@
       }
     } catch (e) {
       console.warn('Reps load failed:', e);
+    }
+
+    loadLeftReps();
+  }
+
+  // ── REPS YOU'VE LEFT ─────────────────────────────────────────────────────
+  let leftRepsData = { pilot: [], corporation: [], alliance: [] };
+  let leftRepsActiveType = 'pilot';
+  const LEFTREP_CAP = 10;
+
+  const leftrepListEl      = document.getElementById('leftrepList');
+  const leftrepEmptyEl     = document.getElementById('leftrepEmpty');
+  const leftrepTabRow      = document.getElementById('leftrepTabRow');
+
+  function buildLeftRepRow(rep) {
+    const a = document.createElement('a');
+    a.className = 'leftrep-row';
+    a.href = `${rep.targetPage}?id=${rep.targetId}`;
+    const tierCls = rep.tier === 'pos' ? 'grade-A' : rep.tier === 'neg' ? 'grade-F' : 'grade-B';
+    a.innerHTML = `
+      <div>
+        <div class="leftrep-name">${escapeHtml(rep.targetName)}</div>
+        <div class="leftrep-meta">${rep.date}${rep.system ? ' · ' + rep.system : ''}</div>
+      </div>
+      <span class="leftrep-grade ${tierCls}">${rep.gradeHtml}</span>
+    `;
+    return a;
+  }
+
+  function renderLeftReps() {
+    leftrepListEl.innerHTML = '';
+    const list = leftRepsData[leftRepsActiveType] || [];
+    if (list.length === 0) {
+      leftrepListEl.appendChild(leftrepEmptyEl);
+      leftrepEmptyEl.style.display = 'block';
+      return;
+    }
+    list.slice(0, LEFTREP_CAP).forEach(rep => leftrepListEl.appendChild(buildLeftRepRow(rep)));
+  }
+
+  leftrepTabRow.addEventListener('click', (evt) => {
+    const btn = evt.target.closest('.tab-btn');
+    if (!btn || btn.classList.contains('active')) return;
+    leftrepTabRow.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+    leftRepsActiveType = btn.dataset.type;
+    renderLeftReps();
+  });
+
+  async function loadLeftReps() {
+    try {
+      const res = await fetch('/.netlify/functions/get-my-reps');
+      if (!res.ok) return;
+      const data = await res.json();
+      leftRepsData = data.reps || { pilot: [], corporation: [], alliance: [] };
+      renderLeftReps();
+    } catch (e) {
+      console.warn('Reps you\'ve left load failed:', e);
     }
   }
 

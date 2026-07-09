@@ -8,7 +8,7 @@ const profanityFilter = new Filter();
 // To exempt a specific EVE term that gets flagged as a false positive,
 // add it here, e.g.: profanityFilter.removeWords('term1', 'term2');
 
-const SESSION_MAX_AGE_MS = 8 * 60 * 60 * 1000; // 8 hours
+const SESSION_MAX_AGE_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 // Simple session cookie parser
 function getSession(cookieHeader) {

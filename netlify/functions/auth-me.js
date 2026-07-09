@@ -1,4 +1,4 @@
-const SESSION_MAX_AGE_MS = 8 * 60 * 60 * 1000; // 8 hours
+const SESSION_MAX_AGE_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 exports.handler = async function (event) {
   const cookieHeader = event.headers.cookie || '';
