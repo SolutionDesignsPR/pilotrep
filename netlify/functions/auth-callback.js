@@ -111,7 +111,10 @@ exports.handler = async function (event) {
   let destination = '/index.html?login=success';
   try {
     const stateData = JSON.parse(Buffer.from(state || '', 'base64').toString('utf8'));
-    if (stateData.origin) destination = stateData.origin + '?login=success';
+    if (stateData.origin) {
+      const separator = stateData.origin.includes('?') ? '&' : '?';
+      destination = stateData.origin + separator + 'login=success';
+    }
   } catch (_) {}
 
   return {

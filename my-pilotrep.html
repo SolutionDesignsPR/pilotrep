@@ -264,13 +264,10 @@
     /* ── PAGE TITLE ── */
     .page-title {
       text-align: center;
-      font-size: clamp(28px, 4vw, 40px);
-      font-weight: 400;
-      letter-spacing: 0.12em;
-      color: var(--cyan-dim);
-      text-transform: uppercase;
       margin: 36px 0 50px;
     }
+    .page-title-img { display: block; max-width: 100%; margin: 0 auto; }
+    .page-title-single { height: clamp(28px, 4vw, 40px); width: auto; aspect-ratio: 237 / 22.16; }
 
     /* ── PILOT HEADER ── */
     .pilot-header {
@@ -959,7 +956,9 @@
   </header>
 
   <!-- PAGE TITLE -->
-  <h1 class="page-title" id="pageTitle">My PilotRep</h1>
+  <h1 class="page-title" id="pageTitle">
+    <img class="page-title-img page-title-single" src="assets/images/PR_My_PilotRep.svg" alt="My PilotRep" />
+  </h1>
 
   <!-- LOGGED OUT GATE -->
   <section id="loggedOutGate" style="display:none; max-width:500px; margin:0 auto; padding:60px 24px 80px; text-align:center;">

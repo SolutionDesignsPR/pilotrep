@@ -121,7 +121,22 @@
     }
 
     .logo-wrap { margin-bottom: 28px; }
-    .logo-wrap img { height: 120px; width: auto; }
+    .logo-wrap img { height: auto; max-width: 100%; margin: 0 auto; }
+    .logo-desktop { display: block; width: clamp(312px, 50vw, 624px); }
+    .logo-mobile { display: none; width: clamp(180px, 55vw, 300px); }
+    @media (max-width: 640px) {
+      .logo-desktop { display: none; }
+      .logo-mobile { display: block; }
+    }
+
+    .tagline-wrap { margin-bottom: 48px; }
+    .tagline-wrap img { height: auto; max-width: 100%; margin: 0 auto; }
+    .tagline-desktop { display: block; width: clamp(260px, 42vw, 520px); }
+    .tagline-mobile { display: none; width: clamp(200px, 65vw, 320px); }
+    @media (max-width: 640px) {
+      .tagline-desktop { display: none; }
+      .tagline-mobile { display: block; }
+    }
 
     /* Fallback text logo if image not loaded */
     .logo-text {
@@ -144,16 +159,6 @@
       margin: 0 0.02em;
       position: relative;
       top: -0.06em;
-    }
-
-    .tagline {
-      font-family: Helvetica, Arial, sans-serif;
-      font-size: clamp(16px, 3vw, 26px);
-      font-weight: 500;
-      letter-spacing: 0.22em;
-      color: var(--cyan-dim);
-      text-transform: uppercase;
-      margin-bottom: 48px;
     }
 
     /* ── SEARCH ── */
@@ -528,10 +533,14 @@
   <!-- HERO -->
   <section class="hero">
     <div class="logo-wrap">
-      <img src="assets/images/PilotRep_Logo_Main.svg" alt="Pilot Rep" />
+      <img class="logo-desktop" src="assets/images/PilotRep_Logo_Main.svg" alt="Pilot Rep" />
+      <img class="logo-mobile" src="assets/images/PilotRep_Logo_Main_M.svg" alt="Pilot Rep" />
     </div>
 
-    <p class="tagline">Reputation Precedes You</p>
+    <div class="tagline-wrap">
+      <img class="tagline-desktop" src="assets/images/PR_Rep_Title.svg" alt="Reputation Precedes You" />
+      <img class="tagline-mobile" src="assets/images/PR_Rep_Title_M.svg" alt="Reputation Precedes You" />
+    </div>
 
     <div class="search-wrap" style="position:relative;">
       <input class="search-input" type="text" id="heroSearchInput" placeholder="Search for Pilots, Corporations and Alliances" />

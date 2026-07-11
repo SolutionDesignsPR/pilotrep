@@ -213,12 +213,14 @@
     /* ── PAGE TITLE ── */
     .page-title {
       text-align: center;
-      font-size: clamp(28px, 4vw, 40px);
-      font-weight: 400;
-      letter-spacing: 0.12em;
-      color: var(--cyan-dim);
-      text-transform: uppercase;
       margin: 36px 0 50px;
+    }
+    .page-title-img { display: block; max-width: 100%; margin: 0 auto; }
+    .page-title-desktop { height: clamp(28px, 4vw, 40px); width: auto; aspect-ratio: 384.12 / 22.16; }
+    .page-title-mobile { display: none; }
+    @media (max-width: 640px) {
+      .page-title-desktop { display: none; }
+      .page-title-mobile { display: block; height: clamp(60px, 15vw, 90px); width: auto; aspect-ratio: 194.9 / 50.42; }
     }
 
     /* ── ALLIANCE IDENTITY ── */
@@ -248,7 +250,7 @@
       text-transform: uppercase;
       text-align: center;
     }
-    .alliance-info { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; text-align: left; }
+    .alliance-info { display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 4px; text-align: center; }
     .alliance-name {
       font-size: clamp(22px, 3vw, 32px);
       font-weight: 700;
@@ -787,7 +789,10 @@
   </header>
 
   <!-- PAGE TITLE -->
-  <h1 class="page-title">Alliance RepScore</h1>
+  <h1 class="page-title">
+    <img class="page-title-img page-title-desktop" src="assets/images/PR_Alliance_Repscore.svg" alt="Alliance RepScore" />
+    <img class="page-title-img page-title-mobile" src="assets/images/PR_Alliance_Repscore_M.svg" alt="Alliance RepScore" />
+  </h1>
 
   <!-- ALLIANCE IDENTITY -->
   <div class="alliance-header">
@@ -837,7 +842,7 @@
 
     <!-- Leave A Rep Panel -->
     <div class="panel">
-      <div style="font-size:11px;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;text-align:center;margin-bottom:8px;"><a href="#" class="hint-link" onclick="event.preventDefault(); window.location.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname);">Login With EVE Online To</a></div>
+      <div style="font-size:11px;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;text-align:center;margin-bottom:8px;"><a href="#" class="hint-link" onclick="event.preventDefault(); window.location.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname+window.location.search);">Login With EVE Online To</a></div>
       <h2 class="panel-title">Submit A Rep</h2>
       <div class="panel-divider"></div>
 
@@ -890,7 +895,7 @@
         <button class="submit-btn" id="submitBtn">Submit A Rep</button>
         <div class="login-prompt" id="loginPrompt">
           <div class="login-prompt-text">You must be logged in to submit a PilotRep.</div>
-          <a id="eveLoginBtn" href="#" class="eve-login-sm" onclick="this.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname)">
+          <a id="eveLoginBtn" href="#" class="eve-login-sm" onclick="this.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname+window.location.search)">
             <span class="eve-logo-sm">&#926;V&#926;</span>
             <span class="eve-divider-sm"></span>
             LOG IN with EVE Online
@@ -1300,7 +1305,22 @@
       const res  = await fetch(`/.netlify/functions/esi-proxy?action=alliance&id=${allianceId}`);
       const esi  = await res.json();
       document.getElementById('allianceName').textContent = esi.name || '—';
-      document.getElementById('allianceTicker').textContent = esi.ticker ? `[${esi.ticker}]` : '';
+      const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      const lines = [];
+      if (esi.ticker) lines.push(escapeHtml(esi.ticker));
+      if (esi.executor_name) lines.push(`EXECUTOR &bull; ${escapeHtml(esi.executor_name)}`);
+      if (esi.date_founded) {
+        const foundedDate = new Date(esi.date_founded);
+        const ordinal = n => {
+          const s = ['th', 'st', 'nd', 'rd'], v = n % 100;
+          return n + (s[(v - 20) % 10] || s[v] || s[0]);
+        };
+        const year  = foundedDate.getFullYear();
+        const month = foundedDate.toLocaleDateString('en-GB', { month: 'long' });
+        const day   = ordinal(foundedDate.getDate());
+        lines.push(`FOUNDED &bull; ${year} ${month} ${day}`);
+      }
+      document.getElementById('allianceTicker').innerHTML = lines.join('<br>');
       const img  = document.getElementById('allianceLogo');
       const placeholder = document.getElementById('allianceLogoPlaceholder');
       img.onload = () => { img.style.display = ''; placeholder.style.display = 'none'; };

@@ -264,12 +264,14 @@
     /* ── PAGE TITLE ── */
     .page-title {
       text-align: center;
-      font-size: clamp(28px, 4vw, 40px);
-      font-weight: 400;
-      letter-spacing: 0.12em;
-      color: var(--cyan-dim);
-      text-transform: uppercase;
       margin: 36px 0 50px;
+    }
+    .page-title-img { display: block; max-width: 100%; margin: 0 auto; }
+    .page-title-desktop { height: clamp(28px, 4vw, 40px); width: auto; aspect-ratio: 307.56 / 22.16; }
+    .page-title-mobile { display: none; }
+    @media (max-width: 640px) {
+      .page-title-desktop { display: none; }
+      .page-title-mobile { display: block; height: clamp(60px, 15vw, 90px); width: auto; aspect-ratio: 194.9 / 50.16; }
     }
 
     /* ── PILOT HEADER ── */
@@ -888,7 +890,10 @@
   </header>
 
   <!-- PAGE TITLE -->
-  <h1 class="page-title" id="pageTitle">Pilot RepScore</h1>
+  <h1 class="page-title" id="pageTitle">
+    <img class="page-title-img page-title-desktop" id="pageTitleDesktop" src="assets/images/PR_Pilot_Repscore.svg" alt="Pilot RepScore" />
+    <img class="page-title-img page-title-mobile" id="pageTitleMobile" src="assets/images/PR_Pilot_Repscore_M.svg" alt="Pilot RepScore" />
+  </h1>
 
   <!-- PILOT HEADER -->
   <section class="pilot-header">
@@ -941,7 +946,7 @@
 
     <!-- Leave A Rep Panel -->
     <div class="panel">
-      <div style="font-size:11px;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;text-align:center;margin-bottom:8px;"><a href="#" class="hint-link" onclick="event.preventDefault(); window.location.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname);">Login With EVE Online To</a></div>
+      <div style="font-size:11px;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;text-align:center;margin-bottom:8px;"><a href="#" class="hint-link" onclick="event.preventDefault(); window.location.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname+window.location.search);">Login With EVE Online To</a></div>
       <h2 class="panel-title">Submit A Rep</h2>
       <div class="panel-divider"></div>
 
@@ -994,7 +999,7 @@
         <button class="submit-btn" id="submitBtn">Submit A Rep</button>
       </div>
       <div class="login-prompt" id="loginPrompt" style="margin-top:36px;">
-        <a id="eveLoginBtn" href="#" class="eve-login-sm" onclick="this.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname)">
+        <a id="eveLoginBtn" href="#" class="eve-login-sm" onclick="this.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname+window.location.search)">
           <span class="eve-logo-sm">ΞVΞ</span>
           <span class="eve-divider-sm"></span>
           LOG IN with EVE Online
@@ -1089,8 +1094,10 @@
         // If viewing own profile, swap the page headline
         const urlPilotId = new URLSearchParams(window.location.search).get('id');
         if (data.characterId && urlPilotId && String(urlPilotId) === String(data.characterId)) {
-          const titleEl = document.getElementById('pageTitle');
-          if (titleEl) titleEl.textContent = 'My PilotRep';
+          const titleDesktop = document.getElementById('pageTitleDesktop');
+          const titleMobile = document.getElementById('pageTitleMobile');
+          if (titleDesktop) { titleDesktop.src = 'assets/images/PR_My_PilotRep.svg'; titleDesktop.alt = 'My PilotRep'; }
+          if (titleMobile) { titleMobile.src = 'assets/images/PR_My_PilotRep.svg'; titleMobile.alt = 'My PilotRep'; }
         }
         const navLoggedIn = document.getElementById('navLoggedInAs');
         const navLoggedInLink = document.getElementById('navLoggedInLink');

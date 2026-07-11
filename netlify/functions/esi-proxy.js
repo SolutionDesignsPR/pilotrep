@@ -244,14 +244,32 @@ exports.handler = async (event) => {
       if (!allianceRes.ok) throw new Error(`ESI alliance failed: ${allianceRes.status}`);
       const alliance = await allianceRes.json();
       const logoUrl = `https://images.evetech.net/alliances/${id}/logo?size=256`;
+
+      // Executor corp name — one extra ESI call, cheap. (Member count deliberately
+      // omitted: ESI has no direct alliance member-count field; getting an accurate
+      // total would mean fetching every member corp individually, which is too slow
+      // for a page load. Parked per Clint's decision, July 2026.)
+      let executorName = '';
+      if (alliance.executor_corporation_id) {
+        try {
+          const execRes = await fetch(`https://esi.evetech.net/latest/corporations/${alliance.executor_corporation_id}/?datasource=tranquility`);
+          if (execRes.ok) {
+            const execCorp = await execRes.json();
+            executorName = execCorp.name || '';
+          }
+        } catch (_) { /* non-fatal — falls back to blank executor */ }
+      }
+
       return {
         statusCode: 200,
         headers,
         body: JSON.stringify({
-          id:     Number(id),
-          name:   alliance.name,
-          ticker: alliance.ticker,
-          logo:   logoUrl
+          id:            Number(id),
+          name:          alliance.name,
+          ticker:        alliance.ticker,
+          logo:          logoUrl,
+          executor_name: executorName,
+          date_founded:  alliance.date_founded || null
         })
       };
     }
