@@ -134,14 +134,34 @@ async function resolveEntity(type, id) {
       const corpRes = await fetch(`https://esi.evetech.net/latest/corporations/${id}/?datasource=tranquility`);
       if (!corpRes.ok) throw new Error('corp lookup failed');
       const corp = await corpRes.json();
-      return { id, name: corp.name || 'Unknown Corporation', subtext: corp.ticker ? `[${corp.ticker}]` : '', portrait: `https://images.evetech.net/corporations/${id}/logo?size=64` };
+      let ceoName = '';
+      if (corp.ceo_id) {
+        const namesRes = await fetch('https://esi.evetech.net/latest/universe/names/?datasource=tranquility', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify([corp.ceo_id])
+        });
+        if (namesRes.ok) {
+          const names = await namesRes.json();
+          ceoName = names[0]?.name || '';
+        }
+      }
+      return { id, name: corp.name || 'Unknown Corporation', subtext: ceoName ? `CEO &bull; ${ceoName}` : '', portrait: `https://images.evetech.net/corporations/${id}/logo?size=64` };
     }
 
     // alliance
     const allianceRes = await fetch(`https://esi.evetech.net/latest/alliances/${id}/?datasource=tranquility`);
     if (!allianceRes.ok) throw new Error('alliance lookup failed');
     const alliance = await allianceRes.json();
-    return { id, name: alliance.name || 'Unknown Alliance', subtext: alliance.ticker ? `[${alliance.ticker}]` : '', portrait: `https://images.evetech.net/alliances/${id}/logo?size=64` };
+    let executorName = '';
+    if (alliance.executor_corporation_id) {
+      const execRes = await fetch(`https://esi.evetech.net/latest/corporations/${alliance.executor_corporation_id}/?datasource=tranquility`);
+      if (execRes.ok) {
+        const execCorp = await execRes.json();
+        executorName = execCorp.name || '';
+      }
+    }
+    return { id, name: alliance.name || 'Unknown Alliance', subtext: executorName ? `EXECUTOR &bull; ${executorName}` : '', portrait: `https://images.evetech.net/alliances/${id}/logo?size=64` };
 
   } catch (err) {
     console.warn(`resolveEntity failed for ${type} ${id} (non-fatal):`, err.message);

@@ -266,6 +266,13 @@
       text-transform: uppercase;
       line-height: 1.8;
     }
+    .corp-alliance-link {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .corp-alliance-link:hover { color: var(--cyan); text-decoration: underline; }
+    .detail-label { color: var(--white); font-weight: 700; }
 
     /* ── PANELS — exact copy from pilot.html ── */
     .panels-section {
@@ -1126,7 +1133,7 @@
     if (words.length > 5) {
       commentInput.value = words.slice(0, 5).join(' ');
     }
-    anonRow.style.display = commentInput.value.trim().length > 0 ? '' : 'none';
+    anonRow.style.display = (isLoggedIn() && commentInput.value.trim().length > 0) ? '' : 'none';
   });
 
   // Anon toggle
@@ -1307,8 +1314,12 @@
       document.getElementById('allianceName').textContent = esi.name || '—';
       const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
       const lines = [];
-      if (esi.ticker) lines.push(escapeHtml(esi.ticker));
-      if (esi.executor_name) lines.push(`EXECUTOR &bull; ${escapeHtml(esi.executor_name)}`);
+      if (esi.executor_name) {
+        const executorLabel = esi.executor_id
+          ? `<a href="corporation.html?id=${esi.executor_id}" class="corp-alliance-link">${escapeHtml(esi.executor_name)}</a>`
+          : escapeHtml(esi.executor_name);
+        lines.push(`<span class="detail-label">EXECUTOR</span> &bull; ${executorLabel}`);
+      }
       if (esi.date_founded) {
         const foundedDate = new Date(esi.date_founded);
         const ordinal = n => {
@@ -1318,7 +1329,7 @@
         const year  = foundedDate.getFullYear();
         const month = foundedDate.toLocaleDateString('en-GB', { month: 'long' });
         const day   = ordinal(foundedDate.getDate());
-        lines.push(`FOUNDED &bull; ${year} ${month} ${day}`);
+        lines.push(`<span class="detail-label">FOUNDED</span> &bull; ${year} ${month} ${day}`);
       }
       document.getElementById('allianceTicker').innerHTML = lines.join('<br>');
       const img  = document.getElementById('allianceLogo');

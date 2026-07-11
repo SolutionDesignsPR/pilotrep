@@ -577,6 +577,28 @@
     }
     .see-all-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
 
+    /* Left Reps panel (pinned reps you've left on this pilot) */
+    .right-column { display: flex; flex-direction: column; gap: 24px; }
+    .panel-title .count-inline { color: var(--cyan); text-transform: none; letter-spacing: 0; }
+    .comment-row-inner { display: flex; align-items: center; gap: 12px; }
+    .rep-grade-badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--white);
+      flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.35);
+    }
+    .rep-grade-badge .modifier { font-size: 0.5em; font-weight: 700; vertical-align: super; line-height: 0; }
+    .rep-grade-badge.neg     { background: var(--grade-d); }
+    .rep-grade-badge.neutral { background: var(--grade-b); }
+    .rep-grade-badge.pos     { background: var(--grade-a); }
+
     /* Leave A Rep panel */
     .panel-title {
       text-align: center;
@@ -944,6 +966,19 @@
       </div>
     </div>
 
+    <!-- Right Column: Left Reps (conditional) + Leave A Rep Panel -->
+    <div class="right-column">
+
+    <!-- Left Reps Panel (only shown if logged-in user has repped this pilot) -->
+    <div class="panel" id="leftRepsPanel" style="display:none;">
+      <h2 class="panel-title">Left Reps <span class="count-inline" id="leftRepsCount">0</span></h2>
+      <div class="panel-divider"></div>
+      <div class="comments-list" id="leftRepsList"></div>
+      <div class="see-all-wrap" id="leftRepsSeeAllWrap" style="display:none;">
+        <button class="see-all-btn" id="leftRepsSeeAllBtn">▾ Show More</button>
+      </div>
+    </div>
+
     <!-- Leave A Rep Panel -->
     <div class="panel">
       <div style="font-size:11px;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;text-align:center;margin-bottom:8px;"><a href="#" class="hint-link" onclick="event.preventDefault(); window.location.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname+window.location.search);">Login With EVE Online To</a></div>
@@ -1007,6 +1042,8 @@
       </div>
     </div>
 
+    </div>
+
   </section>
 
   <!-- SHARE TOAST -->
@@ -1064,7 +1101,7 @@
     if (words.length > 5) {
       commentInput.value = words.slice(0, 5).join(' ');
     }
-    anonRow.style.display = commentInput.value.trim().length > 0 ? '' : 'none';
+    anonRow.style.display = (isLoggedIn() && commentInput.value.trim().length > 0) ? '' : 'none';
   });
 
   // ── AUTH GATE ──
@@ -1098,6 +1135,11 @@
           const titleMobile = document.getElementById('pageTitleMobile');
           if (titleDesktop) { titleDesktop.src = 'assets/images/PR_My_PilotRep.svg'; titleDesktop.alt = 'My PilotRep'; }
           if (titleMobile) { titleMobile.src = 'assets/images/PR_My_PilotRep.svg'; titleMobile.alt = 'My PilotRep'; }
+        }
+        // Load any reps this session's character has already left on this pilot
+        // (self-reps are blocked server-side, so skip the call on your own profile)
+        if (data.characterId && urlPilotId && String(urlPilotId) !== String(data.characterId)) {
+          loadMyRepsForPilot(urlPilotId);
         }
         const navLoggedIn = document.getElementById('navLoggedInAs');
         const navLoggedInLink = document.getElementById('navLoggedInLink');
@@ -1243,6 +1285,65 @@
     commentsExpanded = !commentsExpanded;
     renderComments();
   });
+
+  // ── LEFT REPS PANEL (reps this session's character has left on this pilot) ──
+  const LEFT_REPS_VISIBLE_LIMIT = 3;
+  let myPilotReps = [];
+  let leftRepsExpanded = false;
+
+  const leftRepsPanelEl     = document.getElementById('leftRepsPanel');
+  const leftRepsListEl      = document.getElementById('leftRepsList');
+  const leftRepsCountEl     = document.getElementById('leftRepsCount');
+  const leftRepsSeeAllWrapEl = document.getElementById('leftRepsSeeAllWrap');
+  const leftRepsSeeAllBtnEl  = document.getElementById('leftRepsSeeAllBtn');
+
+  function buildLeftRepRow(rep) {
+    const row = document.createElement('div');
+    row.className = 'comment-row ' + rep.tier;
+    row.innerHTML = `
+      <div class="comment-row-inner">
+        <span class="rep-grade-badge ${rep.tier}">${rep.gradeHtml}</span>
+        <div>
+          <div class="comment-meta">${rep.date || 'Just now'}</div>
+          ${rep.comment && rep.comment.trim() ? `<div class="comment-text">${escapeHtml(rep.comment)}</div>` : ''}
+        </div>
+      </div>
+      <span class="comment-system">${rep.system}</span>
+    `;
+    return row;
+  }
+
+  function renderLeftReps() {
+    leftRepsListEl.innerHTML = '';
+    const visible = leftRepsExpanded ? myPilotReps : myPilotReps.slice(0, LEFT_REPS_VISIBLE_LIMIT);
+    visible.forEach(rep => leftRepsListEl.appendChild(buildLeftRepRow(rep)));
+    if (myPilotReps.length > LEFT_REPS_VISIBLE_LIMIT) {
+      leftRepsSeeAllWrapEl.style.display = 'block';
+      leftRepsSeeAllBtnEl.textContent = leftRepsExpanded ? '▴ Show Less' : '▾ Show More';
+    } else {
+      leftRepsSeeAllWrapEl.style.display = 'none';
+    }
+  }
+
+  leftRepsSeeAllBtnEl.addEventListener('click', () => {
+    leftRepsExpanded = !leftRepsExpanded;
+    renderLeftReps();
+  });
+
+  async function loadMyRepsForPilot(pilotId) {
+    try {
+      const res = await fetch(`/.netlify/functions/get-my-reps-for-pilot?id=${pilotId}`);
+      if (!res.ok) return; // not logged in or request failed — panel stays hidden
+      const data = await res.json();
+      myPilotReps = data.reps || [];
+      if (myPilotReps.length === 0) return; // panel stays hidden
+      leftRepsCountEl.textContent = myPilotReps.length;
+      leftRepsPanelEl.style.display = '';
+      renderLeftReps();
+    } catch (e) {
+      console.warn('Left reps load failed:', e);
+    }
+  }
 
   function recalcAndRender() {
     repsCountEl.textContent    = submittedReps.length;

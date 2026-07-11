@@ -269,6 +269,7 @@ exports.handler = async (event) => {
           ticker:        alliance.ticker,
           logo:          logoUrl,
           executor_name: executorName,
+          executor_id:   alliance.executor_corporation_id || null,
           date_founded:  alliance.date_founded || null
         })
       };

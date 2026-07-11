@@ -272,6 +272,7 @@
       transition: color 0.15s;
     }
     .corp-alliance-link:hover { color: var(--cyan); text-decoration: underline; }
+    .detail-label { color: var(--white); font-weight: 700; }
 
     /* ── PANELS — exact copy from pilot.html ── */
     .panels-section {
@@ -1132,7 +1133,7 @@
     if (words.length > 5) {
       commentInput.value = words.slice(0, 5).join(' ');
     }
-    anonRow.style.display = commentInput.value.trim().length > 0 ? '' : 'none';
+    anonRow.style.display = (isLoggedIn() && commentInput.value.trim().length > 0) ? '' : 'none';
   });
 
   // Anon toggle
@@ -1313,19 +1314,17 @@
       document.getElementById('corpName').textContent = esi.name || '—';
       const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
       const lines = [];
-      if (esi.ticker) lines.push(escapeHtml(esi.ticker));
       if (esi.ceo_name) {
         const ceoLabel = esi.ceo_id
           ? `<a href="pilot.html?id=${esi.ceo_id}" class="corp-alliance-link">${escapeHtml(esi.ceo_name)}</a>`
           : escapeHtml(esi.ceo_name);
-        lines.push(`CEO &bull; ${ceoLabel}`);
+        lines.push(`<span class="detail-label">CEO</span> &bull; ${ceoLabel}`);
       }
       if (esi.alliance_name) {
-        const tickerSuffix = esi.alliance_ticker ? ` [${escapeHtml(esi.alliance_ticker)}]` : '';
         const allianceLabel = esi.alliance_id
-          ? `<a href="alliance.html?id=${esi.alliance_id}" class="corp-alliance-link">${escapeHtml(esi.alliance_name)}${tickerSuffix}</a>`
-          : `${escapeHtml(esi.alliance_name)}${tickerSuffix}`;
-        lines.push(`ALLIANCE &bull; ${allianceLabel}`);
+          ? `<a href="alliance.html?id=${esi.alliance_id}" class="corp-alliance-link">${escapeHtml(esi.alliance_name)}</a>`
+          : escapeHtml(esi.alliance_name);
+        lines.push(`<span class="detail-label">ALLIANCE</span> &bull; ${allianceLabel}`);
       }
       if (esi.date_founded) {
         const foundedDate = new Date(esi.date_founded);
@@ -1336,9 +1335,9 @@
         const year  = foundedDate.getFullYear();
         const month = foundedDate.toLocaleDateString('en-GB', { month: 'long' });
         const day   = ordinal(foundedDate.getDate());
-        lines.push(`FOUNDED &bull; ${year} ${month} ${day}`);
+        lines.push(`<span class="detail-label">FOUNDED</span> &bull; ${year} ${month} ${day}`);
       }
-      if (esi.member_count) lines.push(`MEMBERS &bull; ${esi.member_count.toLocaleString()}`);
+      if (esi.member_count) lines.push(`<span class="detail-label">MEMBERS</span> &bull; ${esi.member_count.toLocaleString()}`);
       document.getElementById('corpDetails').innerHTML = lines.join('<br>');
       const img = document.getElementById('corpLogo');
       const placeholder = document.getElementById('corpLogoPlaceholder');
