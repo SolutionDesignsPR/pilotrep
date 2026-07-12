@@ -41,7 +41,7 @@ exports.handler = async (event) => {
     // Fetch all reps for this entity
     const { data: reps, error } = await supabase
       .from('reps')
-      .select('id, grade, grade_index, system_type, comment, anonymous, reviewer_name, created_at')
+      .select('id, grade, grade_index, system_type, comment, anonymous, reviewer_name, reviewer_id, is_corp_alliance, created_at')
       .eq('target_id', String(id))
       .eq('target_type', type)
       .order('created_at', { ascending: false });
@@ -55,6 +55,8 @@ exports.handler = async (event) => {
         body: JSON.stringify({
           repScore:      null,
           repCount:      0,
+          pilotRepsCount: 0,
+          corpAllianceRepsCount: 0,
           commentCount:  0,
           averageIndex:  null,
           reps:          []
@@ -62,8 +64,30 @@ exports.handler = async (event) => {
       };
     }
 
-    // Calculate average grade index
-    const avgIndex = reps.reduce((sum, r) => sum + r.grade_index, 0) / reps.length;
+    // Corp/alliance-mate cap — only the first 3 corp/alliance reps per calendar month
+    // count toward the grade. Everything beyond that is still recorded and included in
+    // the transparency count below, it just doesn't move the score. This makes spamming
+    // reps from corp/alliance mates visible (via the counter) and mathematically pointless
+    // (via the cap) without silently dropping any submitted rep.
+    const MONTHLY_CAP = 3;
+    const otherReps = reps.filter(r => !r.is_corp_alliance);
+    const corpAllianceReps = reps.filter(r => r.is_corp_alliance);
+
+    const seenPerMonth = {};
+    const countedCorpAllianceReps = corpAllianceReps
+      // oldest-first, so the *earliest* reps in a month are the ones that count
+      .slice()
+      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+      .filter(r => {
+        const monthKey = (r.created_at || '').slice(0, 7); // 'YYYY-MM'
+        seenPerMonth[monthKey] = (seenPerMonth[monthKey] || 0) + 1;
+        return seenPerMonth[monthKey] <= MONTHLY_CAP;
+      });
+
+    const scoredReps = [...otherReps, ...countedCorpAllianceReps];
+
+    // Calculate average grade index (from scored reps only — see cap above)
+    const avgIndex = scoredReps.reduce((sum, r) => sum + r.grade_index, 0) / scoredReps.length;
     const roundedIndex = Math.round(avgIndex);
     const scoreGrade = GRADE_TABLE[roundedIndex] || null;
 
@@ -83,6 +107,8 @@ exports.handler = async (event) => {
         comment:     (r.comment && r.comment.trim()) ? r.comment.trim() : '',
         anonymous:   r.anonymous,
         author:      r.anonymous ? '' : (r.reviewer_name || ''),
+        reviewerId:  r.anonymous ? null : (r.reviewer_id || null),
+        isCorpAlliance: !!r.is_corp_alliance,
         date:        formatDate(r.created_at)
       };
     });
@@ -95,6 +121,8 @@ exports.handler = async (event) => {
         repScoreHtml: scoreGrade ? scoreGrade.html  : null,
         repScoreTier: scoreGrade ? scoreGrade.tier  : null,
         repCount:     reps.length,
+        pilotRepsCount: otherReps.length,
+        corpAllianceRepsCount: corpAllianceReps.length,
         commentCount,
         averageIndex: avgIndex,
         reps:         shaped

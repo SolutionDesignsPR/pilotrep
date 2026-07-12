@@ -415,8 +415,9 @@
 
     .stats-row {
       display: flex;
-      justify-content: center;
-      gap: 60px;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
       text-align: center;
       padding-bottom: 24px;
       border-bottom: 1px solid var(--border);
@@ -579,8 +580,7 @@
 
     /* Left Reps panel (pinned reps you've left on this pilot) */
     .right-column { display: flex; flex-direction: column; gap: 24px; }
-    .panel-title .count-inline { color: var(--cyan); text-transform: none; letter-spacing: 0; }
-    .comment-row-inner { display: flex; align-items: center; gap: 12px; }
+    .rep-row-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
     .rep-grade-badge {
       width: 34px;
       height: 34px;
@@ -942,7 +942,8 @@
       </div>
 
       <div class="stats-row">
-        <span class="stat-label-inline">Reps<span class="stat-count-inline" id="repsCount">0</span></span>
+        <span class="stat-label-inline">Pilot Reps<span class="stat-count-inline" id="pilotRepsCount">0</span></span>
+        <span class="stat-label-inline">Corp / Alliance Reps<span class="stat-count-inline" id="corpAllianceRepsCount">0</span></span>
       </div>
 
       <div class="comments-headrow">
@@ -971,7 +972,7 @@
 
     <!-- Left Reps Panel (only shown if logged-in user has repped this pilot) -->
     <div class="panel" id="leftRepsPanel" style="display:none;">
-      <h2 class="panel-title">Left Reps <span class="count-inline" id="leftRepsCount">0</span></h2>
+      <h2 class="panel-title">Left Reps</h2>
       <div class="panel-divider"></div>
       <div class="comments-list" id="leftRepsList"></div>
       <div class="see-all-wrap" id="leftRepsSeeAllWrap" style="display:none;">
@@ -1106,6 +1107,8 @@
 
   // ── AUTH GATE ──
   let currentUser = null;
+  let currentUserCorpId = null;
+  let currentUserAllianceId = null;
 
   async function loadSession() {
     try {
@@ -1113,6 +1116,8 @@
       const data = await res.json();
       if (data.loggedIn) {
         currentUser = data.characterName;
+        currentUserCorpId = data.corpId || null;
+        currentUserAllianceId = data.allianceId || null;
         const submitterName = document.getElementById('submitterName');
         if (submitterName) {
           submitterName.textContent = currentUser;
@@ -1227,10 +1232,13 @@
   ];
 
   let submittedReps = [];
+  let targetCorpId = null;
+  let targetAllianceId = null;
   let commentsExpanded = false;
   const VISIBLE_LIMIT = 5;
 
-  const repsCountEl      = document.getElementById('repsCount');
+  const pilotRepsCountEl        = document.getElementById('pilotRepsCount');
+  const corpAllianceRepsCountEl = document.getElementById('corpAllianceRepsCount');
   const commentsCountEl  = document.getElementById('commentsCount');
   const gradeCircleLetterEl = document.getElementById('gradeCircleLetter');
   const commentsListEl   = document.getElementById('commentsList');
@@ -1252,9 +1260,14 @@
     const row = document.createElement('div');
     row.className = 'comment-row ' + rep.tier;
     const dateLabel = rep.date || 'Just now';
+    const authorLabel = rep.author
+      ? (rep.reviewerId
+          ? `<a class="submitter-link" href="/pilot.html?id=${rep.reviewerId}">${escapeHtml(rep.author)}</a>`
+          : escapeHtml(rep.author))
+      : 'Anonymous';
     row.innerHTML = `
       <div>
-        <div class="comment-meta">${dateLabel} · ${escapeHtml(rep.author) || 'Anonymous'}</div>
+        <div class="comment-meta">${dateLabel} · ${authorLabel}</div>
         ${rep.comment && rep.comment.trim() ? `<div class="comment-text">${escapeHtml(rep.comment)}</div>` : ''}
       </div>
       <span class="comment-system">${rep.system}</span>
@@ -1293,7 +1306,6 @@
 
   const leftRepsPanelEl     = document.getElementById('leftRepsPanel');
   const leftRepsListEl      = document.getElementById('leftRepsList');
-  const leftRepsCountEl     = document.getElementById('leftRepsCount');
   const leftRepsSeeAllWrapEl = document.getElementById('leftRepsSeeAllWrap');
   const leftRepsSeeAllBtnEl  = document.getElementById('leftRepsSeeAllBtn');
 
@@ -1301,14 +1313,14 @@
     const row = document.createElement('div');
     row.className = 'comment-row ' + rep.tier;
     row.innerHTML = `
-      <div class="comment-row-inner">
-        <span class="rep-grade-badge ${rep.tier}">${rep.gradeHtml}</span>
-        <div>
-          <div class="comment-meta">${rep.date || 'Just now'}</div>
-          ${rep.comment && rep.comment.trim() ? `<div class="comment-text">${escapeHtml(rep.comment)}</div>` : ''}
-        </div>
+      <div>
+        <div class="comment-meta">${rep.date || 'Just now'}</div>
+        ${rep.comment && rep.comment.trim() ? `<div class="comment-text">${escapeHtml(rep.comment)}</div>` : ''}
       </div>
-      <span class="comment-system">${rep.system}</span>
+      <div class="rep-row-right">
+        <span class="comment-system">${rep.system}</span>
+        <span class="rep-grade-badge ${rep.tier}">${rep.gradeHtml}</span>
+      </div>
     `;
     return row;
   }
@@ -1337,7 +1349,6 @@
       const data = await res.json();
       myPilotReps = data.reps || [];
       if (myPilotReps.length === 0) return; // panel stays hidden
-      leftRepsCountEl.textContent = myPilotReps.length;
       leftRepsPanelEl.style.display = '';
       renderLeftReps();
     } catch (e) {
@@ -1346,7 +1357,8 @@
   }
 
   function recalcAndRender() {
-    repsCountEl.textContent    = submittedReps.length;
+    pilotRepsCountEl.textContent        = submittedReps.filter(r => !r.isCorpAlliance).length;
+    corpAllianceRepsCountEl.textContent = submittedReps.filter(r => r.isCorpAlliance).length;
     commentsCountEl.textContent = submittedReps.filter(r => r.comment && r.comment.trim()).length;
 
     if (submittedReps.length === 0) {
@@ -1396,6 +1408,8 @@
         body: JSON.stringify({
           targetId:   new URLSearchParams(window.location.search).get('id') || 'unknown',
           targetType: 'pilot',
+          targetCorpId,
+          targetAllianceId,
           grade,
           gradeIndex: INPUT_TO_NUM[grade],
           systemType: selectedSys.textContent.trim(),
@@ -1408,16 +1422,24 @@
       if (!res.ok) {
         showValidation(data.error || 'Submission failed. Please try again.');
       } else {
+        const isCorpAlliance = !!(
+          (targetCorpId && currentUserCorpId && targetCorpId === currentUserCorpId) ||
+          (targetAllianceId && currentUserAllianceId && targetAllianceId === currentUserAllianceId)
+        );
         const rep = {
           grade,
           gradeNum: INPUT_TO_NUM[grade],
           tier: selectedDot.dataset.tier,
           system: selectedSys.textContent,
           comment: commentInput.value.trim(),
-          author: anonCheck.checked ? '' : currentUser
+          author: anonCheck.checked ? '' : currentUser,
+          isCorpAlliance
         };
         submittedReps.unshift(rep);
         recalcAndRender();
+        // Instant feedback above is approximate (doesn't apply the monthly cap);
+        // refresh from the server moments later for the authoritative grade/counts.
+        loadRepsData(new URLSearchParams(window.location.search).get('id'));
         dots.forEach(d => d.classList.remove('selected'));
         sysButtons.forEach(b => b.classList.remove('selected'));
         commentInput.value = '';
@@ -1443,6 +1465,8 @@
       const esiRes = await fetch(`/.netlify/functions/esi-proxy?action=character&id=${pilotId}`);
       const esi = await esiRes.json();
       if (esi && esi.name) {
+        targetCorpId = esi.corporation_id || null;
+        targetAllianceId = esi.alliance_id || null;
         document.title = `${esi.name} — PilotRep`;
         document.getElementById('pilotName').textContent = esi.name;
         const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -1484,12 +1508,18 @@
     }
 
     // Load reps from Supabase
+    await loadRepsData(pilotId);
+  })();
+
+  async function loadRepsData(pilotId) {
+    if (!pilotId) return;
     try {
       const repsRes = await fetch(`/.netlify/functions/get-reps?id=${pilotId}&type=pilot`);
       const data = await repsRes.json();
       if (data.repCount > 0) {
         // Update stats
-        repsCountEl.textContent = data.repCount;
+        pilotRepsCountEl.textContent        = data.pilotRepsCount;
+        corpAllianceRepsCountEl.textContent = data.corpAllianceRepsCount;
         commentsCountEl.textContent = data.commentCount;
         // Update grade circle
         gradeCircleLetterEl.innerHTML = data.repScoreHtml || '–';
@@ -1502,7 +1532,9 @@
           tier:     r.tier,
           system:   r.system,
           comment:  r.comment,
-          author:   r.author,
+          author:     r.author,
+          reviewerId: r.reviewerId,
+          isCorpAlliance: r.isCorpAlliance,
           date:     r.date
         }));
         renderComments();
@@ -1510,7 +1542,7 @@
     } catch (e) {
       console.warn('Reps load failed:', e);
     }
-  })();
+  }
 
   // ── SEARCH BAR ────────────────────────────────────────────────────────────
   const searchInput    = document.getElementById('navSearchInput');

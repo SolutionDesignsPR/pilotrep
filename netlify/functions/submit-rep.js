@@ -43,7 +43,7 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: 'Invalid request body' }) };
   }
 
-  const { targetId, targetType, grade, gradeIndex, systemType, comment, anonymous } = body;
+  const { targetId, targetType, targetCorpId, targetAllianceId, grade, gradeIndex, systemType, comment, anonymous } = body;
 
   // 3. Validate required fields
   if (!targetId || !targetType || !grade || gradeIndex === undefined) {
@@ -70,6 +70,13 @@ exports.handler = async (event) => {
 
   const reviewerId = session.characterId;
   const reviewerName = session.characterName;
+
+  // Corp/alliance-mate flag — reviewer's corp/alliance (captured at login) vs. the
+  // target's corp/alliance (sent by the front end, already loaded from ESI on-page).
+  const isCorpAlliance = !!(
+    (targetCorpId && session.corpId && String(targetCorpId) === String(session.corpId)) ||
+    (targetAllianceId && session.allianceId && String(targetAllianceId) === String(session.allianceId))
+  );
 
   // 4. Block self-reps (pilots only)
   if (targetType === 'pilot' && String(targetId) === String(reviewerId)) {
@@ -109,7 +116,8 @@ exports.handler = async (event) => {
     grade_index:   gradeIndex,
     system_type:   systemType || null,
     comment:       trimmedComment,
-    anonymous:     anonymous || false
+    anonymous:     anonymous || false,
+    is_corp_alliance: isCorpAlliance
   });
 
   if (error) {
