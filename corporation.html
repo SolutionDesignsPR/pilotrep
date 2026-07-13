@@ -338,8 +338,9 @@
 
     .stats-row {
       display: flex;
-      justify-content: center;
-      gap: 60px;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
       text-align: center;
       padding-bottom: 24px;
       border-bottom: 1px solid var(--border);
@@ -824,6 +825,7 @@
 
       <div class="stats-row">
         <span class="stat-label-inline">Reps<span class="stat-count-inline" id="repsCount">0</span></span>
+        <span class="stat-label-inline">Corp / Alliance Reps<span class="stat-count-inline" id="corpAllianceRepsCount">0</span></span>
       </div>
 
       <div class="comments-headrow">
@@ -944,6 +946,8 @@
 
   // ── Auth — real EVE SSO session check ──
   let currentUser = null;
+  let currentUserCorpId = null;
+  let currentUserAllianceId = null;
 
   async function loadSession() {
     try {
@@ -951,6 +955,8 @@
       const data = await res.json();
       if (data.loggedIn) {
         currentUser = data.characterName;
+        currentUserCorpId = data.corpId || null;
+        currentUserAllianceId = data.allianceId || null;
         const submitterName = document.getElementById('submitterName');
         if (submitterName) {
           submitterName.textContent = currentUser;
@@ -1020,10 +1026,13 @@
   ];
 
   let submittedReps    = [];
+  let targetCorpId = null;
+  let targetAllianceId = null;
   let commentsExpanded = false;
   const VISIBLE_LIMIT  = 5;
 
   const repsCountEl        = document.getElementById('repsCount');
+  const corpAllianceRepsCountEl = document.getElementById('corpAllianceRepsCount');
   const commentsCountEl    = document.getElementById('commentsCount');
   const gradeCircleLetterEl = document.getElementById('gradeCircleLetter');
   const commentsListEl     = document.getElementById('commentsList');
@@ -1045,9 +1054,14 @@
     const row = document.createElement('div');
     row.className = 'comment-row ' + rep.tier;
     const dateLabel = rep.date || 'Just now';
+    const authorLabel = rep.author
+      ? (rep.reviewerId
+          ? `<a class="submitter-link" href="/pilot.html?id=${rep.reviewerId}">${escapeHtml(rep.author)}</a>`
+          : escapeHtml(rep.author))
+      : 'Anonymous';
     row.innerHTML = `
       <div>
-        <div class="comment-meta">${dateLabel} · ${escapeHtml(rep.author) || 'Anonymous'}</div>
+        <div class="comment-meta">${dateLabel} · ${authorLabel}</div>
         ${rep.comment && rep.comment.trim() ? `<div class="comment-text">${escapeHtml(rep.comment)}</div>` : ''}
       </div>
       <span class="comment-system">${rep.system}</span>
@@ -1080,7 +1094,8 @@
   });
 
   function recalcAndRender() {
-    repsCountEl.textContent     = submittedReps.length;
+    repsCountEl.textContent     = submittedReps.filter(r => !r.isCorpAlliance).length;
+    corpAllianceRepsCountEl.textContent = submittedReps.filter(r => r.isCorpAlliance).length;
     commentsCountEl.textContent = submittedReps.filter(r => r.comment && r.comment.trim()).length;
 
     if (submittedReps.length === 0) {
@@ -1165,6 +1180,8 @@
         body: JSON.stringify({
           targetId:   new URLSearchParams(window.location.search).get('id') || 'unknown',
           targetType: 'corporation',
+          targetCorpId,
+          targetAllianceId,
           grade,
           gradeIndex: INPUT_TO_NUM[grade],
           systemType: selectedSys.textContent.trim(),
@@ -1177,16 +1194,22 @@
       if (!res.ok) {
         showValidation(data.error || 'Submission failed. Please try again.');
       } else {
+        const isCorpAlliance = !!(
+          (targetCorpId && currentUserCorpId && String(targetCorpId) === String(currentUserCorpId)) ||
+          (targetAllianceId && currentUserAllianceId && String(targetAllianceId) === String(currentUserAllianceId))
+        );
         const rep = {
           grade,
           gradeNum: INPUT_TO_NUM[grade],
           tier: selectedDot.dataset.tier,
           system: selectedSys.textContent,
           comment: commentInput.value.trim(),
-          author: anonymous ? '' : currentUser
+          author: anonymous ? '' : currentUser,
+          isCorpAlliance
         };
         submittedReps.unshift(rep);
         recalcAndRender();
+        loadRepsData(new URLSearchParams(window.location.search).get('id'));
         dots.forEach(d => d.classList.remove('selected'));
         sysButtons.forEach(b => b.classList.remove('selected'));
         commentInput.value = '';
@@ -1306,11 +1329,13 @@
     const params = new URLSearchParams(window.location.search);
     const corpId = params.get('id');
     if (!corpId) return;
+    targetCorpId = corpId;
 
     // Load ESI identity
     try {
       const res  = await fetch(`/.netlify/functions/esi-proxy?action=corporation&id=${corpId}`);
       const esi  = await res.json();
+      targetAllianceId = esi.alliance_id || null;
       document.getElementById('corpName').textContent = esi.name || '—';
       const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
       const lines = [];
@@ -1349,11 +1374,17 @@
     }
 
     // Load reps from Supabase
+    await loadRepsData(corpId);
+  })();
+
+  async function loadRepsData(corpId) {
+    if (!corpId) return;
     try {
       const repsRes = await fetch(`/.netlify/functions/get-reps?id=${corpId}&type=corporation`);
       const data    = await repsRes.json();
       if (data.repCount > 0) {
-        document.getElementById('repsCount').textContent     = data.repCount;
+        repsCountEl.textContent = data.pilotRepsCount;
+        corpAllianceRepsCountEl.textContent = data.corpAllianceRepsCount;
         document.getElementById('commentsCount').textContent = data.commentCount;
         const gradeEl = document.getElementById('gradeCircleLetter');
         gradeEl.innerHTML = data.repScoreHtml || '–';
@@ -1365,7 +1396,9 @@
           tier:     r.tier,
           system:   r.system,
           comment:  r.comment,
-          author:   r.author,
+          author:     r.author,
+          reviewerId: r.reviewerId,
+          isCorpAlliance: r.isCorpAlliance,
           date:     r.date
         }));
         renderComments();
@@ -1373,7 +1406,7 @@
     } catch (e) {
       console.warn('Reps load failed:', e);
     }
-  })();
+  }
 
   // ── EVE TIME CLOCK ──
   function updateEveTime() {

@@ -630,11 +630,23 @@
       color: var(--muted);
       margin-top: 2px;
     }
-    .leftrep-grade { font-size: 18px; font-weight: 700; letter-spacing: 0.02em; }
-    .leftrep-grade .modifier { font-size: 0.5em; font-weight: 700; vertical-align: super; line-height: 0; }
-    .leftrep-grade.grade-F { color: var(--grade-f); }
-    .leftrep-grade.grade-B { color: var(--grade-b); }
-    .leftrep-grade.grade-A { color: var(--grade-a); }
+    .leftrep-grade {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #ffffff;
+    }
+    .leftrep-grade .modifier { font-size: 0.6em; font-weight: 700; vertical-align: super; line-height: 0; }
+    .leftrep-grade.grade-F { background: var(--grade-f); }
+    .leftrep-grade.grade-B { background: var(--grade-b); }
+    .leftrep-grade.grade-A { background: var(--grade-a); }
     .leftrep-empty {
       text-align: center;
       font-size: 13px;
@@ -1182,9 +1194,14 @@
     const row = document.createElement('div');
     row.className = 'comment-row ' + rep.tier;
     const dateLabel = rep.date || 'Just now';
+    const authorLabel = rep.author
+      ? (rep.reviewerId
+          ? `<a class="submitter-link" href="/pilot.html?id=${rep.reviewerId}">${escapeHtml(rep.author)}</a>`
+          : escapeHtml(rep.author))
+      : 'Anonymous';
     row.innerHTML = `
       <div>
-        <div class="comment-meta">${dateLabel} · ${escapeHtml(rep.author) || 'Anonymous'}</div>
+        <div class="comment-meta">${dateLabel} · ${authorLabel}</div>
         ${rep.comment && rep.comment.trim() ? `<div class="comment-text">${escapeHtml(rep.comment)}</div>` : ''}
       </div>
       <span class="comment-system">${rep.system}</span>
@@ -1300,6 +1317,7 @@
           system:   r.system,
           comment:  r.comment,
           author:   r.author,
+          reviewerId: r.reviewerId,
           date:     r.date
         }));
         renderComments();
