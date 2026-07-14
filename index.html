@@ -374,31 +374,38 @@
 
     .grade {
       font-family: Helvetica, Arial, sans-serif;
-      font-size: 22px;
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
       font-weight: 700;
-      min-width: 38px;
-      text-align: center;
+      color: #ffffff;
+      background: var(--muted);
     }
     .grade .modifier {
-      font-size: 0.55em;
+      font-size: 0.6em;
       font-weight: 700;
       vertical-align: super;
       line-height: 0;
       letter-spacing: 0;
     }
-    .grade-Ap { color: var(--grade-ap); }
-    .grade-A  { color: var(--grade-a);  }
-    .grade-Am { color: var(--grade-am); }
-    .grade-Bp { color: var(--grade-bp); }
-    .grade-B  { color: var(--grade-b);  }
-    .grade-Bm { color: var(--grade-bm); }
-    .grade-Cp { color: var(--grade-cp); }
-    .grade-C  { color: var(--grade-c);  }
-    .grade-Cm { color: var(--grade-cm); }
-    .grade-Dp { color: var(--grade-dp); }
-    .grade-D  { color: var(--grade-d);  }
-    .grade-Dm { color: var(--grade-dm); }
-    .grade-F  { color: var(--grade-f);  }
+    .grade-Ap { background: var(--grade-ap); }
+    .grade-A  { background: var(--grade-a);  }
+    .grade-Am { background: var(--grade-am); }
+    .grade-Bp { background: var(--grade-bp); }
+    .grade-B  { background: var(--grade-b);  }
+    .grade-Bm { background: var(--grade-bm); }
+    .grade-Cp { background: var(--grade-cp); }
+    .grade-C  { background: var(--grade-c);  }
+    .grade-Cm { background: var(--grade-cm); }
+    .grade-Dp { background: var(--grade-dp); }
+    .grade-D  { background: var(--grade-d);  }
+    .grade-Dm { background: var(--grade-dm); }
+    .grade-F  { background: var(--grade-f);  }
 
     /* ── LEGAL NOTE ── */
     .legal-note {
