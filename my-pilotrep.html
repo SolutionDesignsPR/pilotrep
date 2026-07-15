@@ -281,70 +281,47 @@
       flex-wrap: wrap;
     }
     .pilot-portrait {
-      width: 170px;
-      height: 200px;
+      width: 130px;
+      height: 130px;
       border-radius: 4px;
       object-fit: cover;
       background: linear-gradient(135deg, #0e1a2b 0%, #1a2a40 100%);
       border: 1px solid var(--border);
       flex-shrink: 0;
     }
-    .pilot-header-info { text-align: left; }
+    .pilot-header-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      padding-top: 4px;
+      text-align: left;
+      flex: 1 1 260px;
+      min-width: 260px;
+      max-width: 640px;
+    }
     .pilot-header-name {
-      font-size: clamp(26px, 4vw, 36px);
+      font-size: 20px;
       font-weight: 700;
       letter-spacing: 0.06em;
       color: var(--cyan);
       text-transform: uppercase;
-      margin-bottom: 10px;
+      line-height: 1.2;
     }
-    .pilot-header-corp,
-    .pilot-header-alliance {
-      font-size: 16px;
-      font-weight: 500;
-      letter-spacing: 0.08em;
-      color: var(--white);
+    .pilot-header-details {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.07em;
       text-transform: uppercase;
+      line-height: 1.8;
     }
-    .pilot-header-corp a,
-    .pilot-header-alliance a {
-      color: var(--white);
+    .pilot-header-details .detail-label { color: var(--white); font-weight: 700; }
+    .pilot-header-details a {
+      color: var(--muted);
       text-decoration: none;
       transition: color 0.15s;
     }
-    .pilot-header-corp a:hover,
-    .pilot-header-alliance a:hover {
-      color: var(--cyan);
-      text-decoration: underline;
-    }
-    .pilot-header-secstatus {
-      margin-top: 18px;
-      font-size: 14px;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-    .pilot-header-secstatus strong {
-      color: var(--white);
-      font-weight: 700;
-      font-size: 18px;
-      margin-left: 8px;
-    }
-    .pilot-header-birthday {
-      margin-top: 6px;
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-    .pilot-header-birthday strong {
-      color: var(--white);
-      font-weight: 600;
-      font-size: 12px;
-      letter-spacing: 0.04em;
-      text-transform: none;
-      margin-left: 6px;
-    }
+    .pilot-header-details a:hover { color: var(--cyan); text-decoration: underline; }
 
     /* ── PANELS ── */
     .panels-section {
@@ -990,10 +967,7 @@
     <div class="pilot-portrait" id="pilotPortraitPlaceholder"></div>
     <div class="pilot-header-info">
       <div class="pilot-header-name" id="pilotName">—</div>
-      <div class="pilot-header-corp" id="pilotCorp"></div>
-      <div class="pilot-header-alliance" id="pilotAlliance"></div>
-      <div class="pilot-header-secstatus" id="pilotSecStatus" style="display:none;">Security Status <strong id="pilotSecValue">0.0</strong></div>
-      <div class="pilot-header-birthday" id="pilotBirthday" style="display:none;">Birthday <strong id="pilotBirthdayValue">—</strong></div>
+      <div class="pilot-header-details" id="pilotDetails"></div>
     </div>
   </section>
 
@@ -1260,17 +1234,17 @@
         document.title = `${esi.name} — PilotRep`;
         document.getElementById('pilotName').textContent = esi.name;
         const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-        document.getElementById('pilotCorp').innerHTML = esi.corporation_name
-          ? (esi.corporation_id ? `<a href="corporation.html?id=${esi.corporation_id}">${escapeHtml(esi.corporation_name)}</a>` : escapeHtml(esi.corporation_name))
-          : '';
-        document.getElementById('pilotAlliance').innerHTML = esi.alliance_name
-          ? (esi.alliance_id ? `<a href="alliance.html?id=${esi.alliance_id}">${escapeHtml(esi.alliance_name)}</a>` : escapeHtml(esi.alliance_name))
-          : '';
-        const secEl = document.getElementById('pilotSecStatus');
-        document.getElementById('pilotSecValue').textContent = esi.security_status ?? '0.0';
-        secEl.style.display = '';
+        const lines = [];
+        if (esi.corporation_name) {
+          const corpLabel = esi.corporation_id ? `<a href="corporation.html?id=${esi.corporation_id}">${escapeHtml(esi.corporation_name)}</a>` : escapeHtml(esi.corporation_name);
+          lines.push(`<span class="detail-label">Corporation</span> &bull; ${corpLabel}`);
+        }
+        if (esi.alliance_name) {
+          const allianceLabel = esi.alliance_id ? `<a href="alliance.html?id=${esi.alliance_id}">${escapeHtml(esi.alliance_name)}</a>` : escapeHtml(esi.alliance_name);
+          lines.push(`<span class="detail-label">Alliance</span> &bull; ${allianceLabel}`);
+        }
+        lines.push(`<span class="detail-label">Security Status</span> &bull; ${esi.security_status ?? '0.0'}`);
         if (esi.birthday) {
-          const bdayEl = document.getElementById('pilotBirthday');
           const bdayDate = new Date(esi.birthday);
           const ordinal = n => {
             const s = ['th', 'st', 'nd', 'rd'], v = n % 100;
@@ -1279,9 +1253,9 @@
           const year = bdayDate.getFullYear();
           const month = bdayDate.toLocaleDateString('en-GB', { month: 'long' });
           const day = ordinal(bdayDate.getDate());
-          document.getElementById('pilotBirthdayValue').textContent = `${year} ${month} ${day}`;
-          bdayEl.style.display = '';
+          lines.push(`<span class="detail-label">Birthday</span> &bull; ${year} ${month} ${day}`);
         }
+        document.getElementById('pilotDetails').innerHTML = lines.join('<br>');
         if (esi.portrait) {
           const img = document.getElementById('pilotPortrait');
           const placeholder = document.getElementById('pilotPortraitPlaceholder');
