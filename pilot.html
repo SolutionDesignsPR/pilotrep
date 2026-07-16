@@ -426,6 +426,8 @@
       transition: color 0.15s;
     }
     .stat-label-link:hover { color: var(--white); text-decoration: underline; }
+    .stat-label-link.disabled { cursor: default; color: var(--muted); pointer-events: none; }
+    .stat-label-link.disabled:hover { text-decoration: none; }
 
     .no-comment-reps-panel {
       margin-top: -6px;
@@ -778,6 +780,9 @@
       transition: color 0.15s;
     }
     .submitter-link:hover { color: var(--cyan); }
+    .comment-row.neg .submitter-link:hover     { color: #c02128; }
+    .comment-row.neutral .submitter-link:hover { color: #2ff541; }
+    .comment-row.pos .submitter-link:hover     { color: #4fc3f7; }
     .anon-label {
       display: flex;
       align-items: center;
@@ -1271,6 +1276,34 @@
   const noCommentRepsSeeAllWrapEl = document.getElementById('noCommentRepsSeeAllWrap');
   const noCommentRepsSeeAllBtnEl  = document.getElementById('noCommentRepsSeeAllBtn');
 
+  const NO_COMMENT_OPEN_KEY = 'pilotRepsOpen';
+  let noCommentStateInitialized = false;
+
+  function getNoCommentCount() {
+    return submittedReps.filter(r => !r.comment || !r.comment.trim()).length;
+  }
+
+  function updatePilotRepsToggleState() {
+    const count = getNoCommentCount();
+    if (count === 0) {
+      pilotRepsToggleEl.classList.add('disabled');
+      if (noCommentRepsOpen) {
+        noCommentRepsOpen = false;
+        noCommentRepsPanelEl.style.display = 'none';
+      }
+    } else {
+      pilotRepsToggleEl.classList.remove('disabled');
+      if (!noCommentStateInitialized) {
+        noCommentStateInitialized = true;
+        if (localStorage.getItem(NO_COMMENT_OPEN_KEY) === 'true') {
+          noCommentRepsOpen = true;
+          noCommentRepsPanelEl.style.display = 'block';
+          renderNoCommentReps();
+        }
+      }
+    }
+  }
+
   function escapeHtml(str) {
     if (!str) return '';
     return String(str)
@@ -1353,8 +1386,10 @@
   }
 
   pilotRepsToggleEl.addEventListener('click', () => {
+    if (pilotRepsToggleEl.classList.contains('disabled')) return;
     noCommentRepsOpen = !noCommentRepsOpen;
     noCommentRepsPanelEl.style.display = noCommentRepsOpen ? 'block' : 'none';
+    localStorage.setItem(NO_COMMENT_OPEN_KEY, noCommentRepsOpen);
     if (noCommentRepsOpen) renderNoCommentReps();
   });
 
@@ -1437,6 +1472,7 @@
     }
     renderComments();
     if (noCommentRepsOpen) renderNoCommentReps();
+    updatePilotRepsToggleState();
   }
 
   const submitBtn   = document.getElementById('submitBtn');
@@ -1604,6 +1640,9 @@
         }));
         renderComments();
         if (noCommentRepsOpen) renderNoCommentReps();
+        updatePilotRepsToggleState();
+      } else {
+        pilotRepsToggleEl.classList.add('disabled');
       }
     } catch (e) {
       console.warn('Reps load failed:', e);
