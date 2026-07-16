@@ -64,24 +64,27 @@ exports.handler = async (event) => {
       };
     }
 
-    // Corp/alliance-mate cap — only the first 3 corp/alliance reps per calendar month
-    // count toward the grade. Everything beyond that is still recorded and included in
+    // Corp/alliance-mate cap — each individual corp/alliance-mate reviewer only has
+    // their first 3 reps per calendar month count toward the grade. Everything beyond
+    // that (from that same reviewer, that same month) is still recorded and included in
     // the transparency count below, it just doesn't move the score. This makes spamming
-    // reps from corp/alliance mates visible (via the counter) and mathematically pointless
-    // (via the cap) without silently dropping any submitted rep.
+    // reps from a single corp/alliance mate visible (via the counter) and mathematically
+    // pointless (via the cap) without silently dropping any submitted rep, and without
+    // penalizing other corp/alliance mates who haven't hit their own cap.
     const MONTHLY_CAP = 3;
     const otherReps = reps.filter(r => !r.is_corp_alliance);
     const corpAllianceReps = reps.filter(r => r.is_corp_alliance);
 
-    const seenPerMonth = {};
+    const seenPerReviewerMonth = {};
     const countedCorpAllianceReps = corpAllianceReps
-      // oldest-first, so the *earliest* reps in a month are the ones that count
+      // oldest-first, so the *earliest* reps from each reviewer in a month are the ones that count
       .slice()
       .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
       .filter(r => {
         const monthKey = (r.created_at || '').slice(0, 7); // 'YYYY-MM'
-        seenPerMonth[monthKey] = (seenPerMonth[monthKey] || 0) + 1;
-        return seenPerMonth[monthKey] <= MONTHLY_CAP;
+        const key = `${r.reviewer_id}_${monthKey}`;
+        seenPerReviewerMonth[key] = (seenPerReviewerMonth[key] || 0) + 1;
+        return seenPerReviewerMonth[key] <= MONTHLY_CAP;
       });
 
     const scoredReps = [...otherReps, ...countedCorpAllianceReps];

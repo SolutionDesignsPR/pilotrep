@@ -29,6 +29,31 @@ function gradeClassSuffix(grade) {
   return grade[0];
 }
 
+// Corp/alliance-mate cap — kept in sync with get-reps.js. Each individual corp/alliance
+// mate only has their first 3 reps per calendar month count toward the grade; everything
+// beyond that (from that same reviewer, that same month) is excluded from the average but
+// still counted elsewhere for transparency. Returns null if there are no scorable reps.
+const MONTHLY_CAP = 3;
+function cappedAverageIndex(entityReps) {
+  const otherReps = entityReps.filter(r => !r.is_corp_alliance);
+  const corpAllianceReps = entityReps.filter(r => r.is_corp_alliance);
+
+  const seenPerReviewerMonth = {};
+  const countedCorpAllianceReps = corpAllianceReps
+    .slice()
+    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+    .filter(r => {
+      const monthKey = (r.created_at || '').slice(0, 7);
+      const key = `${r.reviewer_id}_${monthKey}`;
+      seenPerReviewerMonth[key] = (seenPerReviewerMonth[key] || 0) + 1;
+      return seenPerReviewerMonth[key] <= MONTHLY_CAP;
+    });
+
+  const scoredReps = [...otherReps, ...countedCorpAllianceReps];
+  if (scoredReps.length === 0) return null;
+  return scoredReps.reduce((sum, r) => sum + r.grade_index, 0) / scoredReps.length;
+}
+
 exports.handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -46,7 +71,7 @@ exports.handler = async (event) => {
     // 1. Pull lightweight rep rows for this entity type — just enough to aggregate
     const { data: reps, error } = await supabase
       .from('reps')
-      .select('target_id, grade_index, created_at')
+      .select('target_id, grade_index, created_at, is_corp_alliance, reviewer_id')
       .eq('target_type', type);
 
     if (error) throw new Error(error.message);
@@ -55,27 +80,26 @@ exports.handler = async (event) => {
       return { statusCode: 200, headers, body: JSON.stringify({ mostReviewed: [], recentlyReviewed: [] }) };
     }
 
-    // 2. Aggregate per target_id: rep count, average grade index, most recent timestamp
+    // 2. Aggregate per target_id: full rep list (for capped scoring) + most recent timestamp
     const byTarget = {};
     for (const r of reps) {
       const key = r.target_id;
-      if (!byTarget[key]) byTarget[key] = { id: key, count: 0, sumIndex: 0, mostRecent: r.created_at };
+      if (!byTarget[key]) byTarget[key] = { id: key, reps: [], mostRecent: r.created_at };
       const agg = byTarget[key];
-      agg.count += 1;
-      agg.sumIndex += r.grade_index;
+      agg.reps.push(r);
       if (new Date(r.created_at) > new Date(agg.mostRecent)) agg.mostRecent = r.created_at;
     }
 
     const entries = Object.values(byTarget).map(agg => {
-      const avgIndex = agg.sumIndex / agg.count;
-      const roundedIndex = Math.max(0, Math.min(12, Math.round(avgIndex)));
-      const gradeEntry = GRADE_TABLE[roundedIndex];
+      const avgIndex = cappedAverageIndex(agg.reps);
+      const roundedIndex = avgIndex === null ? null : Math.max(0, Math.min(12, Math.round(avgIndex)));
+      const gradeEntry = roundedIndex === null ? null : GRADE_TABLE[roundedIndex];
       return {
         id:          agg.id,
-        repCount:    agg.count,
+        repCount:    agg.reps.length,
         mostRecent:  agg.mostRecent,
-        grade:       gradeEntry.grade,
-        gradeClass:  gradeClassSuffix(gradeEntry.grade),
+        grade:       gradeEntry ? gradeEntry.grade : '—',
+        gradeClass:  gradeEntry ? gradeClassSuffix(gradeEntry.grade) : '',
       };
     });
 
