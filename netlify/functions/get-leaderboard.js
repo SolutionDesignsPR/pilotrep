@@ -1,0 +1,194 @@
+const { createClient } = require('@supabase/supabase-js');
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+);
+
+// Grade index to letter mapping (13-point scale) — kept in sync with get-reps.js
+const GRADE_TABLE = [
+  { index: 0,  grade: 'F',  tier: 'neg',     html: 'F'  },
+  { index: 1,  grade: 'D−', tier: 'neg',     html: 'D<span class="modifier">−</span>' },
+  { index: 2,  grade: 'D',  tier: 'neg',     html: 'D'  },
+  { index: 3,  grade: 'D+', tier: 'neg',     html: 'D<span class="modifier">+</span>' },
+  { index: 4,  grade: 'C−', tier: 'neutral', html: 'C<span class="modifier">−</span>' },
+  { index: 5,  grade: 'C',  tier: 'neutral', html: 'C'  },
+  { index: 6,  grade: 'C+', tier: 'neutral', html: 'C<span class="modifier">+</span>' },
+  { index: 7,  grade: 'B−', tier: 'neutral', html: 'B<span class="modifier">−</span>' },
+  { index: 8,  grade: 'B',  tier: 'neutral', html: 'B'  },
+  { index: 9,  grade: 'B+', tier: 'neutral', html: 'B<span class="modifier">+</span>' },
+  { index: 10, grade: 'A−', tier: 'pos',     html: 'A<span class="modifier">−</span>' },
+  { index: 11, grade: 'A',  tier: 'pos',     html: 'A'  },
+  { index: 12, grade: 'A+', tier: 'pos',     html: 'A<span class="modifier">+</span>' },
+];
+
+// Maps a grade letter (e.g. "B−", "A+", "C") to its CSS class suffix (e.g. "Bm", "Ap", "C")
+function gradeClassSuffix(grade) {
+  if (!grade) return '';
+  if (grade.endsWith('+')) return grade[0] + 'p';
+  if (grade.endsWith('−') || grade.endsWith('-')) return grade[0] + 'm';
+  return grade[0];
+}
+
+// Corp/alliance-mate cap — kept in sync with get-reps.js. Each individual corp/alliance
+// mate only has their first 3 reps per calendar month count toward the grade; everything
+// beyond that (from that same reviewer, that same month) is excluded from the average but
+// still counted elsewhere for transparency. Returns null if there are no scorable reps.
+const MONTHLY_CAP = 3;
+function cappedAverageIndex(entityReps) {
+  const otherReps = entityReps.filter(r => !r.is_corp_alliance);
+  const corpAllianceReps = entityReps.filter(r => r.is_corp_alliance);
+
+  const seenPerReviewerMonth = {};
+  const countedCorpAllianceReps = corpAllianceReps
+    .slice()
+    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+    .filter(r => {
+      const monthKey = (r.created_at || '').slice(0, 7);
+      const key = `${r.reviewer_id}_${monthKey}`;
+      seenPerReviewerMonth[key] = (seenPerReviewerMonth[key] || 0) + 1;
+      return seenPerReviewerMonth[key] <= MONTHLY_CAP;
+    });
+
+  const scoredReps = [...otherReps, ...countedCorpAllianceReps];
+  if (scoredReps.length === 0) return null;
+  return scoredReps.reduce((sum, r) => sum + r.grade_index, 0) / scoredReps.length;
+}
+
+exports.handler = async (event) => {
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Content-Type': 'application/json'
+  };
+
+  try {
+    const { type = 'pilot', limit = '5' } = event.queryStringParameters || {};
+    const limitNum = Math.max(1, Math.min(20, parseInt(limit, 10) || 5));
+
+    if (!['pilot', 'corporation', 'alliance'].includes(type)) {
+      return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid type' }) };
+    }
+
+    // 1. Pull lightweight rep rows for this entity type — just enough to aggregate
+    const { data: reps, error } = await supabase
+      .from('reps')
+      .select('target_id, grade_index, created_at, is_corp_alliance, reviewer_id')
+      .eq('target_type', type);
+
+    if (error) throw new Error(error.message);
+
+    if (!reps || reps.length === 0) {
+      return { statusCode: 200, headers, body: JSON.stringify({ mostReviewed: [], recentlyReviewed: [] }) };
+    }
+
+    // 2. Aggregate per target_id: full rep list (for capped scoring) + most recent timestamp
+    const byTarget = {};
+    for (const r of reps) {
+      const key = r.target_id;
+      if (!byTarget[key]) byTarget[key] = { id: key, reps: [], mostRecent: r.created_at };
+      const agg = byTarget[key];
+      agg.reps.push(r);
+      if (new Date(r.created_at) > new Date(agg.mostRecent)) agg.mostRecent = r.created_at;
+    }
+
+    const entries = Object.values(byTarget).map(agg => {
+      const avgIndex = cappedAverageIndex(agg.reps);
+      const roundedIndex = avgIndex === null ? null : Math.max(0, Math.min(12, Math.round(avgIndex)));
+      const gradeEntry = roundedIndex === null ? null : GRADE_TABLE[roundedIndex];
+      return {
+        id:          agg.id,
+        repCount:    agg.reps.length,
+        mostRecent:  agg.mostRecent,
+        grade:       gradeEntry ? gradeEntry.grade : '—',
+        gradeClass:  gradeEntry ? gradeClassSuffix(gradeEntry.grade) : '',
+      };
+    });
+
+    // 3. Build the two leaderboards off the same aggregate
+    const mostReviewed = [...entries].sort((a, b) => b.repCount - a.repCount).slice(0, limitNum);
+    const recentlyReviewed = [...entries]
+      .sort((a, b) => new Date(b.mostRecent) - new Date(a.mostRecent))
+      .slice(0, limitNum);
+
+    // 4. Resolve name/corp/portrait via ESI — only for the IDs actually needed
+    const neededIds = [...new Set([...mostReviewed, ...recentlyReviewed].map(e => e.id))];
+    const details = await Promise.all(neededIds.map(id => resolveEntity(type, id)));
+    const byId = Object.fromEntries(details.map(d => [d.id, d]));
+
+    const attach = list => list.map(e => ({ ...e, ...byId[e.id] }));
+
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({
+        mostReviewed:     attach(mostReviewed),
+        recentlyReviewed: attach(recentlyReviewed),
+      })
+    };
+
+  } catch (err) {
+    console.error('get-leaderboard error:', err);
+    return { statusCode: 500, headers, body: JSON.stringify({ error: 'Failed to fetch leaderboard', detail: err.message }) };
+  }
+};
+
+// Resolves display name, subtext (corp/ticker), and portrait/logo URL for one entity via public ESI.
+// Failures are non-fatal — the entity just falls back to a generic label rather than breaking the list.
+async function resolveEntity(type, id) {
+  try {
+    if (type === 'pilot') {
+      const charRes = await fetch(`https://esi.evetech.net/latest/characters/${id}/?datasource=tranquility`);
+      if (!charRes.ok) throw new Error('char lookup failed');
+      const char = await charRes.json();
+      let corpName = '';
+      if (char.corporation_id) {
+        const namesRes = await fetch('https://esi.evetech.net/latest/universe/names/?datasource=tranquility', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify([char.corporation_id])
+        });
+        if (namesRes.ok) {
+          const names = await namesRes.json();
+          corpName = names[0]?.name || '';
+        }
+      }
+      return { id, name: char.name || 'Unknown Pilot', subtext: corpName, portrait: `https://images.evetech.net/characters/${id}/portrait?size=64` };
+    }
+
+    if (type === 'corporation') {
+      const corpRes = await fetch(`https://esi.evetech.net/latest/corporations/${id}/?datasource=tranquility`);
+      if (!corpRes.ok) throw new Error('corp lookup failed');
+      const corp = await corpRes.json();
+      let ceoName = '';
+      if (corp.ceo_id) {
+        const namesRes = await fetch('https://esi.evetech.net/latest/universe/names/?datasource=tranquility', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify([corp.ceo_id])
+        });
+        if (namesRes.ok) {
+          const names = await namesRes.json();
+          ceoName = names[0]?.name || '';
+        }
+      }
+      return { id, name: corp.name || 'Unknown Corporation', subtext: ceoName ? `CEO &bull; ${ceoName}` : '', portrait: `https://images.evetech.net/corporations/${id}/logo?size=64` };
+    }
+
+    // alliance
+    const allianceRes = await fetch(`https://esi.evetech.net/latest/alliances/${id}/?datasource=tranquility`);
+    if (!allianceRes.ok) throw new Error('alliance lookup failed');
+    const alliance = await allianceRes.json();
+    let executorName = '';
+    if (alliance.executor_corporation_id) {
+      const execRes = await fetch(`https://esi.evetech.net/latest/corporations/${alliance.executor_corporation_id}/?datasource=tranquility`);
+      if (execRes.ok) {
+        const execCorp = await execRes.json();
+        executorName = execCorp.name || '';
+      }
+    }
+    return { id, name: alliance.name || 'Unknown Alliance', subtext: executorName ? `EXECUTOR &bull; ${executorName}` : '', portrait: `https://images.evetech.net/alliances/${id}/logo?size=64` };
+
+  } catch (err) {
+    console.warn(`resolveEntity failed for ${type} ${id} (non-fatal):`, err.message);
+    return { id, name: 'Unknown', subtext: '', portrait: '' };
+  }
+}
