@@ -414,6 +414,47 @@
       text-transform: none;
       margin-left: 10px;
     }
+    .stat-label-link {
+      cursor: pointer;
+      color: var(--cyan);
+      transition: color 0.15s;
+    }
+    .stat-label-link:hover { color: var(--white); text-decoration: underline; }
+    .stat-label-link.disabled { cursor: default; color: var(--muted); pointer-events: none; }
+    .stat-label-link.disabled:hover { text-decoration: none; }
+
+    .no-comment-reps-panel {
+      margin-top: -6px;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .no-comment-reps-list { border-radius: 4px; overflow: hidden; }
+    .no-comment-rep-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 4px;
+      border-bottom: 1px solid var(--border);
+    }
+    .no-comment-rep-row:last-child { border-bottom: none; }
+    .no-comment-rep-badge {
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--white);
+    }
+    .no-comment-rep-badge .modifier { font-size: 0.6em; font-weight: 700; vertical-align: super; line-height: 0; }
+    .no-comment-rep-badge.neg     { background: var(--grade-d); }
+    .no-comment-rep-badge.neutral { background: var(--grade-b); }
+    .no-comment-rep-badge.pos     { background: var(--grade-a); }
 
     .comments-headrow {
       display: flex;
@@ -983,7 +1024,14 @@
       </div>
 
       <div class="stats-row">
-        <span class="stat-label-inline">Reps<span class="stat-count-inline" id="repsCount">0</span></span>
+        <span class="stat-label-inline"><span class="stat-label-link" id="pilotRepsToggle">Pilot Reps</span><span class="stat-count-inline" id="repsCount">0</span></span>
+      </div>
+
+      <div class="no-comment-reps-panel" id="noCommentRepsPanel" style="display:none;">
+        <div class="no-comment-reps-list" id="noCommentRepsList"></div>
+        <div class="see-all-wrap" id="noCommentRepsSeeAllWrap" style="display:none;">
+          <button class="see-all-btn" id="noCommentRepsSeeAllBtn">▾ See All Reps</button>
+        </div>
       </div>
 
       <div class="comments-headrow">
@@ -1154,6 +1202,42 @@
   const seeAllWrapEl     = document.getElementById('seeAllWrap');
   const seeAllBtnEl      = document.getElementById('seeAllBtn');
 
+  let noCommentRepsExpanded = false;
+  let noCommentRepsOpen = false;
+  const pilotRepsToggleEl        = document.getElementById('pilotRepsToggle');
+  const noCommentRepsPanelEl     = document.getElementById('noCommentRepsPanel');
+  const noCommentRepsListEl      = document.getElementById('noCommentRepsList');
+  const noCommentRepsSeeAllWrapEl = document.getElementById('noCommentRepsSeeAllWrap');
+  const noCommentRepsSeeAllBtnEl  = document.getElementById('noCommentRepsSeeAllBtn');
+
+  const NO_COMMENT_OPEN_KEY = 'pilotRepsOpen';
+  let noCommentStateInitialized = false;
+
+  function getNoCommentCount() {
+    return submittedReps.filter(r => !r.comment || !r.comment.trim()).length;
+  }
+
+  function updatePilotRepsToggleState() {
+    const count = getNoCommentCount();
+    if (count === 0) {
+      pilotRepsToggleEl.classList.add('disabled');
+      if (noCommentRepsOpen) {
+        noCommentRepsOpen = false;
+        noCommentRepsPanelEl.style.display = 'none';
+      }
+    } else {
+      pilotRepsToggleEl.classList.remove('disabled');
+      if (!noCommentStateInitialized) {
+        noCommentStateInitialized = true;
+        if (localStorage.getItem(NO_COMMENT_OPEN_KEY) === 'true') {
+          noCommentRepsOpen = true;
+          noCommentRepsPanelEl.style.display = 'block';
+          renderNoCommentReps();
+        }
+      }
+    }
+  }
+
   function escapeHtml(str) {
     if (!str) return '';
     return String(str)
@@ -1207,6 +1291,47 @@
     renderComments();
   });
 
+  function buildNoCommentRepRow(rep) {
+    const row = document.createElement('div');
+    row.className = 'no-comment-rep-row';
+    const nameLabel = rep.author
+      ? (rep.reviewerId
+          ? `<a class="submitter-link" href="/pilot.html?id=${rep.reviewerId}">${escapeHtml(rep.author)}</a>`
+          : escapeHtml(rep.author))
+      : 'Anonymous';
+    row.innerHTML = `
+      <span>${nameLabel}</span>
+      <span class="no-comment-rep-badge ${rep.tier}">${rep.grade}</span>
+    `;
+    return row;
+  }
+
+  function renderNoCommentReps() {
+    noCommentRepsListEl.innerHTML = '';
+    const noComment = submittedReps.filter(r => !r.comment || !r.comment.trim());
+    const visible = noCommentRepsExpanded ? noComment : noComment.slice(0, VISIBLE_LIMIT);
+    visible.forEach(rep => noCommentRepsListEl.appendChild(buildNoCommentRepRow(rep)));
+    if (noComment.length > VISIBLE_LIMIT) {
+      noCommentRepsSeeAllWrapEl.style.display = 'block';
+      noCommentRepsSeeAllBtnEl.textContent = noCommentRepsExpanded ? '▴ Show Less' : '▾ See All Reps';
+    } else {
+      noCommentRepsSeeAllWrapEl.style.display = 'none';
+    }
+  }
+
+  pilotRepsToggleEl.addEventListener('click', () => {
+    if (pilotRepsToggleEl.classList.contains('disabled')) return;
+    noCommentRepsOpen = !noCommentRepsOpen;
+    noCommentRepsPanelEl.style.display = noCommentRepsOpen ? 'block' : 'none';
+    localStorage.setItem(NO_COMMENT_OPEN_KEY, noCommentRepsOpen);
+    if (noCommentRepsOpen) renderNoCommentReps();
+  });
+
+  noCommentRepsSeeAllBtnEl.addEventListener('click', () => {
+    noCommentRepsExpanded = !noCommentRepsExpanded;
+    renderNoCommentReps();
+  });
+
   function recalcAndRender() {
     repsCountEl.textContent    = submittedReps.length;
     commentsCountEl.textContent = submittedReps.filter(r => r.comment && r.comment.trim()).length;
@@ -1222,6 +1347,8 @@
       gradeCircleLetterEl.className = 'grade-circle-letter ' + grade.cls;
     }
     renderComments();
+    if (noCommentRepsOpen) renderNoCommentReps();
+    updatePilotRepsToggleState();
   }
 
   // ── LOAD OWN PILOT DATA FROM ESI + SUPABASE ──────────────────────────────
@@ -1295,6 +1422,10 @@
           date:     r.date
         }));
         renderComments();
+        if (noCommentRepsOpen) renderNoCommentReps();
+        updatePilotRepsToggleState();
+      } else {
+        pilotRepsToggleEl.classList.add('disabled');
       }
     } catch (e) {
       console.warn('Reps load failed:', e);

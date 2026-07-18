@@ -58,12 +58,17 @@ exports.handler = async (event) => {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing id' }) };
     }
 
+    const targetType = event.queryStringParameters?.type || 'pilot';
+    if (!['pilot', 'corporation', 'alliance'].includes(targetType)) {
+      return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid type' }) };
+    }
+
     const { data: reps, error } = await supabase
       .from('reps')
       .select('id, grade, grade_index, system_type, comment, created_at')
       .eq('reviewer_id', session.characterId)
       .eq('target_id', String(targetId))
-      .eq('target_type', 'pilot')
+      .eq('target_type', targetType)
       .order('created_at', { ascending: false });
 
     if (error) throw new Error(error.message);
