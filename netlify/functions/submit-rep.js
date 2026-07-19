@@ -35,6 +35,18 @@ exports.handler = async (event) => {
     return { statusCode: 401, body: JSON.stringify({ error: 'Not logged in' }) };
   }
 
+  // 1b. Check ban status — banned characters can still log in and browse,
+  // they're just blocked from submitting new reps.
+  const { data: pilotRecord } = await supabase
+    .from('pilots')
+    .select('banned')
+    .eq('character_id', session.characterId)
+    .maybeSingle();
+
+  if (pilotRecord && pilotRecord.banned) {
+    return { statusCode: 403, body: JSON.stringify({ error: 'This character is no longer able to submit reps on PilotRep.' }) };
+  }
+
   // 2. Parse body
   let body;
   try {

@@ -459,12 +459,55 @@
     }
     .footer-grid a:hover { color: var(--cyan); }
 
+    /* ── SITE STATS ── */
+    .stats-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 960px;
+      margin: 36px auto 0;
+      padding: 0 24px;
+    }
+    .stats-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 60%;
+      background: var(--cyan-dim);
+      border: 1.5px solid var(--cyan);
+      border-radius: 5px;
+      padding: 11px 18px;
+    }
+    .stats-section .stats-btn:nth-child(1) { justify-self: end; }
+    .stats-section .stats-btn:nth-child(2) { justify-self: start; }
+    .stats-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--white);
+    }
+    .stats-divider {
+      color: rgba(232,238,245,0.5);
+      font-size: 12px;
+    }
+    .stats-num {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--white);
+      font-variant-numeric: tabular-nums;
+    }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 640px) {
       .lists-section {
         grid-template-columns: 1fr;
       }
       .hero { padding: 60px 16px 40px; }
+      .stats-section { grid-template-columns: 1fr; }
+      .stats-section .stats-btn { justify-self: center; width: 80%; max-width: 320px; }
     }
     .search-drop-item {
       display: flex;
@@ -597,6 +640,20 @@
       </div>
     </div>
 
+  </section>
+
+  <!-- SITE STATS -->
+  <section class="stats-section" id="statsSection">
+    <div class="stats-btn">
+      <span class="stats-label">Total Reps</span>
+      <span class="stats-divider">|</span>
+      <span class="stats-num" id="statTotalReps">—</span>
+    </div>
+    <div class="stats-btn">
+      <span class="stats-label">Total Comments</span>
+      <span class="stats-divider">|</span>
+      <span class="stats-num" id="statTotalComments">—</span>
+    </div>
   </section>
 
   <!-- FOOTER -->
@@ -795,7 +852,7 @@
     const container = document.getElementById(containerId);
     if (!container) return;
     if (!entries || entries.length === 0) {
-      container.innerHTML = `<div class="pilot-list-empty">No reps yet. Be the first to leave one.</div>`;
+      container.innerHTML = `<div class="pilot-list-empty">NO REPS YET</div>`;
       return;
     }
     container.innerHTML = entries.map(e => buildPilotRow(e, type)).join('');
@@ -835,6 +892,34 @@
 
   loadPanel('recentlyRated', 'recentlyRatedRows', 'recentlyReviewed', 'pilot');
   loadPanel('mostReviewed', 'mostReviewedRows', 'mostReviewed', 'pilot');
+
+  // ── SITE STATS (Total Reps / Total Comments) ──────────────────────────────
+  function animateCount(el, target, duration = 1200) {
+    const start = performance.now();
+    function tick(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      el.textContent = Math.round(target * eased).toLocaleString();
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  async function loadSiteStats() {
+    try {
+      const res = await fetch('/.netlify/functions/get-site-stats');
+      const data = await res.json();
+      const repsEl = document.getElementById('statTotalReps');
+      const commentsEl = document.getElementById('statTotalComments');
+      if (repsEl && typeof data.totalReps === 'number') animateCount(repsEl, data.totalReps);
+      if (commentsEl && typeof data.totalComments === 'number') animateCount(commentsEl, data.totalComments);
+    } catch (e) {
+      console.warn('Site stats fetch failed (non-fatal):', e);
+    }
+  }
+
+  loadSiteStats();
+
 </script>
 </body>
 </html>

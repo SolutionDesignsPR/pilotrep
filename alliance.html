@@ -111,6 +111,19 @@
       transition: color 0.15s;
     }
     .nav-logged-in a:hover { color: var(--white); }
+    .nav-login-prompt {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      text-decoration: none;
+      padding-left: 5.6px;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .nav-login-prompt:hover { color: var(--white); }
     .nav-links {
       display: inline-flex;
       gap: 0;
@@ -289,6 +302,11 @@
       border: 1px solid var(--border);
       border-radius: 6px;
       padding: 32px 28px;
+    }
+
+    /* Left Reps panel: darker than standard panels so it stands out */
+    #leftRepsPanel {
+      background: #000000;
     }
 
     /* RepScore panel */
@@ -839,6 +857,7 @@
     <div class="nav-left">
       <a href="index.html" class="nav-logo"><img src="/assets/images/PilotRep_Logo_NavBar.svg" alt="Pilot Rep" style="height:38px;width:auto;display:block;" /></a>
       <div class="nav-logged-in" id="navLoggedInAs">LOGGED IN AS &nbsp;<a href="pilot.html" id="navLoggedInLink">—</a></div>
+      <a href="#" class="nav-login-prompt" id="navLoginPrompt" onclick="event.preventDefault(); window.location.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname+window.location.search);">Log In With EVE Online</a>
     </div>
 
     <nav class="nav-links">
@@ -1065,6 +1084,8 @@
           navLoggedInLink.href = `my-pilotrep.html`;
           navLoggedIn.style.display = 'block';
         }
+        const navLoginPrompt = document.getElementById('navLoginPrompt');
+        if (navLoginPrompt) navLoginPrompt.style.display = 'none';
         // Logged in: hide the EVE login button, it's no longer needed
         document.getElementById('loginPrompt').classList.add('hide');
         // Load any reps this session's character has already left on this alliance
@@ -1074,6 +1095,10 @@
     } catch (e) {
       console.warn('Session check failed:', e);
     }
+    // Submitting-as / Remain Anonymous row: visible whenever logged in
+    const anonRowEl = document.getElementById('anonRow');
+    if (anonRowEl) anonRowEl.style.display = isLoggedIn() ? '' : 'none';
+    // Enable submit now that we know the session state
     document.getElementById('submitBtn').disabled = false;
   }
 
@@ -1228,7 +1253,10 @@
           : escapeHtml(rep.author))
       : 'Anonymous';
     row.innerHTML = `
-      <span>${nameLabel}</span>
+      <div>
+        <div class="comment-meta">${rep.date || 'Just now'}</div>
+        <span>${nameLabel}</span>
+      </div>
       <span class="no-comment-rep-badge ${rep.tier}">${rep.grade}</span>
     `;
     return row;
@@ -1374,7 +1402,6 @@
     if (words.length > 5) {
       commentInput.value = words.slice(0, 5).join(' ');
     }
-    anonRow.style.display = (isLoggedIn() && commentInput.value.trim().length > 0) ? '' : 'none';
   });
 
   // Anon toggle
