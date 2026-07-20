@@ -1025,6 +1025,7 @@
 
       <div class="stats-row">
         <span class="stat-label-inline"><span class="stat-label-link" id="pilotRepsToggle">Pilot Reps</span><span class="stat-count-inline" id="repsCount">0</span></span>
+        <span class="stat-label-inline">Corp / Alliance Reps<span class="stat-count-inline" id="corpAllianceRepsCount">0</span></span>
       </div>
 
       <div class="no-comment-reps-panel" id="noCommentRepsPanel" style="display:none;">
@@ -1195,6 +1196,7 @@
   const VISIBLE_LIMIT = 10;
 
   const repsCountEl      = document.getElementById('repsCount');
+  const corpAllianceRepsCountEl = document.getElementById('corpAllianceRepsCount');
   const commentsCountEl  = document.getElementById('commentsCount');
   const gradeCircleLetterEl = document.getElementById('gradeCircleLetter');
   const commentsListEl   = document.getElementById('commentsList');
@@ -1300,7 +1302,10 @@
           : escapeHtml(rep.author))
       : 'Anonymous';
     row.innerHTML = `
-      <span>${nameLabel}</span>
+      <div>
+        <div class="comment-meta">${rep.date || 'Just now'}</div>
+        <span>${nameLabel}</span>
+      </div>
       <span class="no-comment-rep-badge ${rep.tier}">${rep.grade}</span>
     `;
     return row;
@@ -1404,7 +1409,8 @@
       const data = await repsRes.json();
       if (data.repCount > 0) {
         // Update stats
-        repsCountEl.textContent = data.repCount;
+        repsCountEl.textContent = data.pilotRepsCount;
+        corpAllianceRepsCountEl.textContent = data.corpAllianceRepsCount;
         commentsCountEl.textContent = data.commentCount;
         // Update grade circle
         gradeCircleLetterEl.innerHTML = data.repScoreHtml || '–';
@@ -1419,6 +1425,7 @@
           comment:  r.comment,
           author:   r.author,
           reviewerId: r.reviewerId,
+          isCorpAlliance: r.isCorpAlliance,
           date:     r.date
         }));
         renderComments();

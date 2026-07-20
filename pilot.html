@@ -977,13 +977,20 @@
 
       <div class="stats-row">
         <span class="stat-label-inline"><span class="stat-label-link" id="pilotRepsToggle">Pilot Reps</span><span class="stat-count-inline" id="pilotRepsCount">0</span></span>
-        <span class="stat-label-inline">Corp / Alliance Reps<span class="stat-count-inline" id="corpAllianceRepsCount">0</span></span>
+        <span class="stat-label-inline"><span class="stat-label-link" id="corpAllianceRepsToggle">Corp / Alliance Reps</span><span class="stat-count-inline" id="corpAllianceRepsCount">0</span></span>
       </div>
 
       <div class="no-comment-reps-panel" id="noCommentRepsPanel" style="display:none;">
         <div class="no-comment-reps-list" id="noCommentRepsList"></div>
         <div class="see-all-wrap" id="noCommentRepsSeeAllWrap" style="display:none;">
           <button class="see-all-btn" id="noCommentRepsSeeAllBtn">▾ See All Reps</button>
+        </div>
+      </div>
+
+      <div class="no-comment-reps-panel" id="corpAllianceRepsPanel" style="display:none;">
+        <div class="no-comment-reps-list" id="corpAllianceRepsList"></div>
+        <div class="see-all-wrap" id="corpAllianceRepsSeeAllWrap" style="display:none;">
+          <button class="see-all-btn" id="corpAllianceRepsSeeAllBtn">▾ See All Reps</button>
         </div>
       </div>
 
@@ -1302,7 +1309,7 @@
   let noCommentStateInitialized = false;
 
   function getNoCommentCount() {
-    return submittedReps.filter(r => !r.comment || !r.comment.trim()).length;
+    return submittedReps.filter(r => !r.isCorpAlliance && (!r.comment || !r.comment.trim())).length;
   }
 
   function updatePilotRepsToggleState() {
@@ -1321,6 +1328,42 @@
           noCommentRepsOpen = true;
           noCommentRepsPanelEl.style.display = 'block';
           renderNoCommentReps();
+        }
+      }
+    }
+  }
+
+  let corpAllianceRepsExpanded = false;
+  let corpAllianceRepsOpen = false;
+  const corpAllianceRepsToggleEl     = document.getElementById('corpAllianceRepsToggle');
+  const corpAllianceRepsPanelEl      = document.getElementById('corpAllianceRepsPanel');
+  const corpAllianceRepsListEl       = document.getElementById('corpAllianceRepsList');
+  const corpAllianceRepsSeeAllWrapEl = document.getElementById('corpAllianceRepsSeeAllWrap');
+  const corpAllianceRepsSeeAllBtnEl  = document.getElementById('corpAllianceRepsSeeAllBtn');
+
+  const CORP_ALLIANCE_OPEN_KEY = 'corpAllianceRepsOpen';
+  let corpAllianceStateInitialized = false;
+
+  function getCorpAllianceCount() {
+    return submittedReps.filter(r => r.isCorpAlliance).length;
+  }
+
+  function updateCorpAllianceRepsToggleState() {
+    const count = getCorpAllianceCount();
+    if (count === 0) {
+      corpAllianceRepsToggleEl.classList.add('disabled');
+      if (corpAllianceRepsOpen) {
+        corpAllianceRepsOpen = false;
+        corpAllianceRepsPanelEl.style.display = 'none';
+      }
+    } else {
+      corpAllianceRepsToggleEl.classList.remove('disabled');
+      if (!corpAllianceStateInitialized) {
+        corpAllianceStateInitialized = true;
+        if (localStorage.getItem(CORP_ALLIANCE_OPEN_KEY) === 'true') {
+          corpAllianceRepsOpen = true;
+          corpAllianceRepsPanelEl.style.display = 'block';
+          renderCorpAllianceReps();
         }
       }
     }
@@ -1399,7 +1442,7 @@
 
   function renderNoCommentReps() {
     noCommentRepsListEl.innerHTML = '';
-    const noComment = submittedReps.filter(r => !r.comment || !r.comment.trim());
+    const noComment = submittedReps.filter(r => !r.isCorpAlliance && (!r.comment || !r.comment.trim()));
     const visible = noCommentRepsExpanded ? noComment : noComment.slice(0, VISIBLE_LIMIT);
     visible.forEach(rep => noCommentRepsListEl.appendChild(buildNoCommentRepRow(rep)));
     if (noComment.length > VISIBLE_LIMIT) {
@@ -1421,6 +1464,51 @@
   noCommentRepsSeeAllBtnEl.addEventListener('click', () => {
     noCommentRepsExpanded = !noCommentRepsExpanded;
     renderNoCommentReps();
+  });
+
+  // ── CORP / ALLIANCE REPS PANEL (all corp/alliance-mate reps, with or without a comment) ──
+  function buildCorpAllianceRepRow(rep) {
+    const row = document.createElement('div');
+    row.className = 'no-comment-rep-row';
+    const nameLabel = rep.author
+      ? (rep.reviewerId
+          ? `<a class="submitter-link" href="/pilot.html?id=${rep.reviewerId}">${escapeHtml(rep.author)}</a>`
+          : escapeHtml(rep.author))
+      : 'Anonymous';
+    row.innerHTML = `
+      <div>
+        <div class="comment-meta">${rep.date || 'Just now'}</div>
+        <span>${nameLabel}</span>
+      </div>
+      <span class="no-comment-rep-badge ${rep.tier}">${rep.grade}</span>
+    `;
+    return row;
+  }
+
+  function renderCorpAllianceReps() {
+    corpAllianceRepsListEl.innerHTML = '';
+    const corpAlliance = submittedReps.filter(r => r.isCorpAlliance);
+    const visible = corpAllianceRepsExpanded ? corpAlliance : corpAlliance.slice(0, VISIBLE_LIMIT);
+    visible.forEach(rep => corpAllianceRepsListEl.appendChild(buildCorpAllianceRepRow(rep)));
+    if (corpAlliance.length > VISIBLE_LIMIT) {
+      corpAllianceRepsSeeAllWrapEl.style.display = 'block';
+      corpAllianceRepsSeeAllBtnEl.textContent = corpAllianceRepsExpanded ? '▴ Show Less' : '▾ See All Reps';
+    } else {
+      corpAllianceRepsSeeAllWrapEl.style.display = 'none';
+    }
+  }
+
+  corpAllianceRepsToggleEl.addEventListener('click', () => {
+    if (corpAllianceRepsToggleEl.classList.contains('disabled')) return;
+    corpAllianceRepsOpen = !corpAllianceRepsOpen;
+    corpAllianceRepsPanelEl.style.display = corpAllianceRepsOpen ? 'block' : 'none';
+    localStorage.setItem(CORP_ALLIANCE_OPEN_KEY, corpAllianceRepsOpen);
+    if (corpAllianceRepsOpen) renderCorpAllianceReps();
+  });
+
+  corpAllianceRepsSeeAllBtnEl.addEventListener('click', () => {
+    corpAllianceRepsExpanded = !corpAllianceRepsExpanded;
+    renderCorpAllianceReps();
   });
 
   // ── LEFT REPS PANEL (reps this session's character has left on this pilot) ──
@@ -1498,6 +1586,8 @@
     renderComments();
     if (noCommentRepsOpen) renderNoCommentReps();
     updatePilotRepsToggleState();
+    if (corpAllianceRepsOpen) renderCorpAllianceReps();
+    updateCorpAllianceRepsToggleState();
   }
 
   const submitBtn   = document.getElementById('submitBtn');
@@ -1666,8 +1756,11 @@
         renderComments();
         if (noCommentRepsOpen) renderNoCommentReps();
         updatePilotRepsToggleState();
+        if (corpAllianceRepsOpen) renderCorpAllianceReps();
+        updateCorpAllianceRepsToggleState();
       } else {
         pilotRepsToggleEl.classList.add('disabled');
+        corpAllianceRepsToggleEl.classList.add('disabled');
       }
     } catch (e) {
       console.warn('Reps load failed:', e);
