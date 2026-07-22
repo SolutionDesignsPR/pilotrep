@@ -379,10 +379,36 @@
       align-items: center;
       gap: 6px;
       text-align: center;
-      padding-bottom: 24px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 20px;
     }
+    .stats-row .total-reps-line { margin-top: 12px; }
+    .stat-total-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .stat-count-total { color: var(--white); }
+    .collapse-all-row {
+      display: flex;
+      justify-content: flex-end;
+      padding-bottom: 20px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .collapse-all-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .collapse-all-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
     .stat-num { font-size: 30px; font-weight: 700; color: var(--cyan); }
     .stat-label {
       font-size: 12px;
@@ -421,61 +447,42 @@
       padding-bottom: 20px;
       border-bottom: 1px solid var(--border);
     }
-    .no-comment-reps-header {
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-      text-transform: uppercase;
-      padding: 8px 4px 6px;
-    }
-    #noCommentRepsPanel { border-bottom: 2px solid rgba(100,180,255,0.25); }
-    .no-comment-reps-list { border-radius: 4px; overflow: hidden; }
-    .no-comment-rep-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 10px 4px;
-      border-bottom: 1px solid var(--border);
-    }
-    .no-comment-rep-row:last-child { border-bottom: none; }
-    .no-comment-rep-badge {
-      width: 28px;
-      height: 28px;
-      flex-shrink: 0;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--white);
-    }
-    .no-comment-rep-badge .modifier { font-size: 0.6em; font-weight: 700; vertical-align: super; line-height: 0; }
-    .no-comment-rep-badge.neg     { background: var(--grade-d); }
-    .no-comment-rep-badge.neutral { background: var(--grade-b); }
-    .no-comment-rep-badge.pos     { background: var(--grade-a); }
-
-    .comments-headrow {
+    .reps-panel-headrow {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 14px;
     }
-    .comments-headrow span {
+    .reps-panel-headrow .reps-panel-label {
       font-size: 14px;
       font-weight: 600;
       letter-spacing: 0.12em;
       color: var(--white);
       text-transform: uppercase;
     }
-    .comments-headrow .comments-count-inline {
+    .reps-panel-headrow .reps-panel-count {
       font-size: 16px;
       font-weight: 700;
       letter-spacing: 0;
       color: var(--cyan);
       text-transform: none;
       margin-left: 10px;
+    }
+    #noCommentRepsPanel { border-bottom: 2px solid rgba(100,180,255,0.25); }
+    .no-comment-reps-list { border-radius: 4px; overflow: hidden; }
+    .rep-row-meta {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--white);
+    }
+    .rep-row-meta .rep-row-bullet { opacity: 0.5; margin: 0 2px; font-weight: 400; }
+    .rep-row-meta .rep-row-date {
+      font-size: 11px;
+      font-weight: 400;
+      opacity: 0.75;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-left: 4px;
     }
     .share-btn {
       background: transparent;
@@ -539,13 +546,7 @@
       border-radius: 4px;
       overflow: hidden;
     }
-    .comments-empty {
-      text-align: center;
-      font-size: 13px;
-      color: var(--muted);
-      letter-spacing: 0.04em;
-      padding: 28px 16px;
-    }
+    .share-btn.small { font-size: 10px; padding: 5px 10px; }
     .comment-row {
       display: flex;
       align-items: center;
@@ -618,6 +619,7 @@
       text-transform: uppercase;
       margin-bottom: 18px;
     }
+    .panel-title.white { color: var(--white); }
     .panel-divider { border-bottom: 1px solid var(--border); margin-bottom: 24px; }
 
     .section-divider {
@@ -936,6 +938,14 @@
     <div class="pilot-header-info">
       <div class="pilot-header-name" id="pilotName">—</div>
       <div class="pilot-header-details" id="pilotDetails"></div>
+      <button class="share-btn small" id="shareBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+        </svg>
+        Share
+      </button>
     </div>
   </section>
 
@@ -953,10 +963,15 @@
       <div class="stats-row">
         <span class="stat-label-inline"><span class="stat-label-link" id="pilotRepsToggle">Pilot Reps</span><span class="stat-count-inline" id="pilotRepsCount">0</span></span>
         <span class="stat-label-inline"><span class="stat-label-link" id="corpAllianceRepsToggle">Corp / Alliance Reps</span><span class="stat-count-inline" id="corpAllianceRepsCount">0</span></span>
+        <span class="stat-label-inline total-reps-line"><span class="stat-total-label">Total Reps</span><span class="stat-count-inline stat-count-total" id="totalRepsCount">0</span></span>
+      </div>
+
+      <div class="collapse-all-row">
+        <button class="collapse-all-btn" id="collapseAllBtn">Collapse All</button>
       </div>
 
       <div class="no-comment-reps-panel" id="noCommentRepsPanel" style="display:none;">
-        <div class="no-comment-reps-header">Pilot Reps</div>
+        <div class="reps-panel-headrow"><span class="reps-panel-label">Pilot Reps</span><span class="reps-panel-count" id="pilotRepsPanelCount">0</span></div>
         <div class="no-comment-reps-list" id="noCommentRepsList"></div>
         <div class="see-all-wrap" id="noCommentRepsSeeAllWrap" style="display:none;">
           <button class="see-all-btn" id="noCommentRepsSeeAllBtn">▾ See All Reps</button>
@@ -964,31 +979,11 @@
       </div>
 
       <div class="no-comment-reps-panel" id="corpAllianceRepsPanel" style="display:none;">
-        <div class="no-comment-reps-header">Corp / Alliance Reps</div>
+        <div class="reps-panel-headrow"><span class="reps-panel-label">Corp / Alliance Reps</span><span class="reps-panel-count" id="corpAllianceRepsPanelCount">0</span></div>
         <div class="no-comment-reps-list" id="corpAllianceRepsList"></div>
         <div class="see-all-wrap" id="corpAllianceRepsSeeAllWrap" style="display:none;">
           <button class="see-all-btn" id="corpAllianceRepsSeeAllBtn">▾ See All Reps</button>
         </div>
-      </div>
-
-      <div class="comments-headrow">
-        <span>Comments<span class="comments-count-inline" id="commentsCount">0</span></span>
-        <button class="share-btn" id="shareBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
-            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-          </svg>
-          Share
-        </button>
-      </div>
-
-      <div class="comments-list" id="commentsList">
-        <div class="comments-empty" id="commentsEmpty">No reps yet. Be the first to leave one.</div>
-      </div>
-
-      <div class="see-all-wrap" id="seeAllWrap" style="display:none;">
-        <button class="see-all-btn" id="seeAllBtn">▾ See All Comments</button>
       </div>
     </div>
 
@@ -997,7 +992,7 @@
 
     <!-- Left Reps Panel (only shown if logged-in user has repped this pilot) -->
     <div class="panel" id="leftRepsPanel" style="display:none;">
-      <h2 class="panel-title">Left Reps</h2>
+      <h2 class="panel-title white">Left Reps</h2>
       <div class="panel-divider"></div>
       <div class="comments-list" id="leftRepsList"></div>
       <div class="see-all-wrap" id="leftRepsSeeAllWrap" style="display:none;">
@@ -1031,9 +1026,9 @@
 
       <div class="subsection-label">System Encountered In</div>
       <div class="system-grid">
-        <button class="system-btn">Nullsec</button>
-        <button class="system-btn">Lowsec</button>
         <button class="system-btn">Highsec</button>
+        <button class="system-btn">Lowsec</button>
+        <button class="system-btn">Nullsec</button>
         <button class="system-btn">Wormhole</button>
         <button class="system-btn">Pochven</button>
         <button class="system-btn">N/A</button>
@@ -1262,17 +1257,12 @@
   let submittedReps = [];
   let targetCorpId = null;
   let targetAllianceId = null;
-  let commentsExpanded = false;
   const VISIBLE_LIMIT = 5;
 
   const pilotRepsCountEl        = document.getElementById('pilotRepsCount');
   const corpAllianceRepsCountEl = document.getElementById('corpAllianceRepsCount');
-  const commentsCountEl  = document.getElementById('commentsCount');
+  const totalRepsCountEl = document.getElementById('totalRepsCount');
   const gradeCircleLetterEl = document.getElementById('gradeCircleLetter');
-  const commentsListEl   = document.getElementById('commentsList');
-  const commentsEmptyEl  = document.getElementById('commentsEmpty');
-  const seeAllWrapEl     = document.getElementById('seeAllWrap');
-  const seeAllBtnEl      = document.getElementById('seeAllBtn');
 
   let noCommentRepsExpanded = false;
   let noCommentRepsOpen = false;
@@ -1281,16 +1271,17 @@
   const noCommentRepsListEl      = document.getElementById('noCommentRepsList');
   const noCommentRepsSeeAllWrapEl = document.getElementById('noCommentRepsSeeAllWrap');
   const noCommentRepsSeeAllBtnEl  = document.getElementById('noCommentRepsSeeAllBtn');
+  const pilotRepsPanelCountEl     = document.getElementById('pilotRepsPanelCount');
 
   const NO_COMMENT_OPEN_KEY = 'pilotRepsOpen';
   let noCommentStateInitialized = false;
 
-  function getNoCommentCount() {
-    return submittedReps.filter(r => !r.isCorpAlliance && (!r.comment || !r.comment.trim())).length;
+  function getPilotRepsTotalCount() {
+    return submittedReps.filter(r => !r.isCorpAlliance).length;
   }
 
   function updatePilotRepsToggleState() {
-    const count = getNoCommentCount();
+    const count = getPilotRepsTotalCount();
     if (count === 0) {
       pilotRepsToggleEl.classList.add('disabled');
       if (noCommentRepsOpen) {
@@ -1301,7 +1292,7 @@
       pilotRepsToggleEl.classList.remove('disabled');
       if (!noCommentStateInitialized) {
         noCommentStateInitialized = true;
-        if (localStorage.getItem(NO_COMMENT_OPEN_KEY) === 'true') {
+        if (localStorage.getItem(NO_COMMENT_OPEN_KEY) !== 'false') {
           noCommentRepsOpen = true;
           noCommentRepsPanelEl.style.display = 'block';
           renderNoCommentReps();
@@ -1317,6 +1308,7 @@
   const corpAllianceRepsListEl       = document.getElementById('corpAllianceRepsList');
   const corpAllianceRepsSeeAllWrapEl = document.getElementById('corpAllianceRepsSeeAllWrap');
   const corpAllianceRepsSeeAllBtnEl  = document.getElementById('corpAllianceRepsSeeAllBtn');
+  const corpAllianceRepsPanelCountEl = document.getElementById('corpAllianceRepsPanelCount');
 
   const CORP_ALLIANCE_OPEN_KEY = 'corpAllianceRepsOpen';
   let corpAllianceStateInitialized = false;
@@ -1337,7 +1329,7 @@
       corpAllianceRepsToggleEl.classList.remove('disabled');
       if (!corpAllianceStateInitialized) {
         corpAllianceStateInitialized = true;
-        if (localStorage.getItem(CORP_ALLIANCE_OPEN_KEY) === 'true') {
+        if (localStorage.getItem(CORP_ALLIANCE_OPEN_KEY) !== 'false') {
           corpAllianceRepsOpen = true;
           corpAllianceRepsPanelEl.style.display = 'block';
           renderCorpAllianceReps();
@@ -1356,7 +1348,14 @@
       .replace(/'/g, '&#39;');
   }
 
-  function buildCommentRow(rep) {
+  function gradeToHtml(grade) {
+    if (!grade) return '';
+    const m = String(grade).match(/^([A-F])([+\-−]?)$/);
+    if (!m) return escapeHtml(grade);
+    return m[2] ? `${m[1]}<span class="modifier">${m[2]}</span>` : m[1];
+  }
+
+  function buildRepRow(rep) {
     const row = document.createElement('div');
     row.className = 'comment-row ' + rep.tier;
     const dateLabel = rep.date || 'Just now';
@@ -1367,62 +1366,24 @@
       : 'Anonymous';
     row.innerHTML = `
       <div>
-        <div class="comment-meta">${dateLabel} · ${authorLabel}</div>
+        <div class="rep-row-meta">${authorLabel}<span class="rep-row-bullet">&bull;</span><span class="rep-row-date">${dateLabel}</span></div>
         ${rep.comment && rep.comment.trim() ? `<div class="comment-text">${escapeHtml(rep.comment)}</div>` : ''}
       </div>
-      <span class="comment-system">${rep.system}</span>
-    `;
-    return row;
-  }
-
-  function renderComments() {
-    commentsListEl.innerHTML = '';
-    const commented = submittedReps.filter(r => r.comment && r.comment.trim());
-    if (commented.length === 0) {
-      commentsListEl.appendChild(commentsEmptyEl);
-      commentsEmptyEl.style.display = 'block';
-      seeAllWrapEl.style.display = 'none';
-      return;
-    }
-    const visible = commentsExpanded ? commented : commented.slice(0, VISIBLE_LIMIT);
-    visible.forEach(rep => commentsListEl.appendChild(buildCommentRow(rep)));
-    if (commented.length > VISIBLE_LIMIT) {
-      seeAllWrapEl.style.display = 'block';
-      seeAllBtnEl.textContent = commentsExpanded ? '▴ Show Less' : '▾ See All Comments';
-    } else {
-      seeAllWrapEl.style.display = 'none';
-    }
-  }
-
-  seeAllBtnEl.addEventListener('click', () => {
-    commentsExpanded = !commentsExpanded;
-    renderComments();
-  });
-
-  function buildNoCommentRepRow(rep) {
-    const row = document.createElement('div');
-    row.className = 'no-comment-rep-row';
-    const nameLabel = rep.author
-      ? (rep.reviewerId
-          ? `<a class="submitter-link" href="/pilot.html?id=${rep.reviewerId}">${escapeHtml(rep.author)}</a>`
-          : escapeHtml(rep.author))
-      : 'Anonymous';
-    row.innerHTML = `
-      <div>
-        <div class="comment-meta">${rep.date || 'Just now'}</div>
-        <span>${nameLabel}</span>
+      <div class="rep-row-right">
+        <span class="comment-system">${rep.system}</span>
+        <span class="rep-grade-badge ${rep.tier}">${gradeToHtml(rep.grade)}</span>
       </div>
-      <span class="no-comment-rep-badge ${rep.tier}">${rep.grade}</span>
     `;
     return row;
   }
 
   function renderNoCommentReps() {
     noCommentRepsListEl.innerHTML = '';
-    const noComment = submittedReps.filter(r => !r.isCorpAlliance && (!r.comment || !r.comment.trim()));
-    const visible = noCommentRepsExpanded ? noComment : noComment.slice(0, VISIBLE_LIMIT);
-    visible.forEach(rep => noCommentRepsListEl.appendChild(buildNoCommentRepRow(rep)));
-    if (noComment.length > VISIBLE_LIMIT) {
+    const pilotReps = submittedReps.filter(r => !r.isCorpAlliance);
+    pilotRepsPanelCountEl.textContent = pilotReps.length;
+    const visible = noCommentRepsExpanded ? pilotReps : pilotReps.slice(0, VISIBLE_LIMIT);
+    visible.forEach(rep => noCommentRepsListEl.appendChild(buildRepRow(rep)));
+    if (pilotReps.length > VISIBLE_LIMIT) {
       noCommentRepsSeeAllWrapEl.style.display = 'block';
       noCommentRepsSeeAllBtnEl.textContent = noCommentRepsExpanded ? '▴ Show Less' : '▾ See All Reps';
     } else {
@@ -1444,29 +1405,12 @@
   });
 
   // ── CORP / ALLIANCE REPS PANEL (all corp/alliance-mate reps, with or without a comment) ──
-  function buildCorpAllianceRepRow(rep) {
-    const row = document.createElement('div');
-    row.className = 'no-comment-rep-row';
-    const nameLabel = rep.author
-      ? (rep.reviewerId
-          ? `<a class="submitter-link" href="/pilot.html?id=${rep.reviewerId}">${escapeHtml(rep.author)}</a>`
-          : escapeHtml(rep.author))
-      : 'Anonymous';
-    row.innerHTML = `
-      <div>
-        <div class="comment-meta">${rep.date || 'Just now'}</div>
-        <span>${nameLabel}</span>
-      </div>
-      <span class="no-comment-rep-badge ${rep.tier}">${rep.grade}</span>
-    `;
-    return row;
-  }
-
   function renderCorpAllianceReps() {
     corpAllianceRepsListEl.innerHTML = '';
     const corpAlliance = submittedReps.filter(r => r.isCorpAlliance);
+    corpAllianceRepsPanelCountEl.textContent = corpAlliance.length;
     const visible = corpAllianceRepsExpanded ? corpAlliance : corpAlliance.slice(0, VISIBLE_LIMIT);
-    visible.forEach(rep => corpAllianceRepsListEl.appendChild(buildCorpAllianceRepRow(rep)));
+    visible.forEach(rep => corpAllianceRepsListEl.appendChild(buildRepRow(rep)));
     if (corpAlliance.length > VISIBLE_LIMIT) {
       corpAllianceRepsSeeAllWrapEl.style.display = 'block';
       corpAllianceRepsSeeAllBtnEl.textContent = corpAllianceRepsExpanded ? '▴ Show Less' : '▾ See All Reps';
@@ -1486,6 +1430,21 @@
   corpAllianceRepsSeeAllBtnEl.addEventListener('click', () => {
     corpAllianceRepsExpanded = !corpAllianceRepsExpanded;
     renderCorpAllianceReps();
+  });
+
+  // ── COLLAPSE ALL BUTTON (closes both Pilot Reps and Corp/Alliance Reps panels) ──
+  const collapseAllBtnEl = document.getElementById('collapseAllBtn');
+  collapseAllBtnEl.addEventListener('click', () => {
+    if (noCommentRepsOpen) {
+      noCommentRepsOpen = false;
+      noCommentRepsPanelEl.style.display = 'none';
+      localStorage.setItem(NO_COMMENT_OPEN_KEY, 'false');
+    }
+    if (corpAllianceRepsOpen) {
+      corpAllianceRepsOpen = false;
+      corpAllianceRepsPanelEl.style.display = 'none';
+      localStorage.setItem(CORP_ALLIANCE_OPEN_KEY, 'false');
+    }
   });
 
   // ── LEFT REPS PANEL (reps this session's character has left on this pilot) ──
@@ -1546,9 +1505,11 @@
   }
 
   function recalcAndRender() {
-    pilotRepsCountEl.textContent        = submittedReps.filter(r => !r.isCorpAlliance).length;
-    corpAllianceRepsCountEl.textContent = submittedReps.filter(r => r.isCorpAlliance).length;
-    commentsCountEl.textContent = submittedReps.filter(r => r.comment && r.comment.trim()).length;
+    const pilotCount = submittedReps.filter(r => !r.isCorpAlliance).length;
+    const corpAllianceCount = submittedReps.filter(r => r.isCorpAlliance).length;
+    pilotRepsCountEl.textContent        = pilotCount;
+    corpAllianceRepsCountEl.textContent = corpAllianceCount;
+    totalRepsCountEl.textContent        = pilotCount + corpAllianceCount;
 
     if (submittedReps.length === 0) {
       gradeCircleLetterEl.textContent = '–';
@@ -1560,7 +1521,6 @@
       gradeCircleLetterEl.innerHTML = grade.html;
       gradeCircleLetterEl.className = 'grade-circle-letter ' + grade.cls;
     }
-    renderComments();
     if (noCommentRepsOpen) renderNoCommentReps();
     updatePilotRepsToggleState();
     if (corpAllianceRepsOpen) renderCorpAllianceReps();
@@ -1713,12 +1673,12 @@
         // Update stats
         pilotRepsCountEl.textContent        = data.pilotRepsCount;
         corpAllianceRepsCountEl.textContent = data.corpAllianceRepsCount;
-        commentsCountEl.textContent = data.commentCount;
+        totalRepsCountEl.textContent        = data.pilotRepsCount + data.corpAllianceRepsCount;
         // Update grade circle
         gradeCircleLetterEl.innerHTML = data.repScoreHtml || '–';
         const tierCls = data.repScoreTier === 'pos' ? 'grade-A' : data.repScoreTier === 'neg' ? 'grade-F' : 'grade-B';
         gradeCircleLetterEl.className = 'grade-circle-letter ' + tierCls;
-        // Load comments
+        // Load reps
         submittedReps = data.reps.map(r => ({
           grade:    r.grade,
           gradeNum: r.gradeIndex,
@@ -1730,7 +1690,6 @@
           isCorpAlliance: r.isCorpAlliance,
           date:     r.date
         }));
-        renderComments();
         if (noCommentRepsOpen) renderNoCommentReps();
         updatePilotRepsToggleState();
         if (corpAllianceRepsOpen) renderCorpAllianceReps();
