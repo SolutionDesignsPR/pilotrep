@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PilotRep — Coming Soon to New Eden</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="alternate icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #04080f;
+      --cyan:      #4fc3f7;
+      --cyan-dim:  #2a8bbf;
+      --white:     #e8eef5;
+      --muted:     #5a7490;
+      --border:    rgba(100,180,255,0.10);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: Helvetica, Arial, sans-serif;
+      font-weight: 400;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ── STARFIELD / NEBULA BACKDROP ── */
+    .starfield {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .starfield::before {
+      content: "";
+      position: absolute;
+      inset: -10%;
+      background:
+        radial-gradient(ellipse 900px 600px at 50% 38%, rgba(79,195,247,0.10), transparent 60%),
+        radial-gradient(ellipse 600px 500px at 60% 30%, rgba(232,135,26,0.06), transparent 65%),
+        radial-gradient(ellipse 700px 700px at 40% 45%, rgba(79,195,247,0.05), transparent 70%);
+    }
+
+    /* ── LAYOUT ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 24px;
+    }
+
+    .logo-wrap { margin-bottom: 20px; }
+    .logo-wrap img { height: auto; max-width: 100%; margin: 0 auto; }
+    .logo-desktop { display: block; width: clamp(312px, 55vw, 680px); }
+    .logo-mobile { display: none; width: clamp(200px, 65vw, 340px); }
+    @media (max-width: 640px) {
+      .logo-desktop { display: none; }
+      .logo-mobile { display: block; }
+    }
+
+    .tagline-wrap { margin-bottom: 26px; }
+    .tagline-wrap img { height: auto; max-width: 100%; margin: 0 auto; }
+    .tagline-desktop { display: block; width: clamp(260px, 42vw, 520px); }
+    .tagline-mobile { display: none; width: clamp(200px, 65vw, 320px); }
+    @media (max-width: 640px) {
+      .tagline-desktop { display: none; }
+      .tagline-mobile { display: block; }
+    }
+
+    .coming-soon {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      color: var(--white);
+      text-transform: uppercase;
+    }
+
+    .footer-copy {
+      position: absolute;
+      bottom: 32px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="starfield" aria-hidden="true">
+    <svg width="100%" height="100%" style="position:absolute; inset:0;">
+      <defs>
+        <pattern id="starPattern" width="220" height="220" patternUnits="userSpaceOnUse">
+          <circle cx="14" cy="22" r="1" fill="#e8eef5" opacity="0.7"/>
+          <circle cx="58" cy="90" r="0.8" fill="#e8eef5" opacity="0.5"/>
+          <circle cx="102" cy="14" r="1.2" fill="#e8eef5" opacity="0.8"/>
+          <circle cx="140" cy="60" r="0.7" fill="#e8eef5" opacity="0.4"/>
+          <circle cx="176" cy="130" r="1" fill="#e8eef5" opacity="0.6"/>
+          <circle cx="200" cy="40" r="0.8" fill="#e8eef5" opacity="0.5"/>
+          <circle cx="30" cy="150" r="0.9" fill="#e8eef5" opacity="0.55"/>
+          <circle cx="80" cy="180" r="1.1" fill="#e8eef5" opacity="0.7"/>
+          <circle cx="120" cy="200" r="0.7" fill="#e8eef5" opacity="0.4"/>
+          <circle cx="190" cy="190" r="1" fill="#e8eef5" opacity="0.6"/>
+          <circle cx="10" cy="100" r="0.6" fill="#e8eef5" opacity="0.35"/>
+          <circle cx="160" cy="100" r="0.9" fill="#e8eef5" opacity="0.5"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#starPattern)"/>
+    </svg>
+  </div>
+
+  <div class="page">
+    <div class="logo-wrap">
+      <img class="logo-desktop" src="assets/images/PilotRep_Logo_Main.svg" alt="Pilot Rep" />
+      <img class="logo-mobile" src="assets/images/PilotRep_Logo_Main.svg" alt="Pilot Rep" />
+    </div>
+
+    <div class="tagline-wrap">
+      <img class="tagline-desktop" src="assets/images/PR_Rep_Title.svg" alt="Reputation Precedes You" />
+      <img class="tagline-mobile" src="assets/images/PR_Rep_Title.svg" alt="Reputation Precedes You" />
+    </div>
+
+    <div class="coming-soon">Coming Soon to New Eden</div>
+  </div>
+
+  <div class="footer-copy">&copy; 2026 PilotRep. All rights reserved.</div>
+
+</body>
+</html>

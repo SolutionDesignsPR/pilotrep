@@ -324,6 +324,8 @@
     /* Left Reps panel: darker than standard panels so it stands out */
     #leftRepsPanel {
       background: #000000;
+      border: 1px solid rgba(255,255,255,0.25);
+      box-shadow: 0 0 12px rgba(255,255,255,0.06);
     }
 
     /* RepScore panel */
@@ -501,6 +503,7 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      align-self: flex-start;
     }
     .share-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
     .share-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
@@ -564,7 +567,7 @@
     .comment-row.neutral { background: var(--grade-b); }
 
     .comment-meta { font-size: 11px; opacity: 0.85; letter-spacing: 0.05em; text-transform: uppercase; }
-    .comment-text { font-size: 14px; font-weight: 600; text-transform: uppercase; margin-top: 2px; }
+    .comment-text { font-size: 14px; font-weight: 600; text-transform: uppercase; margin-top: 17px; }
     .comment-system {
       font-size: 11px;
       font-weight: 700;
@@ -1008,7 +1011,7 @@
 
     <!-- Leave A Rep Panel -->
     <div class="panel">
-      <div style="font-size:11px;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;text-align:center;margin-bottom:8px;"><a href="#" class="hint-link" onclick="event.preventDefault(); window.location.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname+window.location.search);">Login With EVE Online To</a></div>
+      <div id="submitRepLoginHint" style="font-size:11px;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;text-align:center;margin-bottom:8px;"><a href="#" class="hint-link" onclick="event.preventDefault(); window.location.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname+window.location.search);">Login With EVE Online To</a></div>
       <h2 class="panel-title">Submit A Rep</h2>
       <div class="panel-divider"></div>
 
@@ -1182,6 +1185,9 @@
         if (navLoginPrompt) navLoginPrompt.style.display = 'none';
         // Logged in: hide the EVE login button, it's no longer needed
         document.getElementById('loginPrompt').classList.add('hide');
+        // Logged in: hide the "Login With EVE Online To" hint above Submit A Rep
+        const submitRepLoginHint = document.getElementById('submitRepLoginHint');
+        if (submitRepLoginHint) submitRepLoginHint.style.display = 'none';
       }
     } catch (e) {
       console.warn('Session check failed:', e);
