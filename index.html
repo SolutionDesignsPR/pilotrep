@@ -442,7 +442,9 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      width: 60%;
+      width: fit-content;
+      max-width: 90%;
+      white-space: nowrap;
       background: var(--cyan-dim);
       border: 1.5px solid var(--cyan);
       border-radius: 5px;
@@ -476,7 +478,7 @@
       }
       .hero { padding: 60px 16px 40px; }
       .stats-section { grid-template-columns: 1fr; }
-      .stats-section .stats-btn { justify-self: center; width: 80%; max-width: 320px; }
+      .stats-section .stats-btn { justify-self: center; width: fit-content; max-width: 92%; }
     }
     .search-drop-item {
       display: flex;

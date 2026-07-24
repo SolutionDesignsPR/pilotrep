@@ -93,7 +93,6 @@
       letter-spacing: 0.12em;
       color: var(--muted);
       text-transform: uppercase;
-      padding-left: 5.6px;
     }
     .nav-logged-in a {
       color: var(--cyan);
@@ -109,7 +108,6 @@
       color: var(--cyan);
       text-transform: uppercase;
       text-decoration: none;
-      padding-left: 5.6px;
       cursor: pointer;
       transition: color 0.15s;
     }
@@ -409,6 +407,12 @@
       transition: border-color 0.15s, color 0.15s;
     }
     .collapse-all-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
+    .left-reps-top-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: -4px;
+      margin-bottom: 14px;
+    }
     .stat-num { font-size: 30px; font-weight: 700; color: var(--cyan); }
     .stat-label {
       font-size: 12px;
@@ -470,19 +474,18 @@
     }
     #noCommentRepsPanel { border-bottom: 2px solid rgba(100,180,255,0.25); }
     .no-comment-reps-list { border-radius: 4px; overflow: hidden; }
-    .rep-row-meta {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--white);
-    }
-    .rep-row-meta .rep-row-bullet { opacity: 0.5; margin: 0 2px; font-weight: 400; }
-    .rep-row-meta .rep-row-date {
+    .rep-row-date {
       font-size: 11px;
       font-weight: 400;
       opacity: 0.75;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      margin-left: 4px;
+      margin-bottom: 2px;
+    }
+    .rep-row-meta {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--white);
     }
     .share-btn {
       background: transparent;
@@ -900,7 +903,7 @@
   <!-- TOP NAV -->
   <header class="topnav">
     <div class="nav-left">
-      <a href="index.html" class="nav-logo"><img src="/assets/images/PilotRep_Logo_NavBar.svg" alt="Pilot Rep" style="height:38px;width:auto;display:block;" /></a>
+      <a href="index.html" class="nav-logo"><img src="assets/images/PilotRep_Logo_NavBar.svg" alt="Pilot Rep" style="height:38px;width:auto;display:block;" /></a>
       <div class="nav-logged-in" id="navLoggedInAs">LOGGED IN AS &nbsp;<a href="pilot.html" id="navLoggedInLink">—</a></div>
       <a href="#" class="nav-login-prompt" id="navLoginPrompt" onclick="event.preventDefault(); window.location.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname+window.location.search);">Log In With EVE Online</a>
     </div>
@@ -994,6 +997,9 @@
     <div class="panel" id="leftRepsPanel" style="display:none;">
       <h2 class="panel-title white">Left Reps</h2>
       <div class="panel-divider"></div>
+      <div class="left-reps-top-row" id="leftRepsTopRow" style="display:none;">
+        <button class="collapse-all-btn" id="leftRepsTopShowLessBtn">▴ Show Less</button>
+      </div>
       <div class="comments-list" id="leftRepsList"></div>
       <div class="see-all-wrap" id="leftRepsSeeAllWrap" style="display:none;">
         <button class="see-all-btn" id="leftRepsSeeAllBtn">▾ Show More</button>
@@ -1366,7 +1372,8 @@
       : 'Anonymous';
     row.innerHTML = `
       <div>
-        <div class="rep-row-meta">${authorLabel}<span class="rep-row-bullet">&bull;</span><span class="rep-row-date">${dateLabel}</span></div>
+        <div class="rep-row-date">${dateLabel}</div>
+        <div class="rep-row-meta">${authorLabel}</div>
         ${rep.comment && rep.comment.trim() ? `<div class="comment-text">${escapeHtml(rep.comment)}</div>` : ''}
       </div>
       <div class="rep-row-right">
@@ -1456,6 +1463,8 @@
   const leftRepsListEl      = document.getElementById('leftRepsList');
   const leftRepsSeeAllWrapEl = document.getElementById('leftRepsSeeAllWrap');
   const leftRepsSeeAllBtnEl  = document.getElementById('leftRepsSeeAllBtn');
+  const leftRepsTopRowEl     = document.getElementById('leftRepsTopRow');
+  const leftRepsTopShowLessBtnEl = document.getElementById('leftRepsTopShowLessBtn');
 
   function buildLeftRepRow(rep) {
     const row = document.createElement('div');
@@ -1480,12 +1489,19 @@
     if (myPilotReps.length > LEFT_REPS_VISIBLE_LIMIT) {
       leftRepsSeeAllWrapEl.style.display = 'block';
       leftRepsSeeAllBtnEl.textContent = leftRepsExpanded ? '▴ Show Less' : '▾ Show More';
+      leftRepsTopRowEl.style.display = leftRepsExpanded ? 'flex' : 'none';
     } else {
       leftRepsSeeAllWrapEl.style.display = 'none';
+      leftRepsTopRowEl.style.display = 'none';
     }
   }
 
   leftRepsSeeAllBtnEl.addEventListener('click', () => {
+    leftRepsExpanded = !leftRepsExpanded;
+    renderLeftReps();
+  });
+
+  leftRepsTopShowLessBtnEl.addEventListener('click', () => {
     leftRepsExpanded = !leftRepsExpanded;
     renderLeftReps();
   });
