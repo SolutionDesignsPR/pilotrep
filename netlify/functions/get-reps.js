@@ -4,6 +4,22 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
+const SESSION_MAX_AGE_MS = 2 * 60 * 60 * 1000; // 2 hours
+
+// Simple session cookie parser (same pattern as submit-rep.js / vote-rep.js)
+function getSession(cookieHeader) {
+  if (!cookieHeader) return null;
+  const match = cookieHeader.match(/pilotrep_session=([^;]+)/);
+  if (!match) return null;
+  try {
+    const session = JSON.parse(Buffer.from(match[1], 'base64').toString('utf8'));
+    if (!session.createdAt || Date.now() - session.createdAt > SESSION_MAX_AGE_MS) return null;
+    return session;
+  } catch {
+    return null;
+  }
+}
+
 // Grade index to letter mapping (13-point scale)
 const GRADE_TABLE = [
   { index: 0,  grade: 'F',  tier: 'neg',     html: 'F'  },
@@ -97,9 +113,35 @@ exports.handler = async (event) => {
     // Count comments (non-empty)
     const commentCount = reps.filter(r => r.comment && r.comment.trim().length > 0).length;
 
+    // Fetch vote data for this batch of reps — aggregate up/down counts per rep,
+    // plus the requesting session's own vote (if logged in) so the UI can
+    // pre-highlight their selection on load.
+    const repIds = reps.map(r => r.id);
+    const { data: votes, error: votesError } = await supabase
+      .from('rep_votes')
+      .select('rep_id, vote_type, voter_character_id')
+      .in('rep_id', repIds);
+    if (votesError) throw new Error(votesError.message);
+
+    const voteCounts = {}; // repId -> { up, down }
+    (votes || []).forEach(v => {
+      if (!voteCounts[v.rep_id]) voteCounts[v.rep_id] = { up: 0, down: 0 };
+      voteCounts[v.rep_id][v.vote_type]++;
+    });
+
+    const session = getSession(event.headers.cookie);
+    const voterCharacterId = session && session.characterId ? String(session.characterId) : null;
+    const userVotes = {}; // repId -> 'up' | 'down'
+    if (voterCharacterId) {
+      (votes || []).forEach(v => {
+        if (String(v.voter_character_id) === voterCharacterId) userVotes[v.rep_id] = v.vote_type;
+      });
+    }
+
     // Shape reps for the front end
     const shaped = reps.map(r => {
       const gradeEntry = GRADE_TABLE.find(g => g.index === r.grade_index) || {};
+      const counts = voteCounts[r.id] || { up: 0, down: 0 };
       return {
         id:          r.id,
         grade:       r.grade,
@@ -112,7 +154,11 @@ exports.handler = async (event) => {
         author:      r.anonymous ? '' : (r.reviewer_name || ''),
         reviewerId:  r.anonymous ? null : (r.reviewer_id || null),
         isCorpAlliance: !!r.is_corp_alliance,
-        date:        formatDate(r.created_at)
+        date:        formatDate(r.created_at),
+        upvotes:     counts.up,
+        downvotes:   counts.down,
+        userVote:    userVotes[r.id] || null,
+        isOwnRep:    voterCharacterId ? String(r.reviewer_id) === voterCharacterId : false
       };
     });
 

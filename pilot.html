@@ -584,6 +584,7 @@
     .comment-row.neg     .vote-btn { color: #c02128; }
     .comment-row.neutral .vote-btn { color: #2ff541; }
     .comment-row.pos     .vote-btn { color: #4fc3f7; }
+    .vote-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
     .comment-meta { font-size: 11px; opacity: 0.85; letter-spacing: 0.05em; text-transform: uppercase; }
     .comment-text { font-size: 14px; font-weight: 600; text-transform: uppercase; margin-top: 12px; }
@@ -1387,7 +1388,7 @@
   }
 
   // ── VOTE ICON (rotated three-dot "constellation" triangle, up = agree, down = disagree) ──
-  // SHELL ONLY: local UI state, no persistence, no login gating, no backend call yet.
+  // Wired to vote-rep.js — optimistic UI update, reconciled with server response.
   function voteIcon(direction, active) {
     const pts = direction === 'up'
       ? [[8, 3], [3, 13], [13, 13]]
@@ -1404,26 +1405,67 @@
     </svg>`;
   }
 
-  function wireVoteButtons(row) {
+  function wireVoteButtons(row, rep) {
     const upBtn = row.querySelector('.vote-up');
     const downBtn = row.querySelector('.vote-down');
-    let upCount = 0, downCount = 0, voted = null; // null | 'up' | 'down' — local only, resets on reload
+    let upCount = rep.upvotes || 0;
+    let downCount = rep.downvotes || 0;
+    let voted = rep.userVote || null; // null | 'up' | 'down'
+    let busy = false;
 
     function render() {
       upBtn.innerHTML = voteIcon('up', voted === 'up') + `<span class="vote-count">${upCount}</span>`;
       downBtn.innerHTML = voteIcon('down', voted === 'down') + `<span class="vote-count">${downCount}</span>`;
     }
 
-    upBtn.addEventListener('click', () => {
-      if (voted === 'up') { upCount--; voted = null; }
-      else { if (voted === 'down') downCount--; upCount++; voted = 'up'; }
+    async function castVote(direction) {
+      if (!isLoggedIn()) { showValidation('Log In With EVE Online To Vote'); return; }
+      if (rep.isOwnRep) return;
+      if (busy || !rep.id) return;
+      busy = true;
+
+      // Optimistic update
+      const prevVoted = voted, prevUp = upCount, prevDown = downCount;
+      const newVoted = voted === direction ? null : direction;
+      if (voted === 'up') upCount--;
+      if (voted === 'down') downCount--;
+      if (newVoted === 'up') upCount++;
+      if (newVoted === 'down') downCount++;
+      voted = newVoted;
       render();
-    });
-    downBtn.addEventListener('click', () => {
-      if (voted === 'down') { downCount--; voted = null; }
-      else { if (voted === 'up') upCount--; downCount++; voted = 'down'; }
-      render();
-    });
+
+      try {
+        const res = await fetch('/.netlify/functions/vote-rep', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ repId: rep.id, voteType: newVoted })
+        });
+        let data = {};
+        try { data = await res.json(); } catch (_) {}
+        if (!res.ok) {
+          // Revert optimistic update on failure
+          voted = prevVoted; upCount = prevUp; downCount = prevDown;
+          render();
+          showValidation(data.error || 'Vote failed. Please try again.');
+        } else {
+          // Reconcile with authoritative server counts
+          upCount = data.upvotes;
+          downCount = data.downvotes;
+          voted = data.userVote;
+          render();
+        }
+      } catch (err) {
+        console.error('Vote error:', err);
+        voted = prevVoted; upCount = prevUp; downCount = prevDown;
+        render();
+        showValidation('Network error. Please try again.');
+      }
+
+      busy = false;
+    }
+
+    upBtn.addEventListener('click', () => castVote('up'));
+    downBtn.addEventListener('click', () => castVote('down'));
 
     render();
   }
@@ -1447,14 +1489,14 @@
         <div class="rep-vote-col">
           <span class="comment-system">${rep.system}</span>
           <div class="vote-row">
-            <button class="vote-btn vote-up" type="button" aria-label="Agree with this rep"></button>
-            <button class="vote-btn vote-down" type="button" aria-label="Disagree with this rep"></button>
+            <button class="vote-btn vote-up" type="button" ${rep.isOwnRep ? 'disabled' : ''} title="${rep.isOwnRep ? 'You cannot vote on your own rep' : 'Agree'}" aria-label="Agree with this rep"></button>
+            <button class="vote-btn vote-down" type="button" ${rep.isOwnRep ? 'disabled' : ''} title="${rep.isOwnRep ? 'You cannot vote on your own rep' : 'Disagree'}" aria-label="Disagree with this rep"></button>
           </div>
         </div>
         <span class="rep-grade-badge ${rep.tier}">${gradeToHtml(rep.grade)}</span>
       </div>
     `;
-    wireVoteButtons(row);
+    wireVoteButtons(row, rep);
     return row;
   }
 
@@ -1807,6 +1849,7 @@
         gradeCircleLetterEl.className = 'grade-circle-letter ' + tierCls;
         // Load reps
         submittedReps = data.reps.map(r => ({
+          id:       r.id,
           grade:    r.grade,
           gradeNum: r.gradeIndex,
           tier:     r.tier,
@@ -1815,7 +1858,11 @@
           author:     r.author,
           reviewerId: r.reviewerId,
           isCorpAlliance: r.isCorpAlliance,
-          date:     r.date
+          date:     r.date,
+          upvotes:   r.upvotes,
+          downvotes: r.downvotes,
+          userVote:  r.userVote,
+          isOwnRep:  r.isOwnRep
         }));
         if (noCommentRepsOpen) renderNoCommentReps();
         updatePilotRepsToggleState();
