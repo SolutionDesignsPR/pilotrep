@@ -1,3 +1,9 @@
+const { createClient } = require('@supabase/supabase-js');
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+);
+
 // Refresh an expired EVE SSO access token using the stored refresh_token.
 // Returns { accessToken, refreshToken, accessTokenExpiresAt } on success, or null
 // if the refresh itself fails (dead/revoked refresh token, network error, etc).
@@ -130,6 +136,46 @@ exports.handler = async (event) => {
             };
           }
         }
+      }
+
+      // Community search — unauthenticated, prefix-match against pilots/corps/alliances
+      // that already have at least one rep on PilotRep. Tries this before falling back
+      // to ESI's exact-match-only endpoint, since it supports real predictive search.
+      try {
+        const { data: repMatches, error: repMatchError } = await supabase
+          .from('reps')
+          .select('target_id, target_type, target_name')
+          .not('target_name', 'is', null)
+          .ilike('target_name', `${query}%`)
+          .limit(150);
+
+        if (!repMatchError && repMatches && repMatches.length > 0) {
+          const byName = (a, b) => a.name.localeCompare(b.name);
+          const byType = (t) => {
+            const seenIds = new Set();
+            const out = [];
+            for (const r of repMatches) {
+              if (r.target_type !== t) continue;
+              if (seenIds.has(r.target_id)) continue;
+              seenIds.add(r.target_id);
+              out.push({ id: Number(r.target_id), name: r.target_name });
+            }
+            return out.sort(byName).slice(0, 10);
+          };
+
+          return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({
+              mode:         'community',
+              characters:   byType('pilot'),
+              corporations: byType('corporation'),
+              alliances:    byType('alliance')
+            })
+          };
+        }
+      } catch (err) {
+        console.warn('Community search error (non-fatal, falling back to ESI):', err);
       }
 
       // Fallback — unauthenticated exact-name match via /universe/ids/

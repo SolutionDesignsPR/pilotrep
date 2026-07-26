@@ -187,11 +187,26 @@
       color: var(--white);
       font-family: Helvetica, Arial, sans-serif;
       font-size: 13px;
-      padding: 8px 12px;
+      padding: 8px 30px 8px 12px;
       outline: none;
       min-width: 0;
     }
     .nav-search input::placeholder { color: var(--muted); }
+    .nav-search-clear-btn {
+      position: absolute;
+      right: 36px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 4px;
+      z-index: 2;
+    }
+    .nav-search-clear-btn:hover { color: var(--white); }
     .nav-search button {
       background: var(--cyan);
       border: 1.5px solid var(--cyan);
@@ -231,6 +246,17 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
+    .search-drop-note {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      padding: 12px 14px;
+      text-align: center;
+      border-top: 1px solid rgba(79,195,247,0.08);
+      line-height: 1.6;
+    }
+    .search-drop-note a { color: var(--cyan); text-decoration: none; font-weight: 600; }
+    .search-drop-note a:hover { color: #7dd8fa; }
     .pilot-portrait img { width: 170px; height: 200px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border); }
     .nav-search-sub {
       font-size: 11px;
@@ -940,6 +966,7 @@
     <div class="nav-right">
       <div class="nav-search" style="position:relative;">
         <input type="text" id="navSearchInput" placeholder="Search for Pilots, Corporations and Alliances" autocomplete="off" />
+        <button id="navSearchClear" class="nav-search-clear-btn" aria-label="Clear search" type="button" style="display:none;">&times;</button>
         <button id="navSearchBtn" aria-label="Search">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -1289,6 +1316,7 @@
   let submittedReps = [];
   let targetCorpId = null;
   let targetAllianceId = null;
+  let targetName = null;
   const VISIBLE_LIMIT = 5;
 
   const pilotRepsCountEl        = document.getElementById('pilotRepsCount');
@@ -1732,6 +1760,7 @@
           targetType: 'pilot',
           targetCorpId,
           targetAllianceId,
+          targetName,
           grade,
           gradeIndex: INPUT_TO_NUM[grade],
           systemType: selectedSys.textContent.trim(),
@@ -1789,6 +1818,7 @@
       if (esi && esi.name) {
         targetCorpId = esi.corporation_id || null;
         targetAllianceId = esi.alliance_id || null;
+        targetName = esi.name || null;
         document.title = `${esi.name} — PilotRep`;
         document.getElementById('pilotName').textContent = esi.name;
         const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -1881,16 +1911,25 @@
   // ── SEARCH BAR ────────────────────────────────────────────────────────────
   const searchInput    = document.getElementById('navSearchInput');
   const searchBtn      = document.getElementById('navSearchBtn');
+  const searchClearBtn = document.getElementById('navSearchClear');
   const searchDropdown = document.getElementById('searchDropdown');
 
 
   let searchTimer;
 
   searchInput.addEventListener('input', () => {
+    searchClearBtn.style.display = searchInput.value.length ? 'block' : 'none';
     clearTimeout(searchTimer);
     const q = searchInput.value.trim();
     if (q.length < 3) { searchDropdown.style.display = 'none'; return; }
     searchTimer = setTimeout(() => runSearch(), 300);
+  });
+
+  searchClearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    searchClearBtn.style.display = 'none';
+    searchDropdown.style.display = 'none';
+    searchInput.focus();
   });
 
   searchInput.addEventListener('keydown', (e) => {
@@ -1913,11 +1952,12 @@
   }
 
   function renderDropdown(data, q) {
-    const { characters = [], corporations = [], alliances = [] } = data;
+    const { characters = [], corporations = [], alliances = [], mode = 'authenticated' } = data;
     const total = characters.length + corporations.length + alliances.length;
+    const advancedSearchNote = `<div class="search-drop-note">For Advanced Search<br><a href="/.netlify/functions/auth-start">Log In With EVE Online</a></div>`;
     if (total === 0) {
-      if (!isLoggedIn()) {
-        searchDropdown.innerHTML = `<div style="padding:14px 16px;font-size:12px;letter-spacing:0.08em;color:var(--muted);text-align:center;">ADVANCED SEARCH. &nbsp;<a href="/.netlify/functions/auth-start" style="color:var(--cyan);text-decoration:none;font-weight:600;">LOG IN WITH EVE ONLINE.</a></div>`;
+      if (mode === 'community' || mode === 'fallback') {
+        searchDropdown.innerHTML = advancedSearchNote;
         searchDropdown.style.display = 'block';
       } else {
         searchDropdown.style.display = 'none';
@@ -1953,6 +1993,7 @@
         </a>`;
       });
     }
+    if (mode === 'community' || mode === 'fallback') html += advancedSearchNote;
     html += `<a class="search-drop-item" href="/search.html?q=${encodeURIComponent(q)}" style="color:var(--cyan);justify-content:center;">
       See all results for "${q}" →
     </a>`;

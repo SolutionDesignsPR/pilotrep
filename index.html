@@ -146,7 +146,7 @@
       color: var(--white);
       font-family: Helvetica, Arial, sans-serif;
       font-size: 15px;
-      padding: 12px 18px;
+      padding: 12px 42px 12px 18px;
       outline: none;
       transition: border-color 0.2s, background 0.2s;
     }
@@ -155,6 +155,21 @@
       border-color: var(--cyan);
       background: rgba(79,195,247,0.13);
     }
+    .search-clear-btn {
+      position: absolute;
+      right: 54px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 4px;
+      z-index: 2;
+    }
+    .search-clear-btn:hover { color: var(--white); }
     .search-btn {
       background: var(--cyan);
       border: 1.5px solid var(--cyan);
@@ -509,16 +524,16 @@
       text-transform: uppercase;
     }
     .search-drop-note {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--muted);
-      letter-spacing: 0.02em;
-      padding: 10px 14px;
+      letter-spacing: 0.08em;
+      padding: 12px 14px;
       text-align: center;
       border-top: 1px solid rgba(79,195,247,0.08);
-      line-height: 1.5;
+      line-height: 1.6;
     }
-    .search-drop-note a { color: var(--cyan-dim); text-decoration: none; }
-    .search-drop-note a:hover { color: var(--cyan); }
+    .search-drop-note a { color: var(--cyan); text-decoration: none; font-weight: 600; }
+    .search-drop-note a:hover { color: #7dd8fa; }
     .validation-toast {
       position: fixed;
       bottom: 28px;
@@ -564,6 +579,7 @@
 
     <div class="search-wrap" style="position:relative;">
       <input class="search-input" type="text" id="heroSearchInput" placeholder="Search for Pilots, Corporations and Alliances" />
+      <button class="search-clear-btn" aria-label="Clear search" id="heroSearchClear" type="button" style="display:none;">&times;</button>
       <button class="search-btn" aria-label="Search" id="heroSearchBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -698,14 +714,23 @@
   // ── HERO SEARCH BAR ───────────────────────────────────────────────────────
   const searchInput    = document.getElementById('heroSearchInput');
   const searchBtn      = document.getElementById('heroSearchBtn');
+  const searchClearBtn = document.getElementById('heroSearchClear');
   const searchDropdown = document.getElementById('heroSearchDropdown');
   let searchTimer;
 
   searchInput.addEventListener('input', () => {
+    searchClearBtn.style.display = searchInput.value.length ? 'block' : 'none';
     clearTimeout(searchTimer);
     const q = searchInput.value.trim();
     if (q.length < 3) { searchDropdown.style.display = 'none'; return; }
     searchTimer = setTimeout(() => runSearch(), 300);
+  });
+
+  searchClearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    searchClearBtn.style.display = 'none';
+    searchDropdown.style.display = 'none';
+    searchInput.focus();
   });
 
   searchInput.addEventListener('keydown', (e) => {
@@ -729,12 +754,10 @@
   function renderDropdown(data, q) {
     const { characters = [], corporations = [], alliances = [], mode = 'authenticated' } = data;
     const total = characters.length + corporations.length + alliances.length;
-    const fallbackNote = `<div class="search-drop-note">
-      Showing exact-name matches only. <a href="/.netlify/functions/auth-start">Log in with EVE Online</a> for live predictive search.
-    </div>`;
+    const advancedSearchNote = `<div class="search-drop-note">For Advanced Search<br><a href="/.netlify/functions/auth-start">Log In With EVE Online</a></div>`;
     if (total === 0) {
-      if (mode === 'fallback') {
-        searchDropdown.innerHTML = `<div class="search-drop-note">No exact match for "${q}". Try the full pilot, corporation, or alliance name, or ${`<a href="/.netlify/functions/auth-start">log in</a>`} for live predictive search.</div>`;
+      if (mode === 'community' || mode === 'fallback') {
+        searchDropdown.innerHTML = advancedSearchNote;
         searchDropdown.style.display = 'block';
       } else {
         searchDropdown.style.display = 'none';
@@ -769,7 +792,7 @@
         </a>`;
       });
     }
-    if (mode === 'fallback') html += fallbackNote;
+    if (mode === 'community' || mode === 'fallback') html += advancedSearchNote;
     html += `<a class="search-drop-item" href="/search.html?q=${encodeURIComponent(q)}" style="color:var(--cyan);justify-content:center;">
       See all results for "${q}" →
     </a>`;

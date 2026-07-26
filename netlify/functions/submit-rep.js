@@ -55,7 +55,7 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: 'Invalid request body' }) };
   }
 
-  const { targetId, targetType, targetCorpId, targetAllianceId, grade, gradeIndex, systemType, comment, anonymous } = body;
+  const { targetId, targetType, targetCorpId, targetAllianceId, targetName, grade, gradeIndex, systemType, comment, anonymous } = body;
 
   // 3. Validate required fields
   if (!targetId || !targetType || !grade || gradeIndex === undefined) {
@@ -122,6 +122,7 @@ exports.handler = async (event) => {
   const { error } = await supabase.from('reps').insert({
     target_id:     String(targetId),
     target_type:   targetType,
+    target_name:   targetName || null,
     reviewer_id:   reviewerId,
     reviewer_name: reviewerName,
     grade,
