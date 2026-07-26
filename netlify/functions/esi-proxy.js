@@ -59,13 +59,16 @@ exports.handler = async (event) => {
     'Content-Type': 'application/json'
   };
   try {
-    const { action, query, id, type } = event.queryStringParameters || {};
+    const { action, query, id, type, limit: limitParam } = event.queryStringParameters || {};
 
     // ── SEARCH ──────────────────────────────────────────────────────────────
     if (action === 'search') {
       if (!query || query.length < 3) {
         return { statusCode: 400, headers, body: JSON.stringify({ error: 'Query must be at least 3 characters' }) };
       }
+      // Dropdown requests default to 10 (fast/snappy); search.html asks for more.
+      // Clamped to 100 as a sane upper bound against abuse.
+      const limit = Math.max(1, Math.min(100, parseInt(limitParam, 10) || 10));
 
       // Try authenticated search first (requires logged-in user's token via cookie)
       const cookieHeader = event.headers.cookie || '';
@@ -108,9 +111,9 @@ exports.handler = async (event) => {
         if (searchRes.ok) {
           const searchData = await searchRes.json();
           const allIds = [
-            ...(searchData.character   || []).slice(0, 50),
-            ...(searchData.corporation || []).slice(0, 50),
-            ...(searchData.alliance    || []).slice(0, 50)
+            ...(searchData.character   || []).slice(0, Math.max(50, limit)),
+            ...(searchData.corporation || []).slice(0, Math.max(50, limit)),
+            ...(searchData.alliance    || []).slice(0, Math.max(50, limit))
           ];
           if (allIds.length === 0) {
             return { statusCode: 200, headers: withRefreshedCookie(headers, refreshedCookie), body: JSON.stringify({ mode: 'authenticated', characters: [], corporations: [], alliances: [] }) };
@@ -129,9 +132,9 @@ exports.handler = async (event) => {
               headers: withRefreshedCookie(headers, refreshedCookie),
               body: JSON.stringify({
                 mode:         'authenticated',
-                characters:   namesData.filter(n => n.category === 'character').filter(startsWithQuery).sort(byName).slice(0, 10),
-                corporations: namesData.filter(n => n.category === 'corporation').filter(startsWithQuery).sort(byName).slice(0, 10),
-                alliances:    namesData.filter(n => n.category === 'alliance').filter(startsWithQuery).sort(byName).slice(0, 10)
+                characters:   namesData.filter(n => n.category === 'character').filter(startsWithQuery).sort(byName).slice(0, limit),
+                corporations: namesData.filter(n => n.category === 'corporation').filter(startsWithQuery).sort(byName).slice(0, limit),
+                alliances:    namesData.filter(n => n.category === 'alliance').filter(startsWithQuery).sort(byName).slice(0, limit)
               })
             };
           }
@@ -147,7 +150,7 @@ exports.handler = async (event) => {
           .select('target_id, target_type, target_name')
           .not('target_name', 'is', null)
           .ilike('target_name', `${query}%`)
-          .limit(150);
+          .limit(Math.max(150, limit * 20));
 
         if (!repMatchError && repMatches && repMatches.length > 0) {
           const byName = (a, b) => a.name.localeCompare(b.name);
@@ -160,7 +163,7 @@ exports.handler = async (event) => {
               seenIds.add(r.target_id);
               out.push({ id: Number(r.target_id), name: r.target_name });
             }
-            return out.sort(byName).slice(0, 10);
+            return out.sort(byName).slice(0, limit);
           };
 
           return {
@@ -187,9 +190,9 @@ exports.handler = async (event) => {
       if (!idsRes.ok) throw new Error(`ESI universe/ids failed: ${idsRes.status}`);
       const idsData = await idsRes.json();
       const byName = (a, b) => a.name.localeCompare(b.name);
-      const characters   = (idsData.characters   || []).slice(0, 10).sort(byName);
-      const corporations = (idsData.corporations  || []).slice(0, 10).sort(byName);
-      const alliances    = (idsData.alliances     || []).slice(0, 10).sort(byName);
+      const characters   = (idsData.characters   || []).slice(0, limit).sort(byName);
+      const corporations = (idsData.corporations  || []).slice(0, limit).sort(byName);
+      const alliances    = (idsData.alliances     || []).slice(0, limit).sort(byName);
       return { statusCode: 200, headers, body: JSON.stringify({ mode: 'fallback', characters, corporations, alliances }) };
     }
 

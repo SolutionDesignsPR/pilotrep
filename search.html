@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PilotRep - Search Results</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="alternate icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #04080f;
+      --bg2:       #0b1220;
+      --bg3:       #101b2e;
+      --panel:     #0e1a2b;
+      --panel2:    #121f33;
+      --border:    rgba(100,180,255,0.10);
+      --cyan:      #4fc3f7;
+      --cyan-dim:  #2a8bbf;
+      --orange:    #e8871a;
+      --white:     #e8eef5;
+      --muted:     #5a7490;
+      --grade-ap: #008bd1;
+      --grade-a:  #008bd1;
+      --grade-b:  #00af10;
+      --grade-bp: #00af10;
+      --grade-bm: #00af10;
+      --grade-c:  #00af10;
+      --grade-cp: #00af10;
+      --grade-cm: #00af10;
+      --grade-d:  #610b0f;
+      --grade-dp: #610b0f;
+      --grade-dm: #610b0f;
+      --grade-f:  #610b0f;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: Helvetica, Arial, sans-serif;
+      font-weight: 400;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .page { position: relative; z-index: 1; }
+
+    /* ── TOP NAV ── */
+    .topnav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 22px 32px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+    .nav-logo {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .nav-logo .o-ring {
+      display: inline-block;
+      width: 0.62em;
+      height: 0.62em;
+      border: 0.13em solid var(--white);
+      border-radius: 50%;
+      vertical-align: middle;
+      margin: 0 0.01em;
+      position: relative;
+      top: -0.07em;
+    }
+    .nav-left {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .nav-logged-in {
+      display: none;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .nav-logged-in a {
+      color: var(--cyan);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .nav-logged-in a:hover { color: var(--white); }
+    .nav-login-prompt {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .nav-login-prompt:hover { color: var(--white); }
+    .nav-links {
+      display: inline-flex;
+      gap: 0;
+      flex: 1;
+      justify-content: center;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .nav-links a {
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      color: var(--white);
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1.5px solid var(--border);
+      padding: 8px 18px;
+      margin-left: -1.5px;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .nav-links a:first-child { border-radius: 4px 0 0 4px; margin-left: 0; }
+    .nav-links a:last-child  { border-radius: 0 4px 4px 0; }
+    .nav-links a.active {
+      color: var(--cyan);
+      border-color: var(--cyan);
+      background: rgba(79,195,247,0.08);
+      pointer-events: none;
+    }
+    .nav-links a:hover:not(.active) { color: var(--cyan); border-color: var(--cyan-dim); }
+
+    .nav-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+    .eve-login-sm {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #1a1a2e;
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: 4px;
+      color: var(--white);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 8px 14px;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: border-color 0.2s, background 0.2s;
+      white-space: nowrap;
+    }
+    .eve-login-sm:hover { border-color: var(--cyan); background: rgba(79,195,247,0.08); }
+    .eve-logo-sm { font-weight: 700; font-size: 13px; letter-spacing: 0.15em; }
+    .eve-divider-sm { width: 1px; height: 14px; background: rgba(255,255,255,0.2); }
+
+    .nav-search {
+      display: flex;
+      align-items: center;
+      width: 320px;
+    }
+    .nav-search input {
+      flex: 1;
+      background: rgba(79,195,247,0.08);
+      border: 1.5px solid var(--cyan-dim);
+      border-right: none;
+      border-radius: 4px 0 0 4px;
+      color: var(--white);
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      padding: 8px 44px 8px 12px;
+      outline: none;
+      min-width: 0;
+    }
+    .nav-search input::placeholder { color: var(--muted); }
+    .nav-search .nav-search-clear-btn {
+      position: absolute;
+      right: 48px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 4px;
+      z-index: 2;
+    }
+    .nav-search .nav-search-clear-btn:hover { color: var(--white); }
+    .nav-search button {
+      background: var(--cyan);
+      border: 1.5px solid var(--cyan);
+      border-radius: 0 4px 4px 0;
+      color: var(--bg);
+      cursor: pointer;
+      padding: 8px 11px;
+      display: flex;
+      align-items: center;
+    }
+    .nav-search svg { width: 14px; height: 14px; }
+    .search-drop-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--white);
+      border-bottom: 1px solid rgba(79,195,247,0.08);
+      text-decoration: none;
+    }
+    .search-drop-item:last-child { border-bottom: none; }
+    .search-drop-item:hover { background: rgba(79,195,247,0.1); }
+    .search-drop-label {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 8px 14px 4px;
+      border-bottom: 1px solid rgba(79,195,247,0.08);
+    }
+    .search-drop-name { flex: 1; }
+    .search-drop-type {
+      font-size: 10px;
+      color: var(--cyan);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .search-drop-note {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      padding: 12px 14px;
+      text-align: center;
+      border-top: 1px solid rgba(79,195,247,0.08);
+      line-height: 1.6;
+    }
+    .search-drop-note a { color: var(--cyan); text-decoration: none; font-weight: 600; }
+    .search-drop-note a:hover { color: #7dd8fa; }
+    .pilot-portrait img { width: 170px; height: 200px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border); }
+    .nav-search-sub {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.03em;
+      align-self: flex-start;
+      padding-left: 12px;
+    }
+
+    /* ── PAGE TITLE ── */
+    .page-title {
+      text-align: center;
+      margin: 36px 0 50px;
+    }
+    .page-title-img { display: block; max-width: 100%; margin: 0 auto; }
+    .page-title-desktop { height: clamp(28px, 4vw, 40px); width: auto; aspect-ratio: 307.56 / 22.16; }
+    .page-title-mobile { display: none; }
+    @media (max-width: 640px) {
+      .page-title-desktop { display: none; }
+      .page-title-mobile { display: block; height: clamp(60px, 15vw, 90px); width: auto; aspect-ratio: 194.9 / 50.16; }
+    }
+
+    /* ── PILOT HEADER ── */
+    .pilot-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 36px;
+      max-width: 960px;
+      margin: 0 auto 50px;
+      padding: 0 24px;
+      flex-wrap: wrap;
+    }
+    .pilot-portrait {
+      width: 130px;
+      height: 130px;
+      border-radius: 4px;
+      object-fit: cover;
+      background: linear-gradient(135deg, #0e1a2b 0%, #1a2a40 100%);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .pilot-header-info {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-top: 4px;
+      text-align: left;
+      max-width: 640px;
+    }
+    .pilot-header-name {
+      font-size: clamp(22px, 3vw, 32px);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      line-height: 1.2;
+    }
+    .pilot-header-details {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      line-height: 1.8;
+    }
+    .pilot-header-details .detail-label { color: var(--white); font-weight: 700; }
+    .pilot-header-details a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .pilot-header-details a:hover { color: var(--cyan); text-decoration: underline; }
+
+    /* ── PANELS ── */
+    .panels-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 50px;
+      align-items: start;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 32px 28px;
+    }
+
+    /* Left Reps panel: darker than standard panels so it stands out */
+    #leftRepsPanel {
+      background: #000000;
+      border: 1px solid rgba(255,255,255,0.25);
+      box-shadow: 0 0 12px rgba(255,255,255,0.06);
+    }
+
+    /* RepScore panel */
+    .grade-circle-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+    .grade-circle {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: 3px solid var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .grade-circle::before,
+    .grade-circle::after {
+      content: '';
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 2px solid var(--white);
+    }
+    .grade-circle::before { top: -3px; left: 50%; transform: translate(-50%, -2px); }
+    .grade-circle::after { bottom: -3px; left: 50%; transform: translate(-50%, 2px); }
+    .grade-circle-letter {
+      font-size: 56px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--muted);
+    }
+    .grade-circle-letter .modifier {
+      font-size: 0.42em;
+      font-weight: 700;
+      vertical-align: super;
+      line-height: 0;
+      letter-spacing: 0;
+    }
+    .grade-circle-letter.grade-F { color: var(--grade-f); }
+    .grade-circle-letter.grade-B { color: var(--grade-b); }
+    .grade-circle-letter.grade-A { color: var(--grade-a); }
+
+    .stats-row {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      text-align: center;
+    }
+    .stats-row .total-reps-line { margin-top: 12px; }
+    .stat-total-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .stat-count-total { color: var(--white); }
+    .collapse-all-row {
+      display: flex;
+      justify-content: flex-end;
+      padding-bottom: 20px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .collapse-all-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .collapse-all-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
+    .left-reps-top-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: -4px;
+      margin-bottom: 14px;
+    }
+    .stat-num { font-size: 30px; font-weight: 700; color: var(--cyan); }
+    .stat-label {
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+    .stats-row .stat-label-inline {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--white);
+      text-transform: uppercase;
+    }
+    .stats-row .stat-count-inline {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0;
+      color: var(--cyan);
+      text-transform: none;
+      margin-left: 10px;
+    }
+    .stat-label-link {
+      cursor: pointer;
+      color: var(--cyan);
+      transition: color 0.15s;
+    }
+    .stat-label-link:hover { color: var(--white); text-decoration: underline; }
+    .stat-label-link.disabled { cursor: default; color: var(--muted); pointer-events: none; }
+    .stat-label-link.disabled:hover { text-decoration: none; }
+
+    .no-comment-reps-panel {
+      margin-top: -6px;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .reps-panel-headrow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .reps-panel-headrow .reps-panel-label {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--white);
+      text-transform: uppercase;
+    }
+    .reps-panel-headrow .reps-panel-count {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0;
+      color: var(--cyan);
+      text-transform: none;
+      margin-left: 10px;
+    }
+    #noCommentRepsPanel { border-bottom: 2px solid rgba(100,180,255,0.25); }
+    .no-comment-reps-list { border-radius: 4px; overflow: hidden; }
+    .rep-row-date {
+      font-size: 11px;
+      font-weight: 400;
+      opacity: 0.75;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .rep-row-meta {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--white);
+    }
+    .share-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      align-self: flex-start;
+    }
+    .share-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
+    .share-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+    .share-toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--cyan);
+      color: var(--bg);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 9px 20px;
+      border-radius: 5px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      z-index: 9999;
+    }
+    .share-toast.show { opacity: 1; }
+
+    .validation-toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--cyan);
+      color: var(--bg);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 9px 20px;
+      border-radius: 5px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      z-index: 9999;
+    }
+    .validation-toast.show { opacity: 1; }
+
+    .comments-list {
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .share-btn.small { font-size: 10px; padding: 5px 10px; }
+    .comment-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(0,0,0,0.2);
+    }
+    .comment-row:last-child { border-bottom: none; }
+    .comment-row.neg     { background: var(--grade-d); }
+    .comment-row.pos     { background: var(--grade-a); }
+    .comment-row.neutral { background: var(--grade-b); }
+    .comment-row.has-votes { align-items: flex-end; }
+    .rep-row-right.has-votes { align-items: flex-end; }
+    .rep-vote-col { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .vote-row { display: flex; align-items: center; gap: 10px; }
+    .vote-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .vote-btn svg { flex-shrink: 0; }
+    .comment-row.neg     .vote-btn { color: #c02128; }
+    .comment-row.neutral .vote-btn { color: #2ff541; }
+    .comment-row.pos     .vote-btn { color: #4fc3f7; }
+    .vote-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .comment-meta { font-size: 11px; opacity: 0.85; letter-spacing: 0.05em; text-transform: uppercase; }
+    .comment-text { font-size: 14px; font-weight: 600; text-transform: uppercase; margin-top: 12px; }
+    .comment-system {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: rgba(0,0,0,0.25);
+      padding: 4px 10px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    .see-all-wrap { text-align: center; margin-top: 18px; }
+    .see-all-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 8px 18px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .see-all-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
+
+    /* Left Reps panel (pinned reps you've left on this pilot) */
+    .right-column { display: flex; flex-direction: column; gap: 24px; }
+    .rep-row-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .rep-grade-badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--white);
+      flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.35);
+    }
+    .rep-grade-badge .modifier { font-size: 0.5em; font-weight: 700; vertical-align: super; line-height: 0; }
+    .rep-grade-badge.neg     { background: var(--grade-d); }
+    .rep-grade-badge.neutral { background: var(--grade-b); }
+    .rep-grade-badge.pos     { background: var(--grade-a); }
+
+    /* Leave A Rep panel */
+    .panel-title {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      color: var(--cyan-dim);
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+    .panel-title.white { color: var(--white); }
+    .panel-divider { border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+
+    .section-divider {
+      border-bottom: 1px solid var(--border);
+      max-width: 420px;
+      margin: 30px auto;
+    }
+
+    .subsection-label {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      color: var(--white);
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+
+    /* slider */
+    .grade-slider {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 420px;
+      margin: 0 auto 10px;
+      padding: 0 8px;
+    }
+    .grade-slider::before {
+      content: '';
+      position: absolute;
+      left: 8px; right: 8px; top: 50%;
+      height: 2px;
+      background: var(--border);
+      transform: translateY(-50%);
+      z-index: 0;
+    }
+    .grade-dot {
+      position: relative;
+      z-index: 1;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2.5px solid var(--muted);
+      background: var(--bg);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .grade-dot[data-tier="neg"]      { border-color: var(--grade-d); background: var(--grade-d); color: var(--white); }
+    .grade-dot[data-tier="neutral"]  { border-color: var(--grade-b); background: var(--grade-b); color: var(--white); }
+    .grade-dot[data-tier="pos"]      { border-color: var(--grade-a); background: var(--grade-a); color: var(--white); }
+
+    .grade-dot.selected[data-tier="neg"]     { background: var(--grade-d); color: var(--white); box-shadow: 0 0 0 3px rgba(255,255,255,0.4); }
+    .grade-dot.selected[data-tier="neutral"] { background: var(--grade-b); color: var(--white); box-shadow: 0 0 0 3px rgba(255,255,255,0.4); }
+    .grade-dot.selected[data-tier="pos"]     { background: var(--grade-a); color: var(--white); box-shadow: 0 0 0 3px rgba(255,255,255,0.4); }
+    .grade-dot.selected { width: 46px; height: 46px; font-size: 16px; }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 0 8px;
+    }
+    .tier-tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 3px;
+      color: var(--white);
+    }
+    .tier-tag.neg { background: var(--grade-d); }
+    .tier-tag.neutral { background: var(--grade-b); }
+    .tier-tag.pos { background: var(--grade-a); }
+    .tier-tag.spacer { visibility: hidden; }
+
+    .system-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+    .system-btn {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 9px 6px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .system-btn:hover { border-color: var(--cyan-dim); }
+    .system-btn.selected { border-color: var(--cyan); color: var(--cyan); background: rgba(79,195,247,0.08); }
+
+    .comment-field-wrap { max-width: 420px; margin: 0 auto; }
+    .comment-input {
+      width: 100%;
+      background: var(--white);
+      border: none;
+      border-radius: 4px;
+      color: #0b1220;
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 14px 16px;
+      outline: none;
+    }
+    .comment-input::placeholder { color: #7a8aa0; }
+    .comment-hint {
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      margin-top: 10px;
+      margin-bottom: 26px;
+    }
+
+    .anon-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 420px;
+      margin: 0 auto 0;
+      flex-wrap: wrap;
+    }
+    .anon-submitting {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+    .anon-submitting strong {
+      color: var(--cyan);
+      font-weight: 600;
+    }
+    .submitter-link {
+      color: var(--white);
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .submitter-link:hover { color: var(--cyan); }
+    .comment-row.neg .submitter-link:hover     { color: #c02128; }
+    .comment-row.neutral .submitter-link:hover { color: #2ff541; }
+    .comment-row.pos .submitter-link:hover     { color: #4fc3f7; }
+    .anon-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .anon-label input[type="checkbox"] {
+      accent-color: var(--cyan);
+      width: 13px;
+      height: 13px;
+      cursor: pointer;
+    }
+
+    .submit-wrap { text-align: center; }
+    .submit-btn {
+      background: var(--white);
+      border: none;
+      border-radius: 4px;
+      color: var(--bg);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 14px 36px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .submit-btn:hover { background: var(--cyan); }
+
+    .login-prompt {
+      display: block;
+      margin-top: 20px;
+      text-align: center;
+    }
+    .login-prompt.hide { display: none; }
+    .login-prompt-text {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      margin-bottom: 12px;
+    }
+    .login-prompt .eve-login-sm { margin: 0 auto; }
+    .hint-link {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .hint-link:hover { color: var(--cyan); }
+
+    /* ── LEGAL + FOOTER (shared) ── */
+    .legal-note {
+      max-width: 480px;
+      margin: 10px auto 0;
+      padding: 0 24px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .legal-note a { color: var(--cyan); text-decoration: none; }
+
+    .site-footer {
+      margin-top: 60px;
+      padding: 30px 24px 40px;
+      text-align: center;
+    }
+    .footer-grid {
+      display: inline-grid;
+      grid-template-columns: repeat(4, auto);
+      gap: 10px 40px;
+      justify-content: center;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .footer-grid a {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .footer-grid a:hover { color: var(--cyan); }
+    .eve-time {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      color: var(--cyan-dim);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .footer-copy {
+      margin-top: 16px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 760px) {
+      .panels-section { grid-template-columns: 1fr; }
+      .pilot-header { text-align: center; justify-content: center; }
+      .pilot-header-info { text-align: center; }
+      .nav-links { order: 3; width: 100%; }
+      .nav-right { align-items: center; width: 100%; }
+    }
+    /* ── SEARCH RESULTS PAGE ── */
+    .results-section { max-width: 760px; margin: 0 auto; padding: 10px 24px 60px; }
+    .results-subtitle {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      margin-bottom: 28px;
+    }
+    .results-subtitle strong { color: var(--white); font-weight: 700; }
+    .login-banner {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .login-banner-text {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .login-banner-link { font-size: 16px; font-weight: 700; color: var(--cyan); text-decoration: none; }
+    .login-banner-link:hover { color: #7dd8fa; }
+    .results-empty {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      padding: 40px 20px;
+    }
+    .results-group { margin-bottom: 36px; }
+    .results-group-label {
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--cyan-dim);
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .results-list { display: flex; flex-direction: column; }
+    .result-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 6px;
+      border-bottom: 1px solid rgba(79,195,247,0.06);
+      text-decoration: none;
+      color: var(--white);
+      font-size: 15px;
+      transition: background 0.15s;
+    }
+    .result-item:hover { background: rgba(79,195,247,0.05); }
+    .result-item:last-child { border-bottom: none; }
+    .result-item-type {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--cyan-dim);
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- TOP NAV -->
+  <header class="topnav">
+    <div class="nav-left">
+      <a href="index.html" class="nav-logo"><img src="assets/images/PilotRep_Logo_NavBar.svg" alt="Pilot Rep" style="height:38px;width:auto;display:block;" /></a>
+      <div class="nav-logged-in" id="navLoggedInAs">LOGGED IN AS &nbsp;<a href="pilot.html" id="navLoggedInLink">—</a></div>
+      <a href="#" class="nav-login-prompt" id="navLoginPrompt" onclick="event.preventDefault(); window.location.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname+window.location.search);">Log In With EVE Online</a>
+    </div>
+
+    <nav class="nav-links">
+      <a href="pilot.html">Pilots</a>
+      <a href="corporation.html">Corporations</a>
+      <a href="alliance.html">Alliances</a>
+    </nav>
+
+    <div class="nav-right">
+      <div class="nav-search" style="position:relative;">
+        <input type="text" id="navSearchInput" placeholder="Search for Pilots, Corporations and Alliances" autocomplete="off" />
+        <button id="navSearchClear" class="nav-search-clear-btn" aria-label="Clear search" type="button" style="display:none;">&times;</button>
+        <button id="navSearchBtn" aria-label="Search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </button>
+        <div id="searchDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#0e1a2b;border:1px solid var(--cyan-dim);border-radius:0 0 6px 6px;z-index:999;max-height:360px;overflow-y:auto;"></div>
+      </div>
+      <div class="nav-search-sub">Search New Eden. Rate Encounters.</div>
+    </div>
+  </header>
+
+  <!-- PAGE TITLE -->
+  <h1 class="page-title" id="pageTitle">
+    <img class="page-title-img page-title-desktop" id="pageTitleDesktop" src="assets/images/PR_Search_Results.svg" alt="Search Results" style="aspect-ratio: 329.17 / 22.16;" />
+    <img class="page-title-img page-title-mobile" id="pageTitleMobile" src="assets/images/PR_Search_Results_M.svg" alt="Search Results" style="aspect-ratio: 168.87 / 52.13;" />
+  </h1>
+
+  <!-- SEARCH RESULTS -->
+  <section class="results-section">
+    <p class="results-subtitle" id="resultsSubtitle">Searching...</p>
+
+    <div id="loginBanner" class="login-banner" style="display:none;">
+      <div class="login-banner-text">For Advanced Search</div>
+      <a href="/.netlify/functions/auth-start" class="login-banner-link">Log In With EVE Online</a>
+    </div>
+
+    <div id="resultsEmpty" class="results-empty" style="display:none;">
+      No results found for "<span id="resultsEmptyQuery"></span>". Try a different name, or check the spelling.
+    </div>
+
+    <div id="resultsPilots" class="results-group" style="display:none;">
+      <div class="results-group-label">Pilots</div>
+      <div class="results-list" id="resultsPilotsList"></div>
+    </div>
+
+    <div id="resultsCorps" class="results-group" style="display:none;">
+      <div class="results-group-label">Corporations</div>
+      <div class="results-list" id="resultsCorpsList"></div>
+    </div>
+
+    <div id="resultsAlliances" class="results-group" style="display:none;">
+      <div class="results-group-label">Alliances</div>
+      <div class="results-list" id="resultsAlliancesList"></div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <a href="about.html">About</a>
+      <a href="subscriptions.html">Subscriptions</a>
+      <a href="my-pilotrep.html" id="myPilotRepLink">My PilotRep</a>
+      <a href="/.netlify/functions/auth-start" id="footerAuthLink">Login</a>
+      <a href="faq.html">FAQ</a>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms Of Service</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="eve-time" id="eveTime" style="margin-top:28px;">EVE TIME 00:00:00</div>
+    <div class="legal-note" style="margin-top:10px;">
+      EVE Online and all related materials are property of Fenris Creations.<br>PilotRep is a third-party fan site and is not affiliated with Fenris Creations.
+    </div>
+    <div class="footer-copy">&copy; 2026 PilotRep. All rights reserved.</div>
+  </footer>
+
+</div>
+
+<script>
+  // ── AUTH GATE ──
+  let currentUser = null;
+
+  async function loadSession() {
+    try {
+      const res = await fetch('/.netlify/functions/auth-me');
+      const data = await res.json();
+      if (data.loggedIn) {
+        currentUser = data.characterName;
+        const authLink = document.getElementById('footerAuthLink');
+        if (authLink) {
+          authLink.textContent = 'Logout';
+          authLink.href = '/.netlify/functions/auth-logout';
+        }
+        const myLink = document.getElementById('myPilotRepLink');
+        if (myLink && data.characterId) myLink.href = 'my-pilotrep.html';
+        const navLoggedIn = document.getElementById('navLoggedInAs');
+        const navLoggedInLink = document.getElementById('navLoggedInLink');
+        if (navLoggedIn && navLoggedInLink && data.characterId) {
+          navLoggedInLink.textContent = data.characterName;
+          navLoggedInLink.href = 'my-pilotrep.html';
+          navLoggedIn.style.display = 'block';
+        }
+        const navLoginPrompt = document.getElementById('navLoginPrompt');
+        if (navLoginPrompt) navLoginPrompt.style.display = 'none';
+      }
+    } catch (e) {
+      console.warn('Session check failed:', e);
+    }
+  }
+
+  function isLoggedIn() { return currentUser !== null; }
+
+  // Footer "My PilotRep" — if not logged in, prompt instead of landing on a blank profile
+  const myPilotRepLink = document.getElementById('myPilotRepLink');
+  if (myPilotRepLink) {
+    myPilotRepLink.addEventListener('click', (e) => {
+      if (!isLoggedIn()) {
+        e.preventDefault();
+        alert('Log In With EVE Online To View Your PilotRep');
+      }
+    });
+  }
+
+  loadSession();
+
+  // ── SEARCH BAR (nav) ──
+  const searchInput    = document.getElementById('navSearchInput');
+  const searchBtn      = document.getElementById('navSearchBtn');
+  const searchClearBtn = document.getElementById('navSearchClear');
+  const searchDropdown = document.getElementById('searchDropdown');
+
+  let searchTimer;
+
+  searchInput.addEventListener('input', () => {
+    searchClearBtn.style.display = searchInput.value.length ? 'block' : 'none';
+    clearTimeout(searchTimer);
+    const q = searchInput.value.trim();
+    if (q.length < 3) { searchDropdown.style.display = 'none'; return; }
+    searchTimer = setTimeout(() => runSearch(), 300);
+  });
+
+  searchClearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    searchClearBtn.style.display = 'none';
+    searchDropdown.style.display = 'none';
+    searchInput.focus();
+  });
+
+  function goToSearchPage() {
+    const q = searchInput.value.trim();
+    if (q.length < 3) return;
+    window.location.href = `/search.html?q=${encodeURIComponent(q)}`;
+  }
+
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') goToSearchPage();
+  });
+
+  searchBtn.addEventListener('click', goToSearchPage);
+
+  async function runSearch() {
+    const q = searchInput.value.trim();
+    if (q.length < 3) { searchDropdown.style.display = 'none'; return; }
+    try {
+      const res = await fetch(`/.netlify/functions/esi-proxy?action=search&query=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      renderDropdown(data, q);
+    } catch (e) {
+      searchDropdown.style.display = 'none';
+    }
+  }
+
+  function renderDropdown(data, q) {
+    const { characters = [], corporations = [], alliances = [], mode = 'authenticated' } = data;
+    const total = characters.length + corporations.length + alliances.length;
+    const advancedSearchNote = `<div class="search-drop-note">For Advanced Search<br><a href="/.netlify/functions/auth-start">Log In With EVE Online</a></div>`;
+    if (total === 0) {
+      if (mode === 'community' || mode === 'fallback') {
+        searchDropdown.innerHTML = advancedSearchNote;
+        searchDropdown.style.display = 'block';
+      } else {
+        searchDropdown.style.display = 'none';
+      }
+      return;
+    }
+
+    let html = '';
+    if (characters.length) {
+      html += `<div class="search-drop-label">Pilots</div>`;
+      characters.forEach(c => {
+        html += `<a class="search-drop-item" href="/pilot.html?id=${c.id}">
+          <span class="search-drop-name">${c.name}</span>
+          <span class="search-drop-type">Pilot</span>
+        </a>`;
+      });
+    }
+    if (corporations.length) {
+      html += `<div class="search-drop-label">Corporations</div>`;
+      corporations.forEach(c => {
+        html += `<a class="search-drop-item" href="/corporation.html?id=${c.id}">
+          <span class="search-drop-name">${c.name}</span>
+          <span class="search-drop-type">Corp</span>
+        </a>`;
+      });
+    }
+    if (alliances.length) {
+      html += `<div class="search-drop-label">Alliances</div>`;
+      alliances.forEach(a => {
+        html += `<a class="search-drop-item" href="/alliance.html?id=${a.id}">
+          <span class="search-drop-name">${a.name}</span>
+          <span class="search-drop-type">Alliance</span>
+        </a>`;
+      });
+    }
+    if (mode === 'community' || mode === 'fallback') {
+      html += advancedSearchNote;
+    } else {
+      html += `<a class="search-drop-item" href="/search.html?q=${encodeURIComponent(q)}" style="color:var(--cyan);justify-content:center;">
+        See all results for "${q}" →
+      </a>`;
+    }
+
+    searchDropdown.innerHTML = html;
+    searchDropdown.style.display = 'block';
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.nav-search')) searchDropdown.style.display = 'none';
+  });
+
+  // ── MAIN RESULTS (this page's actual job) ──
+  const initialQuery = (new URLSearchParams(window.location.search).get('q') || '').trim();
+  searchInput.value = initialQuery;
+
+  const resultGroups = {
+    pilot:       { wrap: document.getElementById('resultsPilots'),    list: document.getElementById('resultsPilotsList'),    page: 'pilot',       label: 'Pilot' },
+    corporation: { wrap: document.getElementById('resultsCorps'),     list: document.getElementById('resultsCorpsList'),     page: 'corporation', label: 'Corp' },
+    alliance:    { wrap: document.getElementById('resultsAlliances'), list: document.getElementById('resultsAlliancesList'), page: 'alliance',    label: 'Alliance' }
+  };
+
+  async function runMainSearch() {
+    const subtitle    = document.getElementById('resultsSubtitle');
+    const loginBanner = document.getElementById('loginBanner');
+    const emptyEl      = document.getElementById('resultsEmpty');
+    const emptyQueryEl = document.getElementById('resultsEmptyQuery');
+
+    if (initialQuery.length < 3) {
+      subtitle.textContent = 'Enter at least 3 characters to search.';
+      return;
+    }
+    subtitle.innerHTML = `Showing results for &ldquo;<strong>${initialQuery}</strong>&rdquo;`;
+
+    try {
+      const res = await fetch(`/.netlify/functions/esi-proxy?action=search&query=${encodeURIComponent(initialQuery)}&limit=50`);
+      const data = await res.json();
+      const { characters = [], corporations = [], alliances = [], mode = 'authenticated' } = data;
+      const total = characters.length + corporations.length + alliances.length;
+
+      if (mode === 'community' || mode === 'fallback') {
+        loginBanner.style.display = 'block';
+      }
+
+      if (total === 0) {
+        emptyQueryEl.textContent = initialQuery;
+        emptyEl.style.display = 'block';
+        return;
+      }
+
+      const byKey = { pilot: characters, corporation: corporations, alliance: alliances };
+      Object.entries(byKey).forEach(([key, items]) => {
+        if (!items.length) return;
+        const g = resultGroups[key];
+        g.wrap.style.display = 'block';
+        g.list.innerHTML = items.map(item => `
+          <a class="result-item" href="/${g.page}.html?id=${item.id}">
+            <span>${item.name}</span>
+            <span class="result-item-type">${g.label}</span>
+          </a>
+        `).join('');
+      });
+    } catch (e) {
+      subtitle.textContent = 'Something went wrong loading results. Please try again.';
+      console.warn('Main search failed:', e);
+    }
+  }
+
+  runMainSearch();
+
+  // ── EVE TIME CLOCK ──
+  function updateEveTime() {
+    const now = new Date();
+    const h = String(now.getUTCHours()).padStart(2, '0');
+    const m = String(now.getUTCMinutes()).padStart(2, '0');
+    const s = String(now.getUTCSeconds()).padStart(2, '0');
+    document.getElementById('eveTime').textContent = `EVE TIME  ${h}:${m}:${s}`;
+  }
+  updateEveTime();
+  setInterval(updateEveTime, 1000);
+</script>
+</body>
+</html>

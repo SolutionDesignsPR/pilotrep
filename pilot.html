@@ -187,26 +187,26 @@
       color: var(--white);
       font-family: Helvetica, Arial, sans-serif;
       font-size: 13px;
-      padding: 8px 30px 8px 12px;
+      padding: 8px 44px 8px 12px;
       outline: none;
       min-width: 0;
     }
     .nav-search input::placeholder { color: var(--muted); }
-    .nav-search-clear-btn {
+    .nav-search .nav-search-clear-btn {
       position: absolute;
-      right: 36px;
+      right: 48px;
       top: 50%;
       transform: translateY(-50%);
       background: none;
       border: none;
       color: var(--muted);
-      font-size: 18px;
+      font-size: 17px;
       line-height: 1;
       cursor: pointer;
       padding: 4px;
       z-index: 2;
     }
-    .nav-search-clear-btn:hover { color: var(--white); }
+    .nav-search .nav-search-clear-btn:hover { color: var(--white); }
     .nav-search button {
       background: var(--cyan);
       border: 1.5px solid var(--cyan);
@@ -1932,11 +1932,17 @@
     searchInput.focus();
   });
 
+  function goToSearchPage() {
+    const q = searchInput.value.trim();
+    if (q.length < 3) return;
+    window.location.href = `/search.html?q=${encodeURIComponent(q)}`;
+  }
+
   searchInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') runSearch();
+    if (e.key === 'Enter') goToSearchPage();
   });
 
-  searchBtn.addEventListener('click', runSearch);
+  searchBtn.addEventListener('click', goToSearchPage);
 
 
   async function runSearch() {
@@ -1993,10 +1999,13 @@
         </a>`;
       });
     }
-    if (mode === 'community' || mode === 'fallback') html += advancedSearchNote;
-    html += `<a class="search-drop-item" href="/search.html?q=${encodeURIComponent(q)}" style="color:var(--cyan);justify-content:center;">
-      See all results for "${q}" →
-    </a>`;
+    if (mode === 'community' || mode === 'fallback') {
+      html += advancedSearchNote;
+    } else {
+      html += `<a class="search-drop-item" href="/search.html?q=${encodeURIComponent(q)}" style="color:var(--cyan);justify-content:center;">
+        See all results for "${q}" →
+      </a>`;
+    }
 
     searchDropdown.innerHTML = html;
     searchDropdown.style.display = 'block';
