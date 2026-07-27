@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PilotRep — Corporations</title>
+  <title>PilotRep — Alliances</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="alternate icon" href="/favicon.ico" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -240,11 +240,11 @@
       margin: 40px 0 56px;
     }
     .page-title-img { display: block; max-width: 100%; margin: 0 auto; }
-    .page-title-desktop { height: clamp(40px, 6vw, 64px); width: auto; aspect-ratio: 485.92 / 22.13; }
+    .page-title-desktop { height: clamp(40px, 6vw, 64px); width: auto; aspect-ratio: 284.42 / 22.16; }
     .page-title-mobile { display: none; }
     @media (max-width: 640px) {
       .page-title-desktop { display: none; }
-      .page-title-mobile { display: block; height: clamp(90px, 22vw, 130px); width: auto; aspect-ratio: 254.52 / 51.06; }
+      .page-title-mobile { display: block; height: clamp(90px, 22vw, 130px); width: auto; aspect-ratio: 177.14 / 50.42; }
     }
 
     /* ── PILOT LISTS ── */
@@ -459,8 +459,8 @@
 
     <nav class="nav-links">
       <a href="pilot-landing.html">Pilots</a>
-      <a href="corporation-landing.html" class="active">Corporations</a>
-      <a href="alliance-landing.html">Alliances</a>
+      <a href="corporation-landing.html">Corporations</a>
+      <a href="alliance-landing.html" class="active">Alliances</a>
     </nav>
 
     <div class="nav-right">
@@ -480,8 +480,8 @@
 
   <!-- PAGE TITLE -->
   <h1 class="page-title">
-    <img class="page-title-img page-title-desktop" src="assets/images/PR_LP_Corp_RepScores.svg" alt="Corporation RepScores" />
-    <img class="page-title-img page-title-mobile" src="assets/images/PR_LP_Corp_RepScores_M.svg" alt="Corporation RepScores" />
+    <img class="page-title-img page-title-desktop" src="assets/images/PR_LP_Alliance_Repscore.svg" alt="Alliance RepScore" />
+    <img class="page-title-img page-title-mobile" src="assets/images/PR_LP_Alliance_Repscore_M.svg" alt="Alliance RepScore" />
   </h1>
 
   <!-- PILOT LISTS -->
@@ -584,7 +584,7 @@
       ? `<img src="${entry.portrait}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:3px;" />`
       : DEFAULT_AVATAR_SVG;
     return `
-      <a href="/corporation.html?id=${entry.id}" class="pilot-row">
+      <a href="/alliance.html?id=${entry.id}" class="pilot-row">
         <div class="avatar-placeholder">${avatarInner}</div>
         <div class="pilot-info">
           <div class="pilot-name">${entry.name || 'Unknown'}</div>
@@ -608,7 +608,7 @@
 
   async function loadPanel(containerId, dataKey) {
     try {
-      const res = await fetch(`/.netlify/functions/get-leaderboard?type=corporation&limit=5`);
+      const res = await fetch(`/.netlify/functions/get-leaderboard?type=alliance&limit=5`);
       const data = await res.json();
       renderPilotList(containerId, data[dataKey]);
     } catch (e) {
