@@ -100,14 +100,111 @@
       letter-spacing: 0.18em;
       color: var(--white);
       text-transform: uppercase;
+      margin-bottom: 22px;
     }
 
-    .footer-copy {
+    /* ── NOTIFY ME ── */
+    .notify-link {
+      display: inline-block;
+      background: none;
+      border: none;
+      color: var(--cyan);
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      padding: 6px 4px;
+      transition: color 0.15s;
+    }
+    .notify-link:hover { color: #7dd8fa; }
+    .notify-link.is-hidden { display: none; }
+
+    .notify-form {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-top: 6px;
+      width: 100%;
+      max-width: 360px;
+    }
+    .notify-form.is-open { display: flex; }
+
+    .notify-form input {
+      width: 100%;
+      background: rgba(79,195,247,0.08);
+      border: 1.5px solid var(--cyan-dim);
+      border-radius: 4px;
+      color: var(--white);
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      padding: 11px 14px;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .notify-form input::placeholder { color: var(--muted); }
+    .notify-form input:focus {
+      border-color: var(--cyan);
+      background: rgba(79,195,247,0.13);
+    }
+
+    .notify-submit {
+      width: 100%;
+      background: var(--cyan);
+      border: 1.5px solid var(--cyan);
+      border-radius: 4px;
+      color: var(--bg);
+      cursor: pointer;
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 11px 14px;
+      transition: background 0.2s;
+    }
+    .notify-submit:hover { background: #7dd8fa; }
+    .notify-submit:disabled { opacity: 0.6; cursor: default; }
+
+    .notify-error {
+      display: none;
+      font-size: 11px;
+      color: #e8871a;
+      letter-spacing: 0.04em;
+    }
+    .notify-error.is-visible { display: block; }
+
+    .notify-success {
+      display: none;
+      font-size: 13px;
+      color: var(--cyan);
+      letter-spacing: 0.05em;
+      margin-top: 6px;
+      max-width: 360px;
+    }
+    .notify-success.is-visible { display: block; }
+
+    .footer-info {
       position: absolute;
       bottom: 32px;
       left: 0;
       right: 0;
       text-align: center;
+    }
+    .footer-contact {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      margin-bottom: 8px;
+      transition: color 0.15s;
+    }
+    .footer-contact:hover { color: var(--cyan); }
+    .footer-copy {
       font-size: 11px;
       color: var(--muted);
       letter-spacing: 0.05em;
@@ -135,9 +232,85 @@
     </div>
 
     <div class="coming-soon">Coming Soon to New Eden</div>
+
+    <a href="#" class="notify-link" id="notifyLink">Notify Me At Launch</a>
+
+    <form class="notify-form" id="notifyForm" name="notify-signup" data-netlify="true" netlify-honeypot="notify-hp" novalidate>
+      <input type="hidden" name="form-name" value="notify-signup" />
+      <input type="text" name="notify-hp" style="display:none" tabindex="-1" autocomplete="off" />
+      <input type="text" id="notifyName" name="name" placeholder="Pilot Name" autocomplete="off" />
+      <input type="email" id="notifyEmail" name="email" placeholder="Email Address" autocomplete="off" />
+      <div class="notify-error" id="notifyError"></div>
+      <button type="submit" class="notify-submit" id="notifySubmit">Notify Me</button>
+    </form>
+
+    <div class="notify-success" id="notifySuccess">You're on the list, capsuleer. We'll signal you the moment PilotRep goes live.</div>
   </div>
 
-  <div class="footer-copy">&copy; 2026 PilotRep. All rights reserved.</div>
+  <div class="footer-info">
+    <div class="footer-copy">&copy; 2026 PilotRep. All rights reserved.</div>
+  </div>
 
+<script>
+  const notifyLink    = document.getElementById('notifyLink');
+  const notifyForm    = document.getElementById('notifyForm');
+  const notifyName    = document.getElementById('notifyName');
+  const notifyEmail   = document.getElementById('notifyEmail');
+  const notifyError   = document.getElementById('notifyError');
+  const notifySubmit  = document.getElementById('notifySubmit');
+  const notifySuccess = document.getElementById('notifySuccess');
+
+  notifyLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    notifyForm.classList.add('is-open');
+    notifyLink.classList.add('is-hidden');
+    notifyName.focus();
+  });
+
+  function isValidEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
+  notifyForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = notifyName.value.trim();
+    const email = notifyEmail.value.trim();
+
+    if (!name) {
+      notifyError.textContent = 'Please enter your pilot name.';
+      notifyError.classList.add('is-visible');
+      notifyName.focus();
+      return;
+    }
+    if (!isValidEmail(email)) {
+      notifyError.textContent = 'Please enter a valid email address.';
+      notifyError.classList.add('is-visible');
+      notifyEmail.focus();
+      return;
+    }
+    notifyError.classList.remove('is-visible');
+
+    notifySubmit.disabled = true;
+    notifySubmit.textContent = 'Submitting…';
+
+    const formData = new URLSearchParams(new FormData(notifyForm)).toString();
+
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formData
+    })
+      .then(() => {
+        notifyForm.classList.remove('is-open');
+        notifySuccess.classList.add('is-visible');
+      })
+      .catch(() => {
+        notifyError.textContent = 'Something went wrong. Please try again.';
+        notifyError.classList.add('is-visible');
+        notifySubmit.disabled = false;
+        notifySubmit.textContent = 'Notify Me';
+      });
+  });
+</script>
 </body>
 </html>
