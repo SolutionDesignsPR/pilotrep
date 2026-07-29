@@ -93,7 +93,6 @@
       letter-spacing: 0.12em;
       color: var(--muted);
       text-transform: uppercase;
-      padding-left: 5.6px;
     }
     .nav-logged-in a {
       color: var(--cyan);
@@ -1010,9 +1009,9 @@
     </div>
 
     <nav class="nav-links">
-      <a href="pilot.html" class="active">Pilots</a>
-      <a href="corporation.html">Corporations</a>
-      <a href="alliance.html">Alliances</a>
+      <a href="pilot-landing.html">Pilots</a>
+      <a href="corporation-landing.html">Corporations</a>
+      <a href="alliance-landing.html">Alliances</a>
     </nav>
 
     <div class="nav-right">
@@ -1147,6 +1146,7 @@
 <script>
   // ── AUTH GATE ──
   let currentUser = null;
+  let currentCharacterId = null;
 
   async function loadSession() {
     try {
@@ -1154,6 +1154,7 @@
       const data = await res.json();
       if (data.loggedIn) {
         currentUser = data.characterName;
+        currentCharacterId = data.characterId || null;
         // Switch footer link to Logout
         const authLink = document.getElementById('footerAuthLink');
         if (authLink) {
@@ -1196,7 +1197,9 @@
   const shareBtn = document.getElementById('shareBtn');
   const shareToast = document.getElementById('shareToast');
   shareBtn.addEventListener('click', () => {
-    const url = window.location.href;
+    const url = currentCharacterId
+      ? `${window.location.origin}/pilot.html?id=${currentCharacterId}`
+      : window.location.href;
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(url).then(showToast);
     } else {

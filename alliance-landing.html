@@ -536,12 +536,15 @@
 
   // Session check — swap nav to logged-in state if a session exists
   let isLoggedIn = false;
+  let myCharacterId = null;
   (async () => {
     try {
       const res = await fetch('/.netlify/functions/auth-me');
       const data = await res.json();
       if (data.loggedIn) {
         isLoggedIn = true;
+        myCharacterId = data.characterId || null;
+        fixOwnProfileLinks();
         const navLoggedIn = document.getElementById('navLoggedInAs');
         const navLoggedInLink = document.getElementById('navLoggedInLink');
         if (navLoggedIn && navLoggedInLink && data.characterId) {
@@ -604,6 +607,16 @@
       return;
     }
     container.innerHTML = entries.map(buildPilotRow).join('');
+    fixOwnProfileLinks();
+  }
+
+  // Redirect any rendered link pointing at the logged-in user's own pilot.html
+  // profile to their dedicated my-pilotrep.html page instead.
+  function fixOwnProfileLinks() {
+    if (!myCharacterId) return;
+    document.querySelectorAll(`a[href="/pilot.html?id=${myCharacterId}"]`).forEach(a => {
+      a.href = 'my-pilotrep.html';
+    });
   }
 
   async function loadPanel(containerId, dataKey) {

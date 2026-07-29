@@ -673,12 +673,15 @@
 
   // Session check — swap login button to character name if already logged in
   let isLoggedIn = false;
+  let myCharacterId = null;
   (async () => {
     try {
       const res = await fetch('/.netlify/functions/auth-me');
       const data = await res.json();
       if (data.loggedIn) {
         isLoggedIn = true;
+        myCharacterId = data.characterId || null;
+        fixOwnProfileLinks();
         const btn = document.getElementById('heroLoginBtn');
         if (btn) {
           btn.textContent = data.characterName;
@@ -858,6 +861,16 @@
       return;
     }
     container.innerHTML = entries.map(e => buildPilotRow(e, type)).join('');
+    fixOwnProfileLinks();
+  }
+
+  // Redirect any rendered link pointing at the logged-in user's own pilot.html
+  // profile to their dedicated my-pilotrep.html page instead.
+  function fixOwnProfileLinks() {
+    if (!myCharacterId) return;
+    document.querySelectorAll(`a[href="/pilot.html?id=${myCharacterId}"]`).forEach(a => {
+      a.href = 'my-pilotrep.html';
+    });
   }
 
   async function loadPanel(panelKey, containerId, dataKey, type) {
