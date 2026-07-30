@@ -975,16 +975,61 @@
       font-size: 14px;
       padding: 40px 20px;
     }
-    .results-group { margin-bottom: 36px; }
-    .results-group-label {
-      font-size: 12px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--cyan-dim);
-      margin-bottom: 10px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border);
+    .results-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 20px;
     }
+    .tab-row {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      padding: 8px 14px 0;
+      background: var(--panel);
+    }
+    .tab-btn {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-align: center;
+      color: var(--cyan-dim);
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 6px 6px 0 0;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: color 0.15s, background 0.15s;
+    }
+    .tab-btn:hover { color: var(--cyan); }
+    .tab-btn.active {
+      color: var(--white);
+      font-weight: 600;
+      background: var(--panel);
+      border-bottom: 1px solid var(--panel);
+      margin-bottom: -1px;
+    }
+    .tab-row + .results-list {
+      border-top: 1px solid var(--border);
+    }
+    .see-all-wrap { text-align: center; margin-top: 18px; }
+    .see-all-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 8px 18px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .see-all-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
     .results-list { display: flex; flex-direction: column; }
     .result-item {
       display: flex;
@@ -1058,19 +1103,13 @@
       No results found for "<span id="resultsEmptyQuery"></span>". Try a different name, or check the spelling.
     </div>
 
-    <div id="resultsPilots" class="results-group" style="display:none;">
-      <div class="results-group-label">Pilots</div>
-      <div class="results-list" id="resultsPilotsList"></div>
+    <div id="resultsPanel" class="results-panel" style="display:none;">
+      <div class="tab-row" id="resultsTabRow"></div>
+      <div class="results-list" id="resultsList"></div>
     </div>
 
-    <div id="resultsCorps" class="results-group" style="display:none;">
-      <div class="results-group-label">Corporations</div>
-      <div class="results-list" id="resultsCorpsList"></div>
-    </div>
-
-    <div id="resultsAlliances" class="results-group" style="display:none;">
-      <div class="results-group-label">Alliances</div>
-      <div class="results-list" id="resultsAlliancesList"></div>
+    <div class="see-all-wrap" id="resultsSeeAllWrap" style="display:none;">
+      <button class="see-all-btn" id="resultsSeeAllBtn">▾ Show More</button>
     </div>
   </section>
 
@@ -1251,11 +1290,65 @@
   const initialQuery = (new URLSearchParams(window.location.search).get('q') || '').trim();
   searchInput.value = initialQuery;
 
-  const resultGroups = {
-    pilot:       { wrap: document.getElementById('resultsPilots'),    list: document.getElementById('resultsPilotsList'),    page: 'pilot',       label: 'Pilot' },
-    corporation: { wrap: document.getElementById('resultsCorps'),     list: document.getElementById('resultsCorpsList'),     page: 'corporation', label: 'Corp' },
-    alliance:    { wrap: document.getElementById('resultsAlliances'), list: document.getElementById('resultsAlliancesList'), page: 'alliance',    label: 'Alliance' }
+  const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  const CATEGORY_META = {
+    pilot:       { label: 'Pilots',        page: 'pilot',       itemLabel: 'Pilot' },
+    corporation: { label: 'Corporations',  page: 'corporation', itemLabel: 'Corp' },
+    alliance:    { label: 'Alliances',     page: 'alliance',    itemLabel: 'Alliance' }
   };
+  const RESULTS_VISIBLE_LIMIT = 25;
+  const RESULTS_STEP = 25;
+
+  let resultsData = { pilot: [], corporation: [], alliance: [] };
+  let activeCategory = null;
+  let visibleCounts = { pilot: RESULTS_VISIBLE_LIMIT, corporation: RESULTS_VISIBLE_LIMIT, alliance: RESULTS_VISIBLE_LIMIT };
+
+  const resultsPanelEl    = document.getElementById('resultsPanel');
+  const resultsTabRowEl   = document.getElementById('resultsTabRow');
+  const resultsListEl     = document.getElementById('resultsList');
+  const resultsSeeAllWrapEl = document.getElementById('resultsSeeAllWrap');
+  const resultsSeeAllBtnEl  = document.getElementById('resultsSeeAllBtn');
+
+  function renderResultsList() {
+    const items = resultsData[activeCategory] || [];
+    const meta = CATEGORY_META[activeCategory];
+    const visibleCount = visibleCounts[activeCategory];
+    const visible = items.slice(0, visibleCount);
+
+    resultsListEl.innerHTML = visible.map(item => `
+      <a class="result-item" href="/${meta.page}.html?id=${item.id}">
+        <span>${escapeHtml(item.name)}</span>
+        <span class="result-item-type">${meta.itemLabel}</span>
+      </a>
+    `).join('');
+
+    if (items.length > visibleCount) {
+      resultsSeeAllWrapEl.style.display = 'block';
+      resultsSeeAllBtnEl.textContent = '▾ Show More';
+    } else if (items.length > RESULTS_VISIBLE_LIMIT) {
+      resultsSeeAllWrapEl.style.display = 'block';
+      resultsSeeAllBtnEl.textContent = '▴ Show Less';
+    } else {
+      resultsSeeAllWrapEl.style.display = 'none';
+    }
+  }
+
+  function switchCategory(key) {
+    activeCategory = key;
+    resultsTabRowEl.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.type === key));
+    renderResultsList();
+  }
+
+  resultsSeeAllBtnEl.addEventListener('click', () => {
+    const items = resultsData[activeCategory] || [];
+    if (visibleCounts[activeCategory] < items.length) {
+      visibleCounts[activeCategory] = Math.min(visibleCounts[activeCategory] + RESULTS_STEP, items.length);
+    } else {
+      visibleCounts[activeCategory] = RESULTS_VISIBLE_LIMIT;
+    }
+    renderResultsList();
+  });
 
   async function runMainSearch() {
     const subtitle    = document.getElementById('resultsSubtitle');
@@ -1267,10 +1360,10 @@
       subtitle.textContent = 'Enter at least 3 characters to search.';
       return;
     }
-    subtitle.innerHTML = `Showing results for &ldquo;<strong>${initialQuery}</strong>&rdquo;`;
+    subtitle.innerHTML = `Showing results for &ldquo;<strong>${escapeHtml(initialQuery)}</strong>&rdquo;`;
 
     try {
-      const res = await fetch(`/.netlify/functions/esi-proxy?action=search&query=${encodeURIComponent(initialQuery)}&limit=50`);
+      const res = await fetch(`/.netlify/functions/esi-proxy?action=search&query=${encodeURIComponent(initialQuery)}&limit=75`);
       const data = await res.json();
       const { characters = [], corporations = [], alliances = [], mode = 'authenticated' } = data;
       const total = characters.length + corporations.length + alliances.length;
@@ -1285,18 +1378,18 @@
         return;
       }
 
-      const byKey = { pilot: characters, corporation: corporations, alliance: alliances };
-      Object.entries(byKey).forEach(([key, items]) => {
-        if (!items.length) return;
-        const g = resultGroups[key];
-        g.wrap.style.display = 'block';
-        g.list.innerHTML = items.map(item => `
-          <a class="result-item" href="/${g.page}.html?id=${item.id}">
-            <span>${item.name}</span>
-            <span class="result-item-type">${g.label}</span>
-          </a>
-        `).join('');
+      resultsData = { pilot: characters, corporation: corporations, alliance: alliances };
+
+      const activeCats = Object.keys(CATEGORY_META).filter(key => resultsData[key].length > 0);
+      resultsTabRowEl.innerHTML = activeCats.map((key, i) => `
+        <button class="tab-btn${i === 0 ? ' active' : ''}" data-type="${key}">${CATEGORY_META[key].label}</button>
+      `).join('');
+      resultsTabRowEl.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchCategory(btn.dataset.type));
       });
+
+      resultsPanelEl.style.display = 'block';
+      switchCategory(activeCats[0]);
     } catch (e) {
       subtitle.textContent = 'Something went wrong loading results. Please try again.';
       console.warn('Main search failed:', e);

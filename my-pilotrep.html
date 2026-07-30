@@ -175,11 +175,26 @@
       color: var(--white);
       font-family: Helvetica, Arial, sans-serif;
       font-size: 13px;
-      padding: 8px 12px;
+      padding: 8px 44px 8px 12px;
       outline: none;
       min-width: 0;
     }
     .nav-search input::placeholder { color: var(--muted); }
+    .nav-search .nav-search-clear-btn {
+      position: absolute;
+      right: 48px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 4px;
+      z-index: 2;
+    }
+    .nav-search .nav-search-clear-btn:hover { color: var(--white); }
     .nav-search button {
       background: var(--cyan);
       border: 1.5px solid var(--cyan);
@@ -563,9 +578,9 @@
     .comment-row.neg     { background: var(--grade-d); }
     .comment-row.pos     { background: var(--grade-a); }
     .comment-row.neutral { background: var(--grade-b); }
-    .comment-row.has-votes { align-items: flex-end; }
-    .rep-row-right.has-votes { align-items: flex-end; }
-    .rep-vote-col { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .comment-row.has-votes { align-items: stretch; }
+    .rep-row-right.has-votes { align-items: center; height: 100%; }
+    .rep-vote-col { display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 5px; height: 100%; }
     .vote-row { display: flex; align-items: center; gap: 10px; }
     .vote-btn {
       display: flex;
@@ -1017,6 +1032,7 @@
     <div class="nav-right">
       <div class="nav-search" style="position:relative;">
         <input type="text" id="navSearchInput" placeholder="Search for Pilots, Corporations and Alliances" autocomplete="off" />
+        <button id="navSearchClear" class="nav-search-clear-btn" aria-label="Clear search" type="button" style="display:none;">&times;</button>
         <button id="navSearchBtn" aria-label="Search">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -1716,23 +1732,38 @@
   // ── SEARCH BAR ────────────────────────────────────────────────────────────
   const searchInput    = document.getElementById('navSearchInput');
   const searchBtn      = document.getElementById('navSearchBtn');
+  const searchClearBtn = document.getElementById('navSearchClear');
   const searchDropdown = document.getElementById('searchDropdown');
 
 
   let searchTimer;
 
   searchInput.addEventListener('input', () => {
+    searchClearBtn.style.display = searchInput.value.length ? 'block' : 'none';
     clearTimeout(searchTimer);
     const q = searchInput.value.trim();
     if (q.length < 3) { searchDropdown.style.display = 'none'; return; }
     searchTimer = setTimeout(() => runSearch(), 300);
   });
 
-  searchInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') runSearch();
+  searchClearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    searchClearBtn.style.display = 'none';
+    searchDropdown.style.display = 'none';
+    searchInput.focus();
   });
 
-  searchBtn.addEventListener('click', runSearch);
+  function goToSearchPage() {
+    const q = searchInput.value.trim();
+    if (q.length < 3) return;
+    window.location.href = `/search.html?q=${encodeURIComponent(q)}`;
+  }
+
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') goToSearchPage();
+  });
+
+  searchBtn.addEventListener('click', goToSearchPage);
 
 
   async function runSearch() {
