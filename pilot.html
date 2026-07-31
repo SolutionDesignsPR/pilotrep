@@ -290,11 +290,17 @@
       padding: 0 24px;
       flex-wrap: wrap;
     }
+    .pilot-portrait-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      min-width: 65px;
+    }
     .pilot-portrait {
       width: auto;
-      height: auto;
+      height: 50%;
       aspect-ratio: 1 / 1;
-      min-width: 130px;
       border-radius: 4px;
       object-fit: cover;
       background: linear-gradient(135deg, #0e1a2b 0%, #1a2a40 100%);
@@ -992,8 +998,10 @@
 
   <!-- PILOT HEADER -->
   <section class="pilot-header">
-    <img class="pilot-portrait" id="pilotPortrait" src="" alt="" style="display:none;" />
-    <div class="pilot-portrait" id="pilotPortraitPlaceholder"></div>
+    <div class="pilot-portrait-wrap">
+      <img class="pilot-portrait" id="pilotPortrait" src="" alt="" style="display:none;" />
+      <div class="pilot-portrait" id="pilotPortraitPlaceholder"></div>
+    </div>
     <div class="pilot-header-info">
       <div class="pilot-header-name" id="pilotName">—</div>
       <div class="pilot-header-details" id="pilotDetails"></div>
