@@ -234,7 +234,6 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
-    .pilot-portrait img { width: 170px; height: 200px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border); }
     .nav-search-sub {
       font-size: 11px;
       color: var(--muted);
@@ -254,7 +253,7 @@
     /* ── PILOT HEADER ── */
     .pilot-header {
       display: flex;
-      align-items: stretch;
+      align-items: center;
       justify-content: center;
       gap: 36px;
       max-width: 960px;
@@ -262,17 +261,9 @@
       padding: 0 24px;
       flex-wrap: wrap;
     }
-    .pilot-portrait-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      min-width: 65px;
-    }
     .pilot-portrait {
-      width: auto;
-      height: 50%;
-      aspect-ratio: 1 / 1;
+      width: 130px;
+      height: 130px;
       border-radius: 4px;
       object-fit: cover;
       background: linear-gradient(135deg, #0e1a2b 0%, #1a2a40 100%);
@@ -587,9 +578,8 @@
     .comment-row.pos     { background: var(--grade-a); }
     .comment-row.neutral { background: var(--grade-b); }
     .comment-row.has-votes { align-items: stretch; }
-    .rep-row-right.has-votes { align-items: stretch; }
-    .rep-row-right.has-votes .rep-grade-badge { align-self: center; }
-    .rep-vote-col { display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 5px; height: auto; }
+    .rep-row-right.has-votes { align-items: center; height: 100%; }
+    .rep-vote-col { display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 5px; height: 100%; }
     .vote-row { display: flex; align-items: center; gap: 10px; }
     .vote-btn {
       display: flex;
@@ -973,8 +963,9 @@
     .legal-note a { color: var(--cyan); text-decoration: none; }
 
     .site-footer {
-      margin-top: 60px;
-      padding: 30px 24px 40px;
+      margin-top: 40px;
+      padding: 32px 24px 40px;
+      border-top: 1px solid var(--border);
       text-align: center;
     }
     .footer-grid {
@@ -1019,7 +1010,6 @@
       .panels-section { grid-template-columns: 1fr; }
       .pilot-header { text-align: center; justify-content: center; }
       .pilot-header-info { text-align: center; }
-      .pilot-portrait { width: 130px; height: 130px; aspect-ratio: auto; min-width: 0; }
       .nav-links { order: 3; width: 100%; }
       .nav-right { align-items: center; width: 100%; }
     }
@@ -1075,10 +1065,8 @@
 
   <!-- PILOT HEADER -->
   <section class="pilot-header">
-    <div class="pilot-portrait-wrap">
-      <img class="pilot-portrait" id="pilotPortrait" src="" alt="" style="display:none;" />
-      <div class="pilot-portrait" id="pilotPortraitPlaceholder"></div>
-    </div>
+    <img class="pilot-portrait" id="pilotPortrait" src="" alt="" style="display:none;" />
+    <div class="pilot-portrait" id="pilotPortraitPlaceholder"></div>
     <div class="pilot-header-info">
       <div class="pilot-header-name" id="pilotName">—</div>
       <div class="pilot-header-details" id="pilotDetails"></div>
