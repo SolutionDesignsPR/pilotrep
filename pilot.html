@@ -573,6 +573,79 @@
     }
     .validation-toast.show { opacity: 1; }
 
+    .confirm-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      z-index: 9990;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .confirm-overlay.show { display: flex; }
+    .confirm-modal {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 28px 26px;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+    }
+    .confirm-modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 14px;
+    }
+    .confirm-modal-summary {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .confirm-modal-summary strong { color: var(--cyan); font-weight: 600; }
+    .confirm-modal-check {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      margin-bottom: 22px;
+    }
+    .confirm-modal-check input[type="checkbox"] {
+      accent-color: var(--cyan);
+      width: 13px;
+      height: 13px;
+      cursor: pointer;
+    }
+    .confirm-modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+    .confirm-modal-actions .submit-btn { padding: 12px 28px; }
+    .confirm-cancel-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 12px 28px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .confirm-cancel-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
+
     .comments-list {
       border-radius: 4px;
       overflow: hidden;
@@ -591,8 +664,9 @@
     .comment-row.pos     { background: var(--grade-a); }
     .comment-row.neutral { background: var(--grade-b); }
     .comment-row.has-votes { align-items: stretch; }
-    .rep-row-right.has-votes { align-items: center; height: 100%; }
-    .rep-vote-col { display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 5px; height: 100%; }
+    .rep-row-right.has-votes { align-items: stretch; }
+    .rep-row-right.has-votes .rep-grade-badge { align-self: center; }
+    .rep-vote-col { display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 5px; height: auto; }
     .vote-row { display: flex; align-items: center; gap: 10px; }
     .vote-btn {
       display: flex;
@@ -1128,6 +1202,20 @@
   <!-- SHARE TOAST -->
   <div class="share-toast" id="shareToast">Link Copied!</div>
   <div class="validation-toast" id="validationToast"></div>
+
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-modal">
+      <div class="confirm-modal-title">Confirm Your Rep</div>
+      <div class="confirm-modal-summary" id="confirmModalSummary"></div>
+      <label class="confirm-modal-check">
+        <input type="checkbox" id="confirmHideCheck"> Don't Show This Again
+      </label>
+      <div class="confirm-modal-actions">
+        <button type="button" class="confirm-cancel-btn" id="confirmCancelBtn">Cancel</button>
+        <button type="button" class="submit-btn" id="confirmSubmitBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
 
   <!-- FOOTER -->
   <footer class="site-footer">
@@ -1749,6 +1837,40 @@
     if (!selectedDot) { showValidation('Select A Grade'); return; }
     if (!selectedSys) { showValidation('Select A System'); return; }
 
+    if (localStorage.getItem('hideRepConfirm')) {
+      performSubmitRep(selectedDot, selectedSys);
+    } else {
+      openConfirmModal(selectedDot, selectedSys);
+    }
+  });
+
+  const confirmOverlay      = document.getElementById('confirmOverlay');
+  const confirmModalSummary = document.getElementById('confirmModalSummary');
+  const confirmHideCheck    = document.getElementById('confirmHideCheck');
+  const confirmCancelBtn    = document.getElementById('confirmCancelBtn');
+  const confirmSubmitBtn    = document.getElementById('confirmSubmitBtn');
+
+  function openConfirmModal(selectedDot, selectedSys) {
+    const grade   = selectedDot.dataset.grade;
+    const system  = selectedSys.textContent.trim();
+    const comment = commentInput.value.trim();
+    confirmModalSummary.innerHTML = `Grade: <strong>${grade}</strong> &nbsp;•&nbsp; System: <strong>${system}</strong>` +
+      (comment ? `<br>"${escapeHtml(comment)}"` : '');
+    confirmHideCheck.checked = false;
+    confirmOverlay.classList.add('show');
+    confirmSubmitBtn.onclick = () => {
+      if (confirmHideCheck.checked) localStorage.setItem('hideRepConfirm', 'true');
+      confirmOverlay.classList.remove('show');
+      performSubmitRep(selectedDot, selectedSys);
+    };
+  }
+
+  confirmCancelBtn.addEventListener('click', () => confirmOverlay.classList.remove('show'));
+  confirmOverlay.addEventListener('click', (e) => {
+    if (e.target === confirmOverlay) confirmOverlay.classList.remove('show');
+  });
+
+  async function performSubmitRep(selectedDot, selectedSys) {
     const grade = selectedDot.dataset.grade;
 
     submitBtn.disabled = true;
@@ -1806,7 +1928,7 @@
 
     submitBtn.disabled = false;
     submitBtn.textContent = 'Submit A Rep';
-  });
+  }
 
   // ── LOAD PILOT DATA FROM ESI + SUPABASE ──────────────────────────────────
   (async () => {

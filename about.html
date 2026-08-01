@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About — PilotRep</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="alternate icon" href="/favicon.ico" />
@@ -12,55 +12,31 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:       #04080f;
-      --white:    #e8eef5;
-      --cyan:     #4fc3f7;
-      --cyan-dim: #2a8bbf;
-      --muted:    #5a7490;
+      --bg:        #04080f;
+      --bg2:       #0b1220;
+      --bg3:       #101b2e;
+      --panel:     #0e1a2b;
+      --panel2:    #121f33;
+      --border:    rgba(100,180,255,0.10);
+      --cyan:      #4fc3f7;
+      --cyan-dim:  #2a8bbf;
+      --orange:    #e8871a;
+      --white:     #e8eef5;
+      --muted:     #5a7490;
     }
+
+    html { scroll-behavior: smooth; }
 
     body {
-      background-color: var(--bg);
+      background: var(--bg);
       color: var(--white);
       font-family: Helvetica, Arial, sans-serif;
+      font-weight: 400;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      overflow-x: hidden;
     }
 
-    /* ── Starfield ── */
-    .starfield {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      background:
-        radial-gradient(ellipse 80% 60% at 50% 20%, rgba(30,60,120,0.35) 0%, transparent 70%),
-        radial-gradient(ellipse 60% 40% at 70% 60%, rgba(20,40,80,0.20) 0%, transparent 60%);
-    }
-    .starfield::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.7) 0%, transparent 100%),
-        radial-gradient(1px 1px at 25% 40%, rgba(255,255,255,0.5) 0%, transparent 100%),
-        radial-gradient(1.5px 1.5px at 40% 10%, rgba(255,255,255,0.6) 0%, transparent 100%),
-        radial-gradient(1px 1px at 55% 75%, rgba(255,255,255,0.4) 0%, transparent 100%),
-        radial-gradient(1px 1px at 70% 30%, rgba(255,255,255,0.6) 0%, transparent 100%),
-        radial-gradient(1.5px 1.5px at 80% 55%, rgba(255,255,255,0.5) 0%, transparent 100%),
-        radial-gradient(1px 1px at 90% 20%, rgba(255,255,255,0.7) 0%, transparent 100%),
-        radial-gradient(1px 1px at 15% 80%, rgba(255,255,255,0.4) 0%, transparent 100%),
-        radial-gradient(1px 1px at 60% 50%, rgba(255,255,255,0.3) 0%, transparent 100%),
-        radial-gradient(1px 1px at 35% 65%, rgba(255,255,255,0.5) 0%, transparent 100%),
-        radial-gradient(1px 1px at 85% 85%, rgba(255,255,255,0.4) 0%, transparent 100%),
-        radial-gradient(1px 1px at 5%  50%, rgba(255,255,255,0.6) 0%, transparent 100%),
-        radial-gradient(1px 1px at 95% 45%, rgba(255,255,255,0.4) 0%, transparent 100%),
-        radial-gradient(1px 1px at 48% 88%, rgba(255,255,255,0.5) 0%, transparent 100%),
-        radial-gradient(1px 1px at 20% 25%, rgba(200,230,255,0.4) 0%, transparent 100%);
-    }
-
-    .page { position: relative; z-index: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .page { position: relative; z-index: 1; }
 
     /* ── TOP NAV — matches pilot.html exactly ── */
     .topnav {
@@ -73,6 +49,7 @@
       position: relative;
     }
     .nav-logo {
+      font-family: Helvetica, Arial, sans-serif;
       font-size: 24px;
       font-weight: 700;
       letter-spacing: 0.06em;
@@ -93,7 +70,6 @@
       letter-spacing: 0.12em;
       color: var(--muted);
       text-transform: uppercase;
-      padding-left: 2px;
     }
     .nav-logged-in a {
       color: var(--cyan);
@@ -101,6 +77,18 @@
       transition: color 0.15s;
     }
     .nav-logged-in a:hover { color: var(--white); }
+    .nav-login-prompt {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .nav-login-prompt:hover { color: var(--white); }
     .nav-links {
       display: inline-flex;
       gap: 0;
@@ -130,10 +118,9 @@
       color: var(--cyan);
       border-color: var(--cyan);
       background: rgba(79,195,247,0.08);
-      pointer-events: none;
     }
+    .nav-links a.active:hover { color: #7dd8fa; border-color: var(--cyan); }
     .nav-links a:hover:not(.active) { color: var(--cyan); border-color: var(--cyan-dim); }
-
 
     .nav-right {
       display: flex;
@@ -141,6 +128,28 @@
       align-items: flex-end;
       gap: 8px;
     }
+    .eve-login-sm {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #1a1a2e;
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: 4px;
+      color: var(--white);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 8px 14px;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: border-color 0.2s, background 0.2s;
+      white-space: nowrap;
+    }
+    .eve-login-sm:hover { border-color: var(--cyan); background: rgba(79,195,247,0.08); }
+    .eve-logo-sm { font-weight: 700; font-size: 13px; letter-spacing: 0.15em; }
+    .eve-divider-sm { width: 1px; height: 14px; background: rgba(255,255,255,0.2); }
+
     .nav-search {
       display: flex;
       align-items: center;
@@ -155,11 +164,26 @@
       color: var(--white);
       font-family: Helvetica, Arial, sans-serif;
       font-size: 13px;
-      padding: 8px 12px;
+      padding: 8px 44px 8px 12px;
       outline: none;
       min-width: 0;
     }
     .nav-search input::placeholder { color: var(--muted); }
+    .nav-search .nav-search-clear-btn {
+      position: absolute;
+      right: 48px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 4px;
+      z-index: 2;
+    }
+    .nav-search .nav-search-clear-btn:hover { color: var(--white); }
     .nav-search button {
       background: var(--cyan);
       border: 1.5px solid var(--cyan);
@@ -171,6 +195,45 @@
       align-items: center;
     }
     .nav-search svg { width: 14px; height: 14px; }
+    .search-drop-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--white);
+      border-bottom: 1px solid rgba(79,195,247,0.08);
+      text-decoration: none;
+    }
+    .search-drop-item:last-child { border-bottom: none; }
+    .search-drop-item:hover { background: rgba(79,195,247,0.1); }
+    .search-drop-label {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 8px 14px 4px;
+      border-bottom: 1px solid rgba(79,195,247,0.08);
+    }
+    .search-drop-name { flex: 1; }
+    .search-drop-type {
+      font-size: 10px;
+      color: var(--cyan);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .search-drop-note {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      padding: 12px 14px;
+      text-align: center;
+      border-top: 1px solid rgba(79,195,247,0.08);
+      line-height: 1.6;
+    }
+    .search-drop-note a { color: var(--cyan); text-decoration: none; font-weight: 600; }
+    .search-drop-note a:hover { color: #7dd8fa; }
     .nav-search-sub {
       font-size: 11px;
       color: var(--muted);
@@ -179,7 +242,7 @@
       padding-left: 12px;
     }
 
-    /* ── PAGE TITLE — matches pilot.html scale/weight ── */
+    /* ── PAGE TITLE (text style — About has no logo asset, unlike pilot.html) ── */
     .page-title {
       text-align: center;
       font-size: clamp(28px, 4vw, 40px);
@@ -190,7 +253,7 @@
       margin: 36px 0 40px;
     }
 
-    /* ── ABOUT PANEL ── */
+    /* ── ABOUT PANEL — styling carried over from the original about.html ── */
     main {
       flex: 1;
       display: flex;
@@ -218,16 +281,55 @@
       text-transform: uppercase;
       margin-bottom: 1.6em;
     }
+    .about-panel .lead:not(:first-child) { margin-top: 1.8em; }
 
     .about-panel p {
       font-size: 0.9rem;
+      line-height: calc(0.9rem + 2.5px);
       color: #8aaabb;
       margin-bottom: 1.2em;
     }
     .about-panel p:last-child { margin-bottom: 0; }
     .about-panel strong { color: var(--cyan); }
 
-    /* ── LOGIN BUTTON below panel — matches pilot.html style ── */
+    .about-panel .feature-list {
+      text-align: left;
+      max-width: 560px;
+      margin: 0 auto 1.2em;
+    }
+    .about-panel .feature-list p {
+      margin-bottom: 0.9em;
+    }
+    .about-panel .feature-list p:last-child { margin-bottom: 0; }
+    .about-panel .feature-list .feature-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--cyan);
+      margin-bottom: 0.25em;
+    }
+    .about-panel .feature-list .feature-desc {
+      line-height: calc(0.9rem + 2.5px);
+      margin-bottom: 1.1em;
+    }
+    .about-panel .feature-list .feature-desc:last-child { margin-bottom: 0; }
+
+    .about-panel .legal-copy {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 1.8em;
+    }
+
+    /* Hidden easter-egg link — must be visually indistinguishable from surrounding text */
+    .about-panel a.hidden-link,
+    .about-panel a.hidden-link:hover,
+    .about-panel a.hidden-link:visited {
+      color: inherit;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    /* ── LOGIN BUTTON below panel ── */
     .about-login-wrap {
       max-width: 720px;
       width: 100%;
@@ -235,27 +337,6 @@
       justify-content: center;
       padding: 28px 0 60px;
     }
-    .eve-login-sm {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #1a1a2e;
-      border: 1.5px solid rgba(255,255,255,0.15);
-      border-radius: 4px;
-      color: var(--white);
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      padding: 8px 14px;
-      text-decoration: none;
-      text-transform: uppercase;
-      transition: border-color 0.2s, background 0.2s;
-      white-space: nowrap;
-    }
-    .eve-login-sm:hover { border-color: var(--cyan); background: rgba(79,195,247,0.08); }
-    .eve-logo-sm { font-weight: 700; font-size: 13px; letter-spacing: 0.15em; }
-    .eve-divider-sm { width: 1px; height: 14px; background: rgba(255,255,255,0.2); }
 
     /* ── LEGAL + FOOTER — matches pilot.html exactly ── */
     .legal-note {
@@ -266,19 +347,23 @@
       font-size: 12px;
       color: var(--muted);
     }
+    .legal-note a { color: var(--cyan); text-decoration: none; }
 
     .site-footer {
-      margin-top: 60px;
-      padding: 30px 24px 40px;
+      margin-top: 40px;
+      padding: 32px 24px 40px;
+      border-top: 1px solid var(--border);
       text-align: center;
     }
     .footer-grid {
       display: inline-grid;
-      grid-template-columns: repeat(4, auto);
-      gap: 10px 40px;
+      grid-template-columns: repeat(3, auto);
+      gap: 20px 64px;
       justify-content: center;
       text-align: center;
-      margin-bottom: 40px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 28px;
     }
     .footer-grid a {
       font-size: 12px;
@@ -307,6 +392,7 @@
       color: var(--muted);
       letter-spacing: 0.05em;
     }
+
     .validation-toast {
       position: fixed;
       bottom: 28px;
@@ -326,90 +412,123 @@
       z-index: 9999;
     }
     .validation-toast.show { opacity: 1; }
+
+    @media (max-width: 640px) {
+      .about-panel { padding: 32px 24px; }
+    }
   </style>
 </head>
 <body>
 
-  <div class="starfield"></div>
+<div class="page">
 
-  <div class="page">
-
-    <!-- TOP NAV -->
-    <header class="topnav">
-      <div class="nav-left">
-      <a href="index.html" class="nav-logo"><img src="/assets/images/PilotRep_Logo_NavBar.svg" alt="Pilot Rep" style="height:38px;width:auto;display:block;" /></a>
+  <!-- TOP NAV -->
+  <header class="topnav">
+    <div class="nav-left">
+      <a href="index.html" class="nav-logo"><img src="assets/images/PilotRep_Logo_NavBar.svg" alt="Pilot Rep" style="height:38px;width:auto;display:block;" /></a>
       <div class="nav-logged-in" id="navLoggedInAs">LOGGED IN AS &nbsp;<a href="pilot.html" id="navLoggedInLink">—</a></div>
+      <a href="#" class="nav-login-prompt" id="navLoginPrompt" onclick="event.preventDefault(); window.location.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname+window.location.search);">Log In With EVE Online</a>
     </div>
 
-      <nav class="nav-links">
-        <a href="pilot.html">Pilots</a>
-        <a href="corporation.html">Corporations</a>
-        <a href="alliance.html">Alliances</a>
-      </nav>
+    <nav class="nav-links">
+      <a href="pilot-landing.html">Pilots</a>
+      <a href="corporation-landing.html">Corporations</a>
+      <a href="alliance-landing.html">Alliances</a>
+    </nav>
 
-      <div class="nav-right">
-        <div class="nav-search">
-          <input type="text" placeholder="Search Pilots, Corps and Alliances" id="searchInput" />
-          <button aria-label="Search" onclick="doSearch()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-          </button>
-        </div>
-        <div class="nav-search-sub">Search New Eden. Rate Encounters.</div>
+    <div class="nav-right">
+      <div class="nav-search" style="position:relative;">
+        <input type="text" id="navSearchInput" placeholder="Search for Pilots, Corporations and Alliances" autocomplete="off" />
+        <button id="navSearchClear" class="nav-search-clear-btn" aria-label="Clear search" type="button" style="display:none;">&times;</button>
+        <button id="navSearchBtn" aria-label="Search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </button>
+        <div id="searchDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#0e1a2b;border:1px solid var(--cyan-dim);border-radius:0 0 6px 6px;z-index:999;max-height:360px;overflow-y:auto;"></div>
       </div>
-    </header>
+      <div class="nav-search-sub">Search New Eden. Rate Encounters.</div>
+    </div>
+  </header>
 
-    <!-- PAGE TITLE -->
-    <h1 class="page-title">About</h1>
+  <!-- PAGE TITLE -->
+  <h1 class="page-title">About</h1>
 
-    <!-- MAIN -->
-    <main>
-      <div class="about-panel">
-        <p class="lead">Reputation Precedes You</p>
-        <p>
-          <strong>PilotRep</strong> is a third-party reputation platform built for the pilots, corporations and alliances of New Eden. In a universe where trust is a currency and betrayal is a profession knowing who you're flying with matters.
-        </p>
-        <p>
-          We give the EVE Online community a neutral structured space to record and review their encounters. From reliable logistics runners to known scammers, war criminals to stalwart allies. Every rep submitted is a data point in a living record of New Eden's social fabric.
-        </p>
-        <p>
-          PilotRep is not affiliated with Fenris Creations. We are an independent fan project operating under the EVE Online Third-Party Developer license. All EVE-related assets remain the property of Fenris Creations.
-        </p>
+  <!-- MAIN -->
+  <main>
+    <div class="about-panel">
+      <p class="lead">Reputation Precedes You</p>
+      <p>
+        In a universe where trust is currency and betrayal is a profession, PilotRep serves the Pilots, Corporations and Alliances of New Eden by letting you know exactly who is flying next to you.
+      </p>
+      <p>
+        We provide the EVE Online community with a neutral and structured space to rate their encounters. From reliable logistics runners and mercenary outfits to known scammers, war criminals, <a href="pilot.html?id=2123973144" class="hidden-link">thieves</a> and stalwart allies, every rep left is a data point in a living record of New Eden's social fabric.
+      </p>
+
+      <p class="lead">Built for Pilots by a Pilot</p>
+      <p>
+        I was drawn into New Eden after seeing the iconic "This is EVE" trailer, and have never looked back. Over the years I've operated across multiple accounts and characters experiencing nearly every facet of New Eden.
+      </p>
+      <div class="feature-list">
+        <p class="feature-title">The Explorer</p>
+        <p class="feature-desc">Driven by the thrill of uncharted space, covert cloaks, silent scanning, and cracking hidden relic anomalies.</p>
+        <p class="feature-title">The Line Member &amp; Operative</p>
+        <p class="feature-desc">Experienced in everything from tight-knit small-gang null-sec ops to massive mega-corporations, with a deep-seated love for stealth and Black Ops operations.</p>
+      </div>
+      <p>
+        Having flown in nearly every sector of space — and having experienced both incredible camaraderie and devastating betrayals — I built PilotRep to give Pilots a tool that actually matters when making split-second decisions on who to trust.
+      </p>
+
+      <p class="lead">How PilotRep Works</p>
+      <div class="feature-list">
+        <p class="feature-title">SSO Verified Authenticity</p>
+        <p class="feature-desc">Every review is tied to a verified character via EVE Online Single Sign-On (SSO).</p>
+        <p class="feature-title">Entities at Every Scale</p>
+        <p class="feature-desc">Search, review, and track reputation metrics across individual Pilots, Corporations, and Alliances.</p>
+        <p class="feature-title">Living Social Metrics</p>
+        <p class="feature-desc">Track real-time interaction feeds, view top-reputed pilots across the cluster, and inspect detailed encounter notes and comments.</p>
+        <p class="feature-title">Neutral &amp; Community-Driven</p>
+        <p class="feature-desc">A structured platform designed to record history as it happens, whether you're vetting a new corp recruit, verifying a contractor, or checking who just entered local.</p>
       </div>
 
-      <!-- LOGIN BUTTON BELOW PANEL -->
-      <div class="about-login-wrap">
-        <a href="/.netlify/functions/auth-start" class="eve-login-sm">
-          <span class="eve-logo-sm">ΞVΞ</span>
-          <span class="eve-divider-sm"></span>
-          LOG IN with EVE Online
-        </a>
-      </div>
-    </main>
+      <p class="legal-copy">
+        EVE Online and all related materials are property of Fenris Creations. PilotRep is an independent third-party fan site operating under the EVE Online Third-Party Developer license and is not affiliated with or endorsed by Fenris Creations.
+      </p>
+    </div>
 
-    <!-- FOOTER -->
-    <footer class="site-footer">
-      <div class="footer-grid">
-        <a href="about.html" class="active">About</a>
-        <a href="subscriptions.html">Subscriptions</a>
-        <a href="pilot.html" id="myPilotRepLink">My PilotRep</a>
-        <a href="/.netlify/functions/auth-start" id="footerAuthLink">Login</a>
-        <a href="faq.html">FAQ</a>
-        <a href="privacy.html">Privacy Policy</a>
-        <a href="terms.html">Terms Of Service</a>
-        <a href="contact.html">Contact</a>
-      </div>
-      <div class="eve-time" id="eveTime" style="margin-top:28px;">EVE TIME 00:00:00</div>
-      <div class="legal-note" style="margin-top:10px;">
-        EVE Online and all related materials are property of Fenris Creations.<br>PilotRep is a third-party fan site and is not affiliated with Fenris Creations.
-      </div>
-      <div class="footer-copy">&copy; 2026 PilotRep. All rights reserved.</div>
-    </footer>
+    <!-- LOGIN BUTTON BELOW PANEL -->
+    <div class="about-login-wrap">
+      <a href="#" id="eveLoginBtn" class="eve-login-sm" onclick="this.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname+window.location.search);">
+        <span class="eve-logo-sm">ΞVΞ</span>
+        <span class="eve-divider-sm"></span>
+        LOG IN with EVE Online
+      </a>
+    </div>
+  </main>
 
-  </div>
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <a href="about.html" class="active">About</a>
+      <a href="/.netlify/functions/auth-start" id="footerAuthLink">Login</a>
+      <a href="my-pilotrep.html" id="myPilotRepLink">My PilotRep</a>
+      <a href="subscriptions.html">Subscribe</a>
+      <a href="support-us.html">Support Us</a>
+      <a href="contact.html">Contact</a>
+      <a href="privacy-policy.html">Privacy Policy</a>
+      <a href="serviceterms.html">Terms Of Service</a>
+      <a href="faq.html">FAQ</a>
+    </div>
+    <div class="eve-time" id="eveTime" style="margin-top:28px;">EVE TIME 00:00:00</div>
+    <div class="legal-note" style="margin-top:10px;">
+      EVE Online and all related materials are property of Fenris Creations.<br>PilotRep is a third-party fan site and is not affiliated with Fenris Creations.
+    </div>
+    <div class="footer-copy">&copy; 2026 PilotRep. All rights reserved.</div>
+  </footer>
 
-  <div class="validation-toast" id="validationToast"></div>
+</div>
+
+<div class="validation-toast" id="validationToast"></div>
 
 <script>
   function showValidation(msg) {
@@ -419,14 +538,15 @@
     setTimeout(() => validationToast.classList.remove('show'), 2200);
   }
 
-  // Session check — swap footer login state, same as index.html
-  let isLoggedIn = false;
+  // ── SESSION CHECK ──────────────────────────────────────────────────────────
+  let isLoggedInFlag = false;
   (async () => {
     try {
       const res = await fetch('/.netlify/functions/auth-me');
       const data = await res.json();
       if (data.loggedIn) {
-        isLoggedIn = true;
+        isLoggedInFlag = true;
+
         const authLink = document.getElementById('footerAuthLink');
         if (authLink) {
           authLink.textContent = 'Logout';
@@ -434,29 +554,143 @@
         }
         const myLink = document.getElementById('myPilotRepLink');
         if (myLink && data.characterId) {
-          myLink.href = `pilot.html?id=${data.characterId}`;
+          myLink.href = 'my-pilotrep.html';
         }
+
+        const navLoggedIn = document.getElementById('navLoggedInAs');
+        const navLoggedInLink = document.getElementById('navLoggedInLink');
+        if (navLoggedIn && navLoggedInLink && data.characterId) {
+          navLoggedInLink.textContent = data.characterName;
+          navLoggedInLink.href = 'my-pilotrep.html';
+          navLoggedIn.style.display = 'block';
+        }
+        const navLoginPrompt = document.getElementById('navLoginPrompt');
+        if (navLoginPrompt) navLoginPrompt.style.display = 'none';
+
+        // Logged in: hide the EVE login button, it's no longer needed
+        const eveLoginBtn = document.getElementById('eveLoginBtn');
+        if (eveLoginBtn) eveLoginBtn.style.display = 'none';
       }
-    } catch (e) { /* non-fatal */ }
+    } catch (e) {
+      console.warn('Session check failed:', e);
+    }
   })();
 
   // Footer "My PilotRep" — if not logged in, prompt instead of landing on a blank profile
   const myPilotRepLink = document.getElementById('myPilotRepLink');
   if (myPilotRepLink) {
     myPilotRepLink.addEventListener('click', (e) => {
-      if (!isLoggedIn) {
+      if (!isLoggedInFlag) {
         e.preventDefault();
         showValidation('Log In With EVE Online To View Your PilotRep');
       }
     });
   }
 
-  function doSearch() {
-    const q = document.getElementById('searchInput').value.trim();
-    if (q) window.location.href = 'search.html?q=' + encodeURIComponent(q);
+  // ── SEARCH BAR ────────────────────────────────────────────────────────────
+  const searchInput    = document.getElementById('navSearchInput');
+  const searchBtn      = document.getElementById('navSearchBtn');
+  const searchClearBtn = document.getElementById('navSearchClear');
+  const searchDropdown = document.getElementById('searchDropdown');
+
+  let searchTimer;
+
+  searchInput.addEventListener('input', () => {
+    searchClearBtn.style.display = searchInput.value.length ? 'block' : 'none';
+    clearTimeout(searchTimer);
+    const q = searchInput.value.trim();
+    if (q.length < 3) { searchDropdown.style.display = 'none'; return; }
+    searchTimer = setTimeout(() => runSearch(), 300);
+  });
+
+  searchClearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    searchClearBtn.style.display = 'none';
+    searchDropdown.style.display = 'none';
+    searchInput.focus();
+  });
+
+  function goToSearchPage() {
+    const q = searchInput.value.trim();
+    if (q.length < 3) return;
+    window.location.href = `/search.html?q=${encodeURIComponent(q)}`;
   }
-  document.getElementById('searchInput').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') doSearch();
+
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') goToSearchPage();
+  });
+
+  searchBtn.addEventListener('click', goToSearchPage);
+
+  async function runSearch() {
+    const q = searchInput.value.trim();
+    if (q.length < 3) { searchDropdown.style.display = 'none'; return; }
+    try {
+      const res = await fetch(`/.netlify/functions/esi-proxy?action=search&query=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      renderDropdown(data, q);
+    } catch (e) {
+      searchDropdown.style.display = 'none';
+    }
+  }
+
+  function renderDropdown(data, q) {
+    const { characters = [], corporations = [], alliances = [], mode = 'authenticated' } = data;
+    const total = characters.length + corporations.length + alliances.length;
+    const advancedSearchNote = `<div class="search-drop-note">For Advanced Search<br><a href="/.netlify/functions/auth-start">Log In With EVE Online</a></div>`;
+    if (total === 0) {
+      if (mode === 'community' || mode === 'fallback') {
+        searchDropdown.innerHTML = advancedSearchNote;
+        searchDropdown.style.display = 'block';
+      } else {
+        searchDropdown.style.display = 'none';
+      }
+      return;
+    }
+
+    let html = '';
+    if (characters.length) {
+      html += `<div class="search-drop-label">Pilots</div>`;
+      characters.forEach(c => {
+        html += `<a class="search-drop-item" href="/pilot.html?id=${c.id}">
+          <span class="search-drop-name">${c.name}</span>
+          <span class="search-drop-type">Pilot</span>
+        </a>`;
+      });
+    }
+    if (corporations.length) {
+      html += `<div class="search-drop-label">Corporations</div>`;
+      corporations.forEach(c => {
+        html += `<a class="search-drop-item" href="/corporation.html?id=${c.id}">
+          <span class="search-drop-name">${c.name}</span>
+          <span class="search-drop-type">Corp</span>
+        </a>`;
+      });
+    }
+    if (alliances.length) {
+      html += `<div class="search-drop-label">Alliances</div>`;
+      alliances.forEach(a => {
+        html += `<a class="search-drop-item" href="/alliance.html?id=${a.id}">
+          <span class="search-drop-name">${a.name}</span>
+          <span class="search-drop-type">Alliance</span>
+        </a>`;
+      });
+    }
+    if (mode === 'community' || mode === 'fallback') {
+      html += advancedSearchNote;
+    } else {
+      html += `<a class="search-drop-item" href="/search.html?q=${encodeURIComponent(q)}" style="color:var(--cyan);justify-content:center;">
+        See all results for "${q}" →
+      </a>`;
+    }
+
+    searchDropdown.innerHTML = html;
+    searchDropdown.style.display = 'block';
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.nav-search')) searchDropdown.style.display = 'none';
   });
 
   // ── EVE TIME CLOCK ──
