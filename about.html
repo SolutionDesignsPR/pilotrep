@@ -242,15 +242,18 @@
       padding-left: 12px;
     }
 
-    /* ── PAGE TITLE (text style — About has no logo asset, unlike pilot.html) ── */
+    /* ── PAGE TITLE ── */
     .page-title {
       text-align: center;
-      font-size: clamp(28px, 4vw, 40px);
-      font-weight: 400;
-      letter-spacing: 0.12em;
-      color: var(--cyan-dim);
-      text-transform: uppercase;
       margin: 36px 0 40px;
+    }
+    .page-title-img { display: block; max-width: 100%; margin: 0 auto; }
+    .page-title-desktop { height: clamp(28px, 4vw, 40px); width: auto; aspect-ratio: 123.12 / 22.14; }
+    .page-title-mobile { display: none; }
+    @media (max-width: 640px) {
+      .page-title-desktop { display: none; }
+      /* Using desktop asset at mobile size until a dedicated PR_About_M.svg exists */
+      .page-title-mobile { display: block; height: clamp(60px, 15vw, 90px); width: auto; aspect-ratio: 123.12 / 22.14; }
     }
 
     /* ── ABOUT PANEL — styling carried over from the original about.html ── */
@@ -288,6 +291,9 @@
       line-height: calc(0.9rem + 2.5px);
       color: #8aaabb;
       margin-bottom: 1.2em;
+      max-width: 560px;
+      margin-left: auto;
+      margin-right: auto;
     }
     .about-panel p:last-child { margin-bottom: 0; }
     .about-panel strong { color: var(--cyan); }
@@ -452,7 +458,10 @@
   </header>
 
   <!-- PAGE TITLE -->
-  <h1 class="page-title">About</h1>
+  <h1 class="page-title" id="pageTitle">
+    <img class="page-title-img page-title-desktop" id="pageTitleDesktop" src="assets/images/PR_About.svg" alt="About" />
+    <img class="page-title-img page-title-mobile" id="pageTitleMobile" src="assets/images/PR_About.svg" alt="About" />
+  </h1>
 
   <!-- MAIN -->
   <main>
@@ -471,24 +480,24 @@
       </p>
       <div class="feature-list">
         <p class="feature-title">The Explorer</p>
-        <p class="feature-desc">Driven by the thrill of uncharted space, covert cloaks, silent scanning, and cracking hidden relic anomalies.</p>
+        <p class="feature-desc">Driven by the thrill of uncharted space, covert cloaks, silent scanning and cracking hidden relic anomalies.</p>
         <p class="feature-title">The Line Member &amp; Operative</p>
         <p class="feature-desc">Experienced in everything from tight-knit small-gang null-sec ops to massive mega-corporations, with a deep-seated love for stealth and Black Ops operations.</p>
       </div>
       <p>
-        Having flown in nearly every sector of space — and having experienced both incredible camaraderie and devastating betrayals — I built PilotRep to give Pilots a tool that actually matters when making split-second decisions on who to trust.
+        Having flown in nearly every sector of space, and having experienced both incredible camaraderie and devastating betrayals, I built PilotRep to give Pilots a tool that actually matters when making split-second decisions on who to trust.
       </p>
 
       <p class="lead">How PilotRep Works</p>
       <div class="feature-list">
         <p class="feature-title">SSO Verified Authenticity</p>
         <p class="feature-desc">Every review is tied to a verified character via EVE Online Single Sign-On (SSO).</p>
-        <p class="feature-title">Entities at Every Scale</p>
-        <p class="feature-desc">Search, review, and track reputation metrics across individual Pilots, Corporations, and Alliances.</p>
+        <p class="feature-title">Reputation At Scale</p>
+        <p class="feature-desc">Search, review and track reputation metrics across individual Pilots, Corporations and Alliances.</p>
         <p class="feature-title">Living Social Metrics</p>
-        <p class="feature-desc">Track real-time interaction feeds, view top-reputed pilots across the cluster, and inspect detailed encounter notes and comments.</p>
-        <p class="feature-title">Neutral &amp; Community-Driven</p>
-        <p class="feature-desc">A structured platform designed to record history as it happens, whether you're vetting a new corp recruit, verifying a contractor, or checking who just entered local.</p>
+        <p class="feature-desc">Track real-time interaction feeds, view top-reputed pilots across the cluster and inspect detailed encounter notes and comments.</p>
+        <p class="feature-title">Community Driven Reputation</p>
+        <p class="feature-desc">A structured platform designed to record history as it happens, whether you're vetting a new corp recruit, verifying a contractor or checking who just entered local. All reps are permanent, creating a lasting and trustworthy record for the community.</p>
       </div>
 
       <p class="legal-copy">

@@ -1592,7 +1592,6 @@
       const esiRes = await fetch(`/.netlify/functions/esi-proxy?action=character&id=${pilotId}`);
       const esi = await esiRes.json();
       if (esi && esi.name) {
-        document.title = `${esi.name} — PilotRep`;
         document.getElementById('pilotName').textContent = esi.name;
         const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
         const lines = [];

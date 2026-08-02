@@ -1944,7 +1944,6 @@
         targetCorpId = esi.corporation_id || null;
         targetAllianceId = esi.alliance_id || null;
         targetName = esi.name || null;
-        document.title = `${esi.name} — PilotRep`;
         document.getElementById('pilotName').textContent = esi.name;
         const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
         const lines = [];
