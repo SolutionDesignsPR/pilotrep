@@ -112,8 +112,15 @@ exports.handler = async function (event) {
   try {
     const stateData = JSON.parse(Buffer.from(state || '', 'base64').toString('utf8'));
     if (stateData.origin) {
-      const separator = stateData.origin.includes('?') ? '&' : '?';
-      destination = stateData.origin + separator + 'login=success';
+      // If the origin was the pilot's own pilot.html page (they logged in from
+      // their own profile), send them to my-pilotrep.html instead.
+      const ownPageMatch = stateData.origin.match(/\/pilot\.html\?id=(\d+)/);
+      if (ownPageMatch && ownPageMatch[1] === String(characterId)) {
+        destination = '/my-pilotrep.html?login=success';
+      } else {
+        const separator = stateData.origin.includes('?') ? '&' : '?';
+        destination = stateData.origin + separator + 'login=success';
+      }
     }
   } catch (_) {}
 
