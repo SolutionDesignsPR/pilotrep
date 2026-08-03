@@ -344,7 +344,7 @@
     }
     .legal-panel p {
       font-size: 0.9rem;
-      line-height: calc(0.9rem + 2.5px);
+      line-height: calc(0.9rem + 4px);
       color: #8aaabb;
       margin-bottom: 1.2em;
     }
@@ -357,7 +357,7 @@
     }
     .legal-panel ul li {
       font-size: 0.9rem;
-      line-height: calc(0.9rem + 2.5px);
+      line-height: calc(0.9rem + 4px);
       color: #8aaabb;
       padding-left: 1.3em;
       position: relative;
@@ -370,6 +370,27 @@
       color: var(--cyan-dim);
     }
     .legal-panel ul li:last-child { margin-bottom: 0; }
+
+    .collapse-all-row {
+      display: flex;
+      justify-content: center;
+      padding-top: 24px;
+      margin-top: 4px;
+      border-top: 1px solid var(--border);
+    }
+    .collapse-all-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .collapse-all-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
 
     /* ── ACCORDION SECTIONS ── */
     .accordion-item {
@@ -547,9 +568,17 @@
   <!-- MAIN -->
   <main>
     <div class="legal-panel">
-      <p>
-        PilotRep is a third-party tool built for players of EVE Online. This Privacy Policy explains how we collect, use and protect your information, particularly data retrieved via Fenris Creations' EVE Single Sign-On (SSO) and the EVE Swagger Interface (ESI) API.
-      </p>
+      <div class="accordion-item">
+        <button class="accordion-header" type="button" data-target="privacySectionOverview">
+          Overview
+          <span class="accordion-chevron">▾</span>
+        </button>
+        <div class="accordion-body" id="privacySectionOverview">
+          <p>
+            PilotRep is a third-party tool built for players of EVE Online. This Privacy Policy explains how we collect, use and protect your information, particularly data retrieved via Fenris Creations' EVE Single Sign-On (SSO) and the EVE Swagger Interface (ESI) API.
+          </p>
+        </div>
+      </div>
 
       <div class="accordion-item">
         <button class="accordion-header" type="button" data-target="privacySection1">
@@ -558,12 +587,12 @@
         </button>
         <div class="accordion-body" id="privacySection1">
           <p>
-            To provide our tools and services, we request access to your EVE Online data using the official EVE SSO. We only collect data corresponding to the specific API scopes you explicitly authorize. This may include:
+            To provide our services, we use EVE Online's Single Sign-On (SSO) to verify your identity and pull limited public character data via the ESI API. This includes:
           </p>
           <ul>
-            <li><strong>Public Character Data:</strong> Character Name, Character ID, Corporation and Alliance affiliations.</li>
-            <li><strong>Authorized ESI Data:</strong> Depending on the features you use, we may request scopes to access your in-game assets, skills, wallet journals, market orders, location and clone data.</li>
-            <li><strong>Authentication Tokens:</strong> We securely store the refresh tokens provided by EVE SSO to maintain your connection and update your data. <strong>We never see, collect or store your EVE Online account username or password.</strong></li>
+            <li><strong>Public Character Data:</strong> Character Name, Character ID, Corporation and Alliance affiliations, Security Status, Character Creation Date and Portrait.</li>
+            <li><strong>Authentication Tokens:</strong> We securely store the refresh token provided by EVE SSO to maintain your session. <strong>We never see, collect or store your EVE Online account username or password.</strong></li>
+            <li><strong>Reputation Data:</strong> Reps and votes you submit are stored and associated with your verified character identity.</li>
           </ul>
         </div>
       </div>
@@ -575,28 +604,28 @@
         </button>
         <div class="accordion-body" id="privacySection2">
           <p>
-            The data pulled from New Eden is used strictly to power the features of this site, including:
+            The data retrieved from New Eden is used strictly to power PilotRep's core features, including:
           </p>
           <ul>
-            <li>Displaying your character's stats, assets or tools within the dashboard.</li>
-            <li>Aggregating public game data (such as market prices or system statistics) to provide search and analysis functionality.</li>
-            <li>Authenticating your identity and managing your user session.</li>
+            <li>Displaying character, corporation and alliance identity and reputation on their public profile pages.</li>
+            <li>Authenticating your identity and managing your login session.</li>
+            <li>Attributing reps and votes you submit to your verified character (or displaying them anonymously, if you choose).</li>
           </ul>
         </div>
       </div>
 
       <div class="accordion-item">
         <button class="accordion-header" type="button" data-target="privacySection3">
-          Data Protection and Security (The "No Spies" Policy)
+          Data Protection and Security
           <span class="accordion-chevron">▾</span>
         </button>
         <div class="accordion-body" id="privacySection3">
           <p>
-            We understand the competitive nature of EVE Online. We implement strict security measures to protect your operational data:
+            We understand the competitive nature of EVE Online. We implement measures to protect your data:
           </p>
           <ul>
-            <li><strong>Access Control:</strong> Your private ESI data is only visible to you when logged in, unless you explicitly use a feature designed to share it (e.g., sharing a fit or an evaluation link).</li>
-            <li><strong>No Third-Party Sharing:</strong> We do not sell, rent or lease your character data to anyone. Your in-game assets, locations and financial data will never be shared with third parties or rival corporations/alliances.</li>
+            <li><strong>Access Control:</strong> Reputation submissions are tied to your verified character identity only when you choose not to submit anonymously.</li>
+            <li><strong>No Third-Party Sharing:</strong> We do not sell, rent or lease your character data to anyone.</li>
           </ul>
         </div>
       </div>
@@ -623,6 +652,10 @@
             PilotRep is an independent, third-party website and is not affiliated with, endorsed by or associated with Fenris Creations. All EVE Online imagery, assets and text are the intellectual property of Fenris Creations.
           </p>
         </div>
+      </div>
+
+      <div class="collapse-all-row">
+        <button class="collapse-all-btn" id="collapseAllBtn">Expand All</button>
       </div>
     </div>
 
@@ -835,12 +868,30 @@
   setInterval(updateEveTime, 1000);
 
   // ── PRIVACY POLICY ACCORDION TWIRL-DOWN ──
-  document.querySelectorAll('.accordion-header').forEach(btn => {
+  const accordionHeaders = document.querySelectorAll('.accordion-header');
+  accordionHeaders.forEach(btn => {
     btn.addEventListener('click', () => {
       const body = document.getElementById(btn.dataset.target);
       const isOpen = btn.classList.toggle('open');
       body.classList.toggle('open', isOpen);
+      updateCollapseAllBtn();
     });
+  });
+
+  // ── EXPAND ALL / COLLAPSE ALL BUTTON ──
+  const collapseAllBtnEl = document.getElementById('collapseAllBtn');
+  function updateCollapseAllBtn() {
+    const allOpen = Array.from(accordionHeaders).every(btn => btn.classList.contains('open'));
+    collapseAllBtnEl.textContent = allOpen ? 'Collapse All' : 'Expand All';
+  }
+  collapseAllBtnEl.addEventListener('click', () => {
+    const shouldExpand = collapseAllBtnEl.textContent === 'Expand All';
+    accordionHeaders.forEach(btn => {
+      const body = document.getElementById(btn.dataset.target);
+      btn.classList.toggle('open', shouldExpand);
+      body.classList.toggle('open', shouldExpand);
+    });
+    updateCollapseAllBtn();
   });
 </script>
 </body>

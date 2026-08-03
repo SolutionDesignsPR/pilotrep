@@ -399,6 +399,12 @@
       transition: border-color 0.15s, color 0.15s;
     }
     .collapse-all-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
+    .collapse-all-row-bottom {
+      display: flex;
+      justify-content: flex-end;
+      padding-top: 20px;
+      margin-top: -6px;
+    }
     .stats-row .stat-label-inline {
       font-size: 14px;
       font-weight: 600;
@@ -441,7 +447,10 @@
       letter-spacing: 0.12em;
       color: var(--white);
       text-transform: uppercase;
+      cursor: pointer;
+      transition: color 0.15s;
     }
+    .reps-panel-headrow .reps-panel-label:hover { color: var(--cyan); }
     .reps-panel-headrow .reps-panel-count {
       font-size: 16px;
       font-weight: 700;
@@ -1104,7 +1113,7 @@
       </div>
 
       <div class="no-comment-reps-panel" id="noCommentRepsPanel" style="display:none;">
-        <div class="reps-panel-headrow"><span class="reps-panel-label">Pilot Reps</span><span class="reps-panel-count" id="pilotRepsPanelCount">0</span></div>
+        <div class="reps-panel-headrow"><span class="reps-panel-label" id="pilotRepsPanelLabel">Pilot Reps</span><span class="reps-panel-count" id="pilotRepsPanelCount">0</span></div>
         <div class="no-comment-reps-list" id="noCommentRepsList"></div>
         <div class="see-all-wrap" id="noCommentRepsSeeAllWrap" style="display:none;">
           <button class="see-all-btn" id="noCommentRepsSeeAllBtn">▾ See All Reps</button>
@@ -1112,11 +1121,15 @@
       </div>
 
       <div class="no-comment-reps-panel" id="corpAllianceRepsPanel" style="display:none;">
-        <div class="reps-panel-headrow"><span class="reps-panel-label">Corp / Alliance Reps</span><span class="reps-panel-count" id="corpAllianceRepsPanelCount">0</span></div>
+        <div class="reps-panel-headrow"><span class="reps-panel-label" id="corpAllianceRepsPanelLabel">Corp / Alliance Reps</span><span class="reps-panel-count" id="corpAllianceRepsPanelCount">0</span></div>
         <div class="no-comment-reps-list" id="corpAllianceRepsList"></div>
         <div class="see-all-wrap" id="corpAllianceRepsSeeAllWrap" style="display:none;">
           <button class="see-all-btn" id="corpAllianceRepsSeeAllBtn">▾ See All Reps</button>
         </div>
+      </div>
+
+      <div class="collapse-all-row-bottom" id="collapseAllRowBottom" style="display:none;">
+        <button class="collapse-all-btn" id="collapseAllBtnBottom">Collapse All</button>
       </div>
     </div>
 
@@ -1539,6 +1552,8 @@
   // ── COLLAPSE ALL / EXPAND ALL BUTTON (toggles both Pilot Reps and Corp/Alliance Reps panels) ──
   const collapseAllRowEl = document.getElementById('collapseAllRow');
   const collapseAllBtnEl = document.getElementById('collapseAllBtn');
+  const collapseAllRowBottomEl = document.getElementById('collapseAllRowBottom');
+  const collapseAllBtnBottomEl = document.getElementById('collapseAllBtnBottom');
   let collapseAllEverShown = false;
 
   function updateCollapseAllBtn() {
@@ -1547,15 +1562,21 @@
       collapseAllEverShown = true;
       collapseAllRowEl.style.display = 'flex';
       collapseAllBtnEl.textContent = 'Collapse All';
-    } else if (collapseAllEverShown) {
-      collapseAllRowEl.style.display = 'flex';
-      collapseAllBtnEl.textContent = 'Expand All';
+      collapseAllRowBottomEl.style.display = 'flex';
+      collapseAllBtnBottomEl.textContent = 'Collapse All';
     } else {
-      collapseAllRowEl.style.display = 'none';
+      // Both panels closed: bottom button has nothing left to act on, so hide it
+      collapseAllRowBottomEl.style.display = 'none';
+      if (collapseAllEverShown) {
+        collapseAllRowEl.style.display = 'flex';
+        collapseAllBtnEl.textContent = 'Expand All';
+      } else {
+        collapseAllRowEl.style.display = 'none';
+      }
     }
   }
 
-  collapseAllBtnEl.addEventListener('click', () => {
+  function toggleAllReps() {
     const anyOpen = noCommentRepsOpen || corpAllianceRepsOpen;
     if (anyOpen) {
       if (noCommentRepsOpen) {
@@ -1583,7 +1604,14 @@
       }
     }
     updateCollapseAllBtn();
-  });
+  }
+
+  collapseAllBtnEl.addEventListener('click', toggleAllReps);
+  collapseAllBtnBottomEl.addEventListener('click', toggleAllReps);
+
+  // ── CLICKABLE PANEL HEADERS (click "Pilot Reps" / "Corp / Alliance Reps" label inside an open panel to close it) ──
+  document.getElementById('pilotRepsPanelLabel').addEventListener('click', () => pilotRepsToggleEl.click());
+  document.getElementById('corpAllianceRepsPanelLabel').addEventListener('click', () => corpAllianceRepsToggleEl.click());
 
   // ── LOAD OWN PILOT DATA FROM ESI + SUPABASE ──────────────────────────────
   async function loadOwnPilotData(pilotId) {
