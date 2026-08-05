@@ -1312,13 +1312,11 @@
         if (myLink && data.characterId) {
           myLink.href = `my-pilotrep.html`;
         }
-        // If viewing own profile, swap the page headline
+        // If viewing own profile, redirect to My PilotRep instead of the public pilot page
         const urlPilotId = new URLSearchParams(window.location.search).get('id');
         if (data.characterId && urlPilotId && String(urlPilotId) === String(data.characterId)) {
-          const titleDesktop = document.getElementById('pageTitleDesktop');
-          const titleMobile = document.getElementById('pageTitleMobile');
-          if (titleDesktop) { titleDesktop.src = 'assets/images/PR_My_PilotRep.svg'; titleDesktop.alt = 'My PilotRep'; }
-          if (titleMobile) { titleMobile.src = 'assets/images/PR_My_PilotRep.svg'; titleMobile.alt = 'My PilotRep'; }
+          window.location.replace('my-pilotrep.html');
+          return;
         }
         // Load any reps this session's character has already left on this pilot
         // (self-reps are blocked server-side, so skip the call on your own profile)
