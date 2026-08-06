@@ -1692,12 +1692,10 @@
   const collapseAllBtnEl = document.getElementById('collapseAllBtn');
   const collapseAllRowBottomEl = document.getElementById('collapseAllRowBottom');
   const collapseAllBtnBottomEl = document.getElementById('collapseAllBtnBottom');
-  let collapseAllEverShown = false;
-
   function updateCollapseAllBtn() {
     const anyOpen = noCommentRepsOpen || corpAllianceRepsOpen;
+    const anyReps = getPilotRepsTotalCount() > 0 || getCorpAllianceCount() > 0;
     if (anyOpen) {
-      collapseAllEverShown = true;
       collapseAllRowEl.style.display = 'flex';
       collapseAllBtnEl.textContent = 'Collapse All';
       collapseAllRowBottomEl.style.display = 'flex';
@@ -1705,7 +1703,7 @@
     } else {
       // Both panels closed: bottom button has nothing left to act on, so hide it
       collapseAllRowBottomEl.style.display = 'none';
-      if (collapseAllEverShown) {
+      if (anyReps) {
         collapseAllRowEl.style.display = 'flex';
         collapseAllBtnEl.textContent = 'Expand All';
       } else {

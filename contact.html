@@ -599,7 +599,7 @@
   <!-- MAIN -->
   <main>
     <div class="legal-panel">
-      <p class="contact-subcopy">
+      <p class="contact-subcopy" id="contactSubcopy">
         Have a question, bug report or feedback for PilotRep? Logged-in pilots can send a suggestion directly which will open a form for you to fill out.
       </p>
 
@@ -622,7 +622,7 @@
         <textarea id="suggestionComment" placeholder="Your suggestion..." maxlength="2000"></textarea>
 
         <div class="suggestion-error" id="suggestionError"></div>
-        <button type="submit" class="suggestion-submit" id="suggestionSubmit">Send Suggestion</button>
+        <button type="submit" class="suggestion-submit" id="suggestionSubmit">Submit</button>
       </form>
 
       <div class="suggestion-success" id="suggestionSuccess">Message sent! Thanks for helping make PilotRep better.</div>
@@ -843,6 +843,7 @@
   const suggestionError     = document.getElementById('suggestionError');
   const suggestionSubmit    = document.getElementById('suggestionSubmit');
   const suggestionSuccess   = document.getElementById('suggestionSuccess');
+  const contactSubcopyEl    = document.getElementById('contactSubcopy');
 
   suggestionForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -886,17 +887,18 @@
         suggestionError.textContent = data.error || 'Something went wrong. Please try again.';
         suggestionError.classList.add('is-visible');
         suggestionSubmit.disabled = false;
-        suggestionSubmit.textContent = 'Send Suggestion';
+        suggestionSubmit.textContent = 'Submit';
         return;
       }
 
       suggestionForm.style.display = 'none';
+      if (contactSubcopyEl) contactSubcopyEl.style.display = 'none';
       suggestionSuccess.classList.add('is-visible');
     } catch (err) {
       suggestionError.textContent = 'Something went wrong. Please try again.';
       suggestionError.classList.add('is-visible');
       suggestionSubmit.disabled = false;
-      suggestionSubmit.textContent = 'Send Suggestion';
+      suggestionSubmit.textContent = 'Submit';
     }
   });
 </script>
