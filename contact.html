@@ -461,6 +461,15 @@
     }
     .suggestion-error.is-visible { display: block; }
 
+    .suggestion-success {
+      display: none;
+      font-size: 13px;
+      color: var(--cyan);
+      letter-spacing: 0.05em;
+      text-align: center;
+    }
+    .suggestion-success.is-visible { display: block; }
+
     /* ── LOGIN BUTTON below panel ── */
     .about-login-wrap {
       max-width: 720px;
@@ -615,6 +624,8 @@
         <div class="suggestion-error" id="suggestionError"></div>
         <button type="submit" class="suggestion-submit" id="suggestionSubmit">Send Suggestion</button>
       </form>
+
+      <div class="suggestion-success" id="suggestionSuccess">Message sent! Thanks for helping make PilotRep better.</div>
     </div>
   </main>
 
@@ -824,16 +835,16 @@
   updateEveTime();
   setInterval(updateEveTime, 1000);
 
-  // ── SUGGESTION BOX: MAILTO SUBMIT ──
+  // ── SUGGESTION BOX: BACKEND SUBMIT ──
   const suggestionForm      = document.getElementById('suggestionForm');
   const suggestionHoneypot  = document.getElementById('suggestionHoneypot');
   const suggestionSubject   = document.getElementById('suggestionSubject');
   const suggestionComment   = document.getElementById('suggestionComment');
   const suggestionError     = document.getElementById('suggestionError');
   const suggestionSubmit    = document.getElementById('suggestionSubmit');
-  const suggestionCharName  = document.getElementById('suggestionCharacterName');
+  const suggestionSuccess   = document.getElementById('suggestionSuccess');
 
-  suggestionForm.addEventListener('submit', (e) => {
+  suggestionForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     // Honeypot tripped — silently drop, no error shown (don't tip off the bot)
@@ -856,11 +867,37 @@
     }
     suggestionError.classList.remove('is-visible');
 
-    const charName = suggestionCharName.textContent !== '—' ? suggestionCharName.textContent : 'Unknown Pilot';
-    const body = `${comment}\n\n—\nSubmitted by: ${charName}`;
-    const mailtoUrl = `mailto:info@pilotrep.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    suggestionSubmit.disabled = true;
+    suggestionSubmit.textContent = 'Sending...';
 
-    window.location.href = mailtoUrl;
+    try {
+      const res = await fetch('/.netlify/functions/submit-suggestion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject,
+          message: comment,
+          'suggestion-hp': suggestionHoneypot.value
+        })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        suggestionError.textContent = data.error || 'Something went wrong. Please try again.';
+        suggestionError.classList.add('is-visible');
+        suggestionSubmit.disabled = false;
+        suggestionSubmit.textContent = 'Send Suggestion';
+        return;
+      }
+
+      suggestionForm.style.display = 'none';
+      suggestionSuccess.classList.add('is-visible');
+    } catch (err) {
+      suggestionError.textContent = 'Something went wrong. Please try again.';
+      suggestionError.classList.add('is-visible');
+      suggestionSubmit.disabled = false;
+      suggestionSubmit.textContent = 'Send Suggestion';
+    }
   });
 </script>
 </body>
