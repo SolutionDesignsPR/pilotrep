@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PilotRep | Moderator</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="alternate icon" href="/favicon.ico" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #04080f;
+      --panel:     #0e1a2b;
+      --panel2:    #121f33;
+      --border:    rgba(100,180,255,0.10);
+      --cyan:      #4fc3f7;
+      --cyan-dim:  #2a8bbf;
+      --white:     #e8eef5;
+      --muted:     #5a7490;
+      --danger:    #e0524f;
+      --danger-dim:#8c2f2d;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      padding: 32px 16px 64px;
+    }
+
+    .wrap { max-width: 960px; margin: 0 auto; }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--cyan);
+      margin-bottom: 4px;
+    }
+    .sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+
+    /* Login gate */
+    #gate {
+      max-width: 360px;
+      margin: 80px auto 0;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 28px;
+      text-align: center;
+    }
+    #gate h1 { text-align: center; }
+    #gate input[type="password"] {
+      width: 100%;
+      margin-top: 20px;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--white);
+      font-size: 14px;
+    }
+    #gate button, .btn {
+      margin-top: 14px;
+      padding: 10px 18px;
+      background: var(--cyan-dim);
+      border: none;
+      border-radius: 6px;
+      color: var(--bg);
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    #gate button:hover, .btn:hover { background: var(--cyan); }
+    #gateError { color: var(--danger); font-size: 13px; margin-top: 12px; min-height: 16px; }
+
+    /* Moderator panel */
+    #panel { display: none; }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .btn-outline:hover { color: var(--white); border-color: var(--cyan-dim); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px 12px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    th {
+      background: var(--panel2);
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.03em;
+    }
+    tr:last-child td { border-bottom: none; }
+    td.comment { max-width: 320px; color: var(--white); }
+    td.muted { color: var(--muted); }
+
+    .del-btn {
+      background: transparent;
+      border: 1px solid var(--danger-dim);
+      color: var(--danger);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .del-btn:hover { background: var(--danger-dim); color: var(--white); }
+    .del-btn:disabled { opacity: 0.5; cursor: default; }
+
+    #status { color: var(--muted); font-size: 13px; margin-top: 16px; }
+    #status.err { color: var(--danger); }
+  </style>
+</head>
+<body>
+
+  <div id="gate">
+    <h1>PilotRep Moderator</h1>
+    <p class="sub" style="margin-bottom:0;">Enter password to continue</p>
+    <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password" />
+    <br />
+    <button onclick="login()">Log In</button>
+    <div id="gateError"></div>
+  </div>
+
+  <div class="wrap" id="panel">
+    <div class="toolbar">
+      <div>
+        <h1>PilotRep Moderator</h1>
+        <p class="sub">Most recent rep submissions — review and remove as needed</p>
+      </div>
+      <button class="btn-outline" onclick="logout()">Log Out</button>
+    </div>
+
+    <table id="repsTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Target</th>
+          <th>Grade</th>
+          <th>Reviewer</th>
+          <th>Comment</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="repsBody"></tbody>
+    </table>
+
+    <div id="status"></div>
+  </div>
+
+  <script>
+    const FN = '/.netlify/functions/';
+
+    async function login() {
+      const password = document.getElementById('passwordInput').value;
+      const errorEl = document.getElementById('gateError');
+      errorEl.textContent = '';
+
+      if (!password) {
+        errorEl.textContent = 'Please enter a password.';
+        return;
+      }
+
+      try {
+        const res = await fetch(FN + 'moderator-login', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          errorEl.textContent = data.error || 'Login failed.';
+          return;
+        }
+        showPanel();
+      } catch (err) {
+        errorEl.textContent = 'Something went wrong. Please try again.';
+      }
+    }
+
+    document.getElementById('passwordInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') login();
+    });
+
+    async function logout() {
+      try {
+        await fetch(FN + 'moderator-logout', { method: 'POST', credentials: 'include' });
+      } catch (_) {}
+      document.getElementById('panel').style.display = 'none';
+      document.getElementById('gate').style.display = 'block';
+      document.getElementById('passwordInput').value = '';
+    }
+
+    function showPanel() {
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('panel').style.display = 'block';
+      loadReps();
+    }
+
+    async function loadReps() {
+      const statusEl = document.getElementById('status');
+      const body = document.getElementById('repsBody');
+      statusEl.textContent = 'Loading...';
+      statusEl.className = '';
+      body.innerHTML = '';
+
+      try {
+        const res = await fetch(FN + 'moderator-list-reps', { credentials: 'include' });
+        if (res.status === 401) {
+          document.getElementById('panel').style.display = 'none';
+          document.getElementById('gate').style.display = 'block';
+          return;
+        }
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to load');
+
+        if (!data.reps || data.reps.length === 0) {
+          statusEl.textContent = 'No rep submissions found.';
+          return;
+        }
+
+        data.reps.forEach(r => body.appendChild(renderRow(r)));
+        statusEl.textContent = `Showing ${data.reps.length} most recent submissions.`;
+      } catch (err) {
+        statusEl.textContent = 'Failed to load reps: ' + err.message;
+        statusEl.className = 'err';
+      }
+    }
+
+    function renderRow(r) {
+      const tr = document.createElement('tr');
+      tr.dataset.id = r.id;
+
+      const date = new Date(r.createdAt);
+      const dateStr = isNaN(date) ? '' : date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+      const target = (r.targetName || `${r.targetType} #${r.targetId}`) + (r.isCorpAlliance ? ' (corp/alliance)' : '');
+      const reviewer = r.anonymous ? '(anonymous)' : (r.reviewerName || '—');
+
+      tr.innerHTML = `
+        <td class="muted">${escapeHtml(dateStr)}</td>
+        <td>${escapeHtml(target)}</td>
+        <td>${escapeHtml(r.grade || '')}</td>
+        <td class="muted">${escapeHtml(reviewer)}</td>
+        <td class="comment">${escapeHtml(r.comment || '—')}</td>
+        <td><button class="del-btn">Delete</button></td>
+      `;
+
+      tr.querySelector('.del-btn').addEventListener('click', () => deleteRep(r.id, tr));
+      return tr;
+    }
+
+    async function deleteRep(id, tr) {
+      if (!confirm('Delete this rep? This cannot be undone.')) return;
+
+      const btn = tr.querySelector('.del-btn');
+      btn.disabled = true;
+      btn.textContent = 'Deleting...';
+
+      try {
+        const res = await fetch(FN + 'moderator-delete-rep', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Delete failed');
+        tr.remove();
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Delete';
+        alert('Failed to delete: ' + err.message);
+      }
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str == null ? '' : String(str);
+      return div.innerHTML;
+    }
+
+    // If a valid session cookie already exists, jump straight to the panel.
+    (async () => {
+      try {
+        const res = await fetch(FN + 'moderator-list-reps', { credentials: 'include' });
+        if (res.ok) showPanel();
+      } catch (_) {}
+    })();
+  </script>
+
+</body>
+</html>

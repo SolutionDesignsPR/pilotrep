@@ -369,18 +369,32 @@
       justify-content: center;
       position: relative;
     }
-    .grade-circle::before,
-    .grade-circle::after {
+    .grade-circle-dots {
+      position: absolute;
+      inset: 0;
+      animation: grade-circle-spin 60s linear infinite;
+    }
+    .grade-circle-dots::before,
+    .grade-circle-dots::after {
       content: '';
       position: absolute;
-      width: 10px;
-      height: 10px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       background: var(--bg);
       border: 2px solid var(--white);
     }
-    .grade-circle::before { top: -3px; left: 50%; transform: translate(-50%, -2px); }
-    .grade-circle::after { bottom: -3px; left: 50%; transform: translate(-50%, 2px); }
+    .grade-circle-dots::before { top: 0; left: 50%; transform: translate(-50%, -50%); }
+    .grade-circle-dots::after { bottom: 0; left: 50%; transform: translate(-50%, 50%); }
+    @keyframes grade-circle-spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .grade-circle-dots {
+        animation: none;
+      }
+    }
     .grade-circle-letter {
       font-size: 56px;
       font-weight: 700;
@@ -1094,6 +1108,7 @@
     <div class="panel">
       <div class="grade-circle-wrap">
         <div class="grade-circle">
+          <div class="grade-circle-dots"></div>
           <span class="grade-circle-letter" id="gradeCircleLetter">–</span>
         </div>
       </div>
