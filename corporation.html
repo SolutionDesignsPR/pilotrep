@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PilotRep - Corporations</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="alternate icon" href="/favicon.ico" />
@@ -14,15 +14,26 @@
     :root {
       --bg:        #04080f;
       --bg2:       #0b1220;
+      --bg3:       #101b2e;
       --panel:     #0e1a2b;
+      --panel2:    #121f33;
       --border:    rgba(100,180,255,0.10);
       --cyan:      #4fc3f7;
       --cyan-dim:  #2a8bbf;
+      --orange:    #e8871a;
       --white:     #e8eef5;
       --muted:     #5a7490;
+      --grade-ap: #008bd1;
       --grade-a:  #008bd1;
       --grade-b:  #00af10;
+      --grade-bp: #00af10;
+      --grade-bm: #00af10;
+      --grade-c:  #00af10;
+      --grade-cp: #00af10;
+      --grade-cm: #00af10;
       --grade-d:  #610b0f;
+      --grade-dp: #610b0f;
+      --grade-dm: #610b0f;
       --grade-f:  #610b0f;
     }
 
@@ -39,7 +50,7 @@
 
     .page { position: relative; z-index: 1; }
 
-    /* ── TOP NAV — exact match to pilot.html ── */
+    /* ── TOP NAV ── */
     .topnav {
       display: flex;
       align-items: center;
@@ -59,6 +70,17 @@
       text-decoration: none;
       white-space: nowrap;
     }
+    .nav-logo .o-ring {
+      display: inline-block;
+      width: 0.62em;
+      height: 0.62em;
+      border: 0.13em solid var(--white);
+      border-radius: 50%;
+      vertical-align: middle;
+      margin: 0 0.01em;
+      position: relative;
+      top: -0.07em;
+    }
     .nav-left {
       display: flex;
       flex-direction: column;
@@ -71,7 +93,6 @@
       letter-spacing: 0.12em;
       color: var(--muted);
       text-transform: uppercase;
-      padding-left: 5.6px;
     }
     .nav-logged-in a {
       color: var(--cyan);
@@ -87,7 +108,6 @@
       color: var(--cyan);
       text-transform: uppercase;
       text-decoration: none;
-      padding-left: 5.6px;
       cursor: pointer;
       transition: color 0.15s;
     }
@@ -121,8 +141,8 @@
       color: var(--cyan);
       border-color: var(--cyan);
       background: rgba(79,195,247,0.08);
-      pointer-events: none;
     }
+    .nav-links a.active:hover { color: #7dd8fa; border-color: var(--cyan); }
     .nav-links a:hover:not(.active) { color: var(--cyan); border-color: var(--cyan-dim); }
 
     .nav-right {
@@ -167,11 +187,26 @@
       color: var(--white);
       font-family: Helvetica, Arial, sans-serif;
       font-size: 13px;
-      padding: 8px 12px;
+      padding: 8px 44px 8px 12px;
       outline: none;
       min-width: 0;
     }
     .nav-search input::placeholder { color: var(--muted); }
+    .nav-search .nav-search-clear-btn {
+      position: absolute;
+      right: 48px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 4px;
+      z-index: 2;
+    }
+    .nav-search .nav-search-clear-btn:hover { color: var(--white); }
     .nav-search button {
       background: var(--cyan);
       border: 1.5px solid var(--cyan);
@@ -183,6 +218,45 @@
       align-items: center;
     }
     .nav-search svg { width: 14px; height: 14px; }
+    .search-drop-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--white);
+      border-bottom: 1px solid rgba(79,195,247,0.08);
+      text-decoration: none;
+    }
+    .search-drop-item:last-child { border-bottom: none; }
+    .search-drop-item:hover { background: rgba(79,195,247,0.1); }
+    .search-drop-label {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 8px 14px 4px;
+      border-bottom: 1px solid rgba(79,195,247,0.08);
+    }
+    .search-drop-name { flex: 1; }
+    .search-drop-type {
+      font-size: 10px;
+      color: var(--cyan);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .search-drop-note {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      padding: 12px 14px;
+      text-align: center;
+      border-top: 1px solid rgba(79,195,247,0.08);
+      line-height: 1.6;
+    }
+    .search-drop-note a { color: var(--cyan); text-decoration: none; font-weight: 600; }
+    .search-drop-note a:hover { color: #7dd8fa; }
     .nav-search-sub {
       font-size: 11px;
       color: var(--muted);
@@ -204,8 +278,8 @@
       .page-title-mobile { display: block; height: clamp(60px, 15vw, 90px); width: auto; aspect-ratio: 254.52 / 51.06; }
     }
 
-    /* ── ALLIANCE IDENTITY ── */
-    .alliance-header {
+    /* ── PILOT HEADER ── */
+    .pilot-header {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -215,47 +289,47 @@
       padding: 0 24px;
       flex-wrap: wrap;
     }
-    .alliance-logo {
+    .pilot-portrait {
       width: 130px;
       height: 130px;
-      flex-shrink: 0;
-      background: var(--panel);
-      border: 1px solid var(--border);
       border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      text-align: center;
+      object-fit: cover;
+      background: linear-gradient(135deg, #0e1a2b 0%, #1a2a40 100%);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
     }
-    .alliance-info { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; text-align: left; max-width: 640px; }
-    .alliance-name {
+    .pilot-header-info {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-top: 4px;
+      text-align: left;
+      max-width: 640px;
+    }
+    .pilot-header-name {
       font-size: clamp(22px, 3vw, 32px);
       font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      letter-spacing: 0.06em;
       color: var(--cyan);
-      line-height: 1.1;
+      text-transform: uppercase;
+      line-height: 1.2;
     }
-    .alliance-corps {
+    .pilot-header-details {
       font-size: 11px;
       color: var(--muted);
       letter-spacing: 0.07em;
       text-transform: uppercase;
       line-height: 1.8;
     }
-    .corp-alliance-link {
+    .pilot-header-details .detail-label { color: var(--white); font-weight: 700; }
+    .pilot-header-details a {
       color: var(--muted);
       text-decoration: none;
       transition: color 0.15s;
     }
-    .corp-alliance-link:hover { color: var(--cyan); text-decoration: underline; }
-    .detail-label { color: var(--white); font-weight: 700; }
+    .pilot-header-details a:hover { color: var(--cyan); text-decoration: underline; }
 
-    /* ── PANELS — exact copy from pilot.html ── */
+    /* ── PANELS ── */
     .panels-section {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -275,6 +349,8 @@
     /* Left Reps panel: darker than standard panels so it stands out */
     #leftRepsPanel {
       background: #000000;
+      border: 1px solid rgba(255,255,255,0.25);
+      box-shadow: 0 0 12px rgba(255,255,255,0.06);
     }
 
     /* RepScore panel */
@@ -293,18 +369,32 @@
       justify-content: center;
       position: relative;
     }
-    .grade-circle::before,
-    .grade-circle::after {
+    .grade-circle-dots {
+      position: absolute;
+      inset: 0;
+      animation: grade-circle-spin 60s linear infinite;
+    }
+    .grade-circle-dots::before,
+    .grade-circle-dots::after {
       content: '';
       position: absolute;
-      width: 10px;
-      height: 10px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       background: var(--bg);
       border: 2px solid var(--white);
     }
-    .grade-circle::before { top: -3px; left: 50%; transform: translate(-50%, -2px); }
-    .grade-circle::after  { bottom: -3px; left: 50%; transform: translate(-50%, 2px); }
+    .grade-circle-dots::before { top: 0; left: 50%; transform: translate(-50%, -50%); }
+    .grade-circle-dots::after { bottom: 0; left: 50%; transform: translate(-50%, 50%); }
+    @keyframes grade-circle-spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .grade-circle-dots {
+        animation: none;
+      }
+    }
     .grade-circle-letter {
       font-size: 56px;
       font-weight: 700;
@@ -328,9 +418,47 @@
       align-items: center;
       gap: 6px;
       text-align: center;
-      padding-bottom: 24px;
-      border-bottom: 1px solid var(--border);
+    }
+    .stats-row .total-reps-line { margin-top: 12px; }
+    .stat-total-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .stat-count-total { color: var(--white); }
+    .collapse-all-row {
+      display: flex;
+      justify-content: flex-end;
+      padding-bottom: 20px;
       margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .collapse-all-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .collapse-all-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
+    .collapse-all-row-bottom {
+      display: flex;
+      justify-content: flex-end;
+      padding-top: 20px;
+      margin-top: -6px;
+    }
+    .left-reps-top-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: -4px;
+      margin-bottom: 14px;
     }
     .stat-num { font-size: 30px; font-weight: 700; color: var(--cyan); }
     .stat-label {
@@ -370,53 +498,44 @@
       padding-bottom: 20px;
       border-bottom: 1px solid var(--border);
     }
-    .no-comment-reps-list { border-radius: 4px; overflow: hidden; }
-    .no-comment-rep-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 10px 4px;
-      border-bottom: 1px solid var(--border);
-    }
-    .no-comment-rep-row:last-child { border-bottom: none; }
-    .no-comment-rep-badge {
-      width: 28px;
-      height: 28px;
-      flex-shrink: 0;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--white);
-    }
-    .no-comment-rep-badge .modifier { font-size: 0.6em; font-weight: 700; vertical-align: super; line-height: 0; }
-    .no-comment-rep-badge.neg     { background: var(--grade-d); }
-    .no-comment-rep-badge.neutral { background: var(--grade-b); }
-    .no-comment-rep-badge.pos     { background: var(--grade-a); }
-
-    .comments-headrow {
+    .reps-panel-headrow {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 14px;
     }
-    .comments-headrow span {
+    .reps-panel-headrow .reps-panel-label {
       font-size: 14px;
       font-weight: 600;
       letter-spacing: 0.12em;
       color: var(--white);
       text-transform: uppercase;
+      cursor: pointer;
+      transition: color 0.15s;
     }
-    .comments-headrow .comments-count-inline {
+    .reps-panel-headrow .reps-panel-label:hover { color: var(--cyan); }
+    .reps-panel-headrow .reps-panel-count {
       font-size: 16px;
       font-weight: 700;
       letter-spacing: 0;
       color: var(--cyan);
       text-transform: none;
       margin-left: 10px;
+    }
+    #noCommentRepsPanel { border-bottom: 2px solid rgba(100,180,255,0.25); }
+    .no-comment-reps-list { border-radius: 4px; overflow: hidden; }
+    .rep-row-date {
+      font-size: 11px;
+      font-weight: 400;
+      opacity: 0.75;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .rep-row-meta {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--white);
     }
     .share-btn {
       background: transparent;
@@ -432,6 +551,7 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      align-self: flex-start;
     }
     .share-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
     .share-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
@@ -456,14 +576,104 @@
     }
     .share-toast.show { opacity: 1; }
 
-    .comments-list { border-radius: 4px; overflow: hidden; }
-    .comments-empty {
+    .validation-toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--cyan);
+      color: var(--bg);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 9px 20px;
+      border-radius: 5px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      z-index: 9999;
+    }
+    .validation-toast.show { opacity: 1; }
+
+    .confirm-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      z-index: 9990;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .confirm-overlay.show { display: flex; }
+    .confirm-modal {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 28px 26px;
+      max-width: 380px;
+      width: 100%;
       text-align: center;
+    }
+    .confirm-modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 14px;
+    }
+    .confirm-modal-summary {
       font-size: 13px;
       color: var(--muted);
-      letter-spacing: 0.04em;
-      padding: 28px 16px;
+      line-height: 1.6;
+      margin-bottom: 20px;
     }
+    .confirm-modal-summary strong { color: var(--cyan); font-weight: 600; }
+    .confirm-modal-check {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      margin-bottom: 22px;
+    }
+    .confirm-modal-check input[type="checkbox"] {
+      accent-color: var(--cyan);
+      width: 13px;
+      height: 13px;
+      cursor: pointer;
+    }
+    .confirm-modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+    .confirm-modal-actions .submit-btn { padding: 12px 28px; }
+    .confirm-cancel-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 12px 28px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .confirm-cancel-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
+
+    .comments-list {
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .share-btn.small { font-size: 10px; padding: 5px 10px; }
     .comment-row {
       display: flex;
       align-items: center;
@@ -476,9 +686,30 @@
     .comment-row.neg     { background: var(--grade-d); }
     .comment-row.pos     { background: var(--grade-a); }
     .comment-row.neutral { background: var(--grade-b); }
+    .comment-row.has-votes { align-items: stretch; }
+    .rep-row-right.has-votes { align-items: stretch; }
+    .rep-row-right.has-votes .rep-grade-badge { align-self: center; }
+    .rep-vote-col { display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 5px; height: auto; }
+    .vote-row { display: flex; align-items: center; gap: 10px; }
+    .vote-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .vote-btn svg { flex-shrink: 0; }
+    .comment-row.neg     .vote-btn { color: #c02128; }
+    .comment-row.neutral .vote-btn { color: #2ff541; }
+    .comment-row.pos     .vote-btn { color: #4fc3f7; }
+    .vote-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
     .comment-meta { font-size: 11px; opacity: 0.85; letter-spacing: 0.05em; text-transform: uppercase; }
-    .comment-text { font-size: 14px; font-weight: 600; text-transform: uppercase; margin-top: 2px; }
+    .comment-text { font-size: 14px; font-weight: 600; text-transform: uppercase; margin-top: 12px; }
     .comment-system {
       font-size: 11px;
       font-weight: 700;
@@ -505,7 +736,7 @@
     }
     .see-all-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
 
-    /* Left Reps panel (reps you've left on this corp) */
+    /* Left Reps panel (pinned reps you've left on this pilot) */
     .right-column { display: flex; flex-direction: column; gap: 24px; }
     .rep-row-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
     .rep-grade-badge {
@@ -536,6 +767,7 @@
       text-transform: uppercase;
       margin-bottom: 18px;
     }
+    .panel-title.white { color: var(--white); }
     .panel-divider { border-bottom: 1px solid var(--border); margin-bottom: 24px; }
 
     .section-divider {
@@ -554,6 +786,7 @@
       margin-bottom: 28px;
     }
 
+    /* slider */
     .grade-slider {
       position: relative;
       display: flex;
@@ -589,9 +822,9 @@
       cursor: pointer;
       transition: all 0.15s;
     }
-    .grade-dot[data-tier="neg"]     { border-color: var(--grade-d); background: var(--grade-d); color: var(--white); }
-    .grade-dot[data-tier="neutral"] { border-color: var(--grade-b); background: var(--grade-b); color: var(--white); }
-    .grade-dot[data-tier="pos"]     { border-color: var(--grade-a); background: var(--grade-a); color: var(--white); }
+    .grade-dot[data-tier="neg"]      { border-color: var(--grade-d); background: var(--grade-d); color: var(--white); }
+    .grade-dot[data-tier="neutral"]  { border-color: var(--grade-b); background: var(--grade-b); color: var(--white); }
+    .grade-dot[data-tier="pos"]      { border-color: var(--grade-a); background: var(--grade-a); color: var(--white); }
 
     .grade-dot.selected[data-tier="neg"]     { background: var(--grade-d); color: var(--white); box-shadow: 0 0 0 3px rgba(255,255,255,0.4); }
     .grade-dot.selected[data-tier="neutral"] { background: var(--grade-b); color: var(--white); box-shadow: 0 0 0 3px rgba(255,255,255,0.4); }
@@ -614,9 +847,10 @@
       border-radius: 3px;
       color: var(--white);
     }
-    .tier-tag.neg     { background: var(--grade-d); }
+    .tier-tag.neg { background: var(--grade-d); }
     .tier-tag.neutral { background: var(--grade-b); }
-    .tier-tag.pos     { background: var(--grade-a); }
+    .tier-tag.pos { background: var(--grade-a); }
+    .tier-tag.spacer { visibility: hidden; }
 
     .system-grid {
       display: grid;
@@ -671,12 +905,24 @@
       align-items: center;
       gap: 10px;
       max-width: 420px;
-      margin: 0 auto;
+      margin: 0 auto 0;
       flex-wrap: wrap;
     }
-    .anon-submitting { font-size: 12px; color: var(--muted); letter-spacing: 0.04em; }
-    .anon-submitting strong { color: var(--cyan); font-weight: 600; }
-    .submitter-link { color: var(--white); font-weight: 600; text-decoration: none; transition: color 0.15s; }
+    .anon-submitting {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+    .anon-submitting strong {
+      color: var(--cyan);
+      font-weight: 600;
+    }
+    .submitter-link {
+      color: var(--white);
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
     .submitter-link:hover { color: var(--cyan); }
     .comment-row.neg .submitter-link:hover     { color: #c02128; }
     .comment-row.neutral .submitter-link:hover { color: #2ff541; }
@@ -692,7 +938,12 @@
       cursor: pointer;
       white-space: nowrap;
     }
-    .anon-label input[type="checkbox"] { accent-color: var(--cyan); width: 13px; height: 13px; cursor: pointer; }
+    .anon-label input[type="checkbox"] {
+      accent-color: var(--cyan);
+      width: 13px;
+      height: 13px;
+      cursor: pointer;
+    }
 
     .submit-wrap { text-align: center; }
     .submit-btn {
@@ -712,7 +963,7 @@
 
     .login-prompt {
       display: block;
-      margin-top: 40px;
+      margin-top: 20px;
       text-align: center;
     }
     .login-prompt.hide { display: none; }
@@ -730,7 +981,7 @@
     }
     .hint-link:hover { color: var(--cyan); }
 
-    /* ── LEGAL + FOOTER — exact match to pilot.html ── */
+    /* ── LEGAL + FOOTER (shared) ── */
     .legal-note {
       max-width: 480px;
       margin: 10px auto 0;
@@ -739,18 +990,23 @@
       font-size: 12px;
       color: var(--muted);
     }
+    .legal-note a { color: var(--cyan); text-decoration: none; }
+
     .site-footer {
-      margin-top: 60px;
-      padding: 30px 24px 40px;
+      margin-top: 40px;
+      padding: 32px 24px 40px;
+      border-top: 1px solid var(--border);
       text-align: center;
     }
     .footer-grid {
       display: inline-grid;
-      grid-template-columns: repeat(4, auto);
-      gap: 10px 40px;
+      grid-template-columns: repeat(3, auto);
+      gap: 20px 64px;
       justify-content: center;
       text-align: center;
-      margin-bottom: 40px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 28px;
     }
     .footer-grid a {
       font-size: 12px;
@@ -779,64 +1035,38 @@
       letter-spacing: 0.05em;
     }
 
+    /* ── RESPONSIVE ── */
     @media (max-width: 760px) {
       .panels-section { grid-template-columns: 1fr; }
-      .alliance-header { justify-content: center; text-align: center; }
+      .pilot-header { text-align: center; justify-content: center; }
+      .pilot-header-info { text-align: center; }
       .nav-links { order: 3; width: 100%; }
       .nav-right { align-items: center; width: 100%; }
-    }
-    .search-drop-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 9px 14px;
-      cursor: pointer;
-      font-size: 13px;
-      color: var(--white);
-      border-bottom: 1px solid rgba(79,195,247,0.08);
-      text-decoration: none;
-    }
-    .search-drop-item:last-child { border-bottom: none; }
-    .search-drop-item:hover { background: rgba(79,195,247,0.1); }
-    .search-drop-label {
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      padding: 8px 14px 4px;
-      border-bottom: 1px solid rgba(79,195,247,0.08);
-    }
-    .search-drop-name { flex: 1; }
-    .search-drop-type {
-      font-size: 10px;
-      color: var(--cyan);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
     }
   </style>
 </head>
 <body>
-
 <div class="page">
 
   <!-- TOP NAV -->
   <header class="topnav">
     <div class="nav-left">
-      <a href="index.html" class="nav-logo"><img src="/assets/images/PilotRep_Logo_NavBar.svg" alt="Pilot Rep" style="height:38px;width:auto;display:block;" /></a>
+      <a href="index.html" class="nav-logo"><img src="assets/images/PilotRep_Logo_NavBar.svg" alt="Pilot Rep" style="height:38px;width:auto;display:block;" /></a>
       <div class="nav-logged-in" id="navLoggedInAs">LOGGED IN AS &nbsp;<a href="pilot.html" id="navLoggedInLink">—</a></div>
       <a href="#" class="nav-login-prompt" id="navLoginPrompt" onclick="event.preventDefault(); window.location.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname+window.location.search);">Log In With EVE Online</a>
     </div>
 
     <nav class="nav-links">
-      <a href="pilot.html">Pilots</a>
-      <a href="corporation.html" class="active">Corporations</a>
-      <a href="alliance.html">Alliances</a>
+      <a href="pilot-landing.html">Pilots</a>
+      <a href="corporation-landing.html" class="active">Corporations</a>
+      <a href="alliance-landing.html">Alliances</a>
     </nav>
 
     <div class="nav-right">
       <div class="nav-search" style="position:relative;">
-        <input type="text" placeholder="Search for Pilots, Corporations and Alliances" id="navSearchInput" />
-        <button aria-label="Search" id="navSearchBtn">
+        <input type="text" id="navSearchInput" placeholder="Search for Pilots, Corporations and Alliances" autocomplete="off" />
+        <button id="navSearchClear" class="nav-search-clear-btn" aria-label="Clear search" type="button" style="display:none;">&times;</button>
+        <button id="navSearchBtn" aria-label="Search">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
@@ -848,20 +1078,28 @@
   </header>
 
   <!-- PAGE TITLE -->
-  <h1 class="page-title">
-    <img class="page-title-img page-title-desktop" src="assets/images/PR_Corp_Repscore.svg" alt="Corporation RepScore" />
-    <img class="page-title-img page-title-mobile" src="assets/images/PR_Corp_Repscore_M.svg" alt="Corporation RepScore" />
+  <h1 class="page-title" id="pageTitle">
+    <img class="page-title-img page-title-desktop" id="pageTitleDesktop" src="assets/images/PR_Corp_Repscore.svg" alt="Corporation RepScore" />
+    <img class="page-title-img page-title-mobile" id="pageTitleMobile" src="assets/images/PR_Corp_Repscore_M.svg" alt="Corporation RepScore" />
   </h1>
 
-  <!-- CORPORATION IDENTITY -->
-  <div class="alliance-header">
-    <img id="corpLogo" src="" alt="Corp Logo" style="display:none;width:128px;height:128px;border-radius:4px;">
-    <div class="alliance-logo" id="corpLogoPlaceholder">Corp<br>Logo</div>
-    <div class="alliance-info">
-      <div class="alliance-name" id="corpName">—</div>
-      <div class="alliance-corps" id="corpDetails"></div>
+  <!-- PILOT HEADER -->
+  <section class="pilot-header">
+    <img class="pilot-portrait" id="corpLogo" src="" alt="" style="display:none;" />
+    <div class="pilot-portrait" id="corpLogoPlaceholder"></div>
+    <div class="pilot-header-info">
+      <div class="pilot-header-name" id="corpName">—</div>
+      <div class="pilot-header-details" id="corpDetails"></div>
+      <button class="share-btn small" id="shareBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+        </svg>
+        Share
+      </button>
     </div>
-  </div>
+  </section>
 
   <!-- PANELS -->
   <section class="panels-section">
@@ -870,50 +1108,52 @@
     <div class="panel">
       <div class="grade-circle-wrap">
         <div class="grade-circle">
+          <div class="grade-circle-dots"></div>
           <span class="grade-circle-letter" id="gradeCircleLetter">–</span>
         </div>
       </div>
 
       <div class="stats-row">
-        <span class="stat-label-inline"><span class="stat-label-link" id="pilotRepsToggle">Reps</span><span class="stat-count-inline" id="repsCount">0</span></span>
-        <span class="stat-label-inline">Corp / Alliance Reps<span class="stat-count-inline" id="corpAllianceRepsCount">0</span></span>
+        <span class="stat-label-inline"><span class="stat-label-link" id="pilotRepsToggle">Pilot Reps</span><span class="stat-count-inline" id="pilotRepsCount">0</span></span>
+        <span class="stat-label-inline"><span class="stat-label-link" id="corpAllianceRepsToggle">Corp / Alliance Reps</span><span class="stat-count-inline" id="corpAllianceRepsCount">0</span></span>
+        <span class="stat-label-inline total-reps-line"><span class="stat-total-label">Total Reps</span><span class="stat-count-inline stat-count-total" id="totalRepsCount">0</span></span>
+      </div>
+
+      <div class="collapse-all-row" id="collapseAllRow" style="display:none;">
+        <button class="collapse-all-btn" id="collapseAllBtn">Collapse All</button>
       </div>
 
       <div class="no-comment-reps-panel" id="noCommentRepsPanel" style="display:none;">
+        <div class="reps-panel-headrow"><span class="reps-panel-label" id="pilotRepsPanelLabel">Pilot Reps</span><span class="reps-panel-count" id="pilotRepsPanelCount">0</span></div>
         <div class="no-comment-reps-list" id="noCommentRepsList"></div>
         <div class="see-all-wrap" id="noCommentRepsSeeAllWrap" style="display:none;">
           <button class="see-all-btn" id="noCommentRepsSeeAllBtn">▾ See All Reps</button>
         </div>
       </div>
 
-      <div class="comments-headrow">
-        <span>Comments<span class="comments-count-inline" id="commentsCount">0</span></span>
-        <button class="share-btn" id="shareBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
-            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-          </svg>
-          Share
-        </button>
+      <div class="no-comment-reps-panel" id="corpAllianceRepsPanel" style="display:none;">
+        <div class="reps-panel-headrow"><span class="reps-panel-label" id="corpAllianceRepsPanelLabel">Corp / Alliance Reps</span><span class="reps-panel-count" id="corpAllianceRepsPanelCount">0</span></div>
+        <div class="no-comment-reps-list" id="corpAllianceRepsList"></div>
+        <div class="see-all-wrap" id="corpAllianceRepsSeeAllWrap" style="display:none;">
+          <button class="see-all-btn" id="corpAllianceRepsSeeAllBtn">▾ See All Reps</button>
+        </div>
       </div>
 
-      <div class="comments-list" id="commentsList">
-        <div class="comments-empty" id="commentsEmpty">No reps yet. Be the first to leave one.</div>
-      </div>
-
-      <div class="see-all-wrap" id="seeAllWrap" style="display:none;">
-        <button class="see-all-btn" id="seeAllBtn">&#9662; See All Comments</button>
+      <div class="collapse-all-row-bottom" id="collapseAllRowBottom" style="display:none;">
+        <button class="collapse-all-btn" id="collapseAllBtnBottom">Collapse All</button>
       </div>
     </div>
 
     <!-- Right Column: Left Reps (conditional) + Leave A Rep Panel -->
     <div class="right-column">
 
-    <!-- Left Reps Panel (only shown if logged-in user has repped this corp) -->
+    <!-- Left Reps Panel (only shown if logged-in user has repped this pilot) -->
     <div class="panel" id="leftRepsPanel" style="display:none;">
-      <h2 class="panel-title">Left Reps</h2>
+      <h2 class="panel-title white">Left Reps</h2>
       <div class="panel-divider"></div>
+      <div class="left-reps-top-row" id="leftRepsTopRow" style="display:none;">
+        <button class="collapse-all-btn" id="leftRepsTopShowLessBtn">▴ Show Less</button>
+      </div>
       <div class="comments-list" id="leftRepsList"></div>
       <div class="see-all-wrap" id="leftRepsSeeAllWrap" style="display:none;">
         <button class="see-all-btn" id="leftRepsSeeAllBtn">▾ Show More</button>
@@ -922,18 +1162,18 @@
 
     <!-- Leave A Rep Panel -->
     <div class="panel">
-      <div style="font-size:11px;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;text-align:center;margin-bottom:8px;"><a href="#" class="hint-link" onclick="event.preventDefault(); window.location.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname+window.location.search);">Login With EVE Online To</a></div>
+      <div id="submitRepLoginHint" style="font-size:11px;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;text-align:center;margin-bottom:8px;"><a href="#" class="hint-link" onclick="event.preventDefault(); window.location.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname+window.location.search);">Login With EVE Online To</a></div>
       <h2 class="panel-title">Submit A Rep</h2>
       <div class="panel-divider"></div>
 
       <div class="subsection-label">Rate Your Encounter</div>
 
       <div class="grade-slider" id="gradeSlider">
-        <div class="grade-dot" data-grade="F"  data-tier="neg">F</div>
-        <div class="grade-dot" data-grade="D"  data-tier="neg">D</div>
-        <div class="grade-dot" data-grade="C"  data-tier="neutral">C</div>
-        <div class="grade-dot" data-grade="B"  data-tier="neutral">B</div>
-        <div class="grade-dot" data-grade="A"  data-tier="pos">A</div>
+        <div class="grade-dot" data-grade="F" data-tier="neg">F</div>
+        <div class="grade-dot" data-grade="D" data-tier="neg">D</div>
+        <div class="grade-dot" data-grade="C" data-tier="neutral">C</div>
+        <div class="grade-dot" data-grade="B" data-tier="neutral">B</div>
+        <div class="grade-dot" data-grade="A" data-tier="pos">A</div>
         <div class="grade-dot" data-grade="A+" data-tier="pos">A+</div>
       </div>
       <div class="slider-labels">
@@ -946,9 +1186,9 @@
 
       <div class="subsection-label">System Encountered In</div>
       <div class="system-grid">
-        <button class="system-btn">Nullsec</button>
-        <button class="system-btn">Lowsec</button>
         <button class="system-btn">Highsec</button>
+        <button class="system-btn">Lowsec</button>
+        <button class="system-btn">Nullsec</button>
         <button class="system-btn">Wormhole</button>
         <button class="system-btn">Pochven</button>
         <button class="system-btn">N/A</button>
@@ -958,8 +1198,8 @@
 
       <div class="subsection-label">Comment On Your Encounter</div>
       <div class="comment-field-wrap">
-        <input type="text" class="comment-input" id="commentInput" maxlength="30" placeholder="MAXIMUM 5 WORDS OR 30 LETTERS" />
-        <div class="comment-hint">No Spam &bull; No Profanity &bull; Keep It Professional &bull; Comments Are Moderated</div>
+        <input type="text" class="comment-input" maxlength="30" placeholder="MAXIMUM 5 WORDS OR 30 LETTERS" />
+        <div class="comment-hint">No Spam • No Profanity • Keep It Professional • Comments Are Moderated</div>
       </div>
 
       <div class="section-divider"></div>
@@ -973,36 +1213,50 @@
 
       <div class="submit-wrap" style="margin-top:24px;">
         <button class="submit-btn" id="submitBtn">Submit A Rep</button>
-        <div class="login-prompt" id="loginPrompt">
-          <div class="login-prompt-text">You must be logged in to submit a PilotRep.</div>
-          <a id="eveLoginBtn" href="#" class="eve-login-sm" onclick="this.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname+window.location.search)">
-            <span class="eve-logo-sm">&#926;V&#926;</span>
-            <span class="eve-divider-sm"></span>
-            LOG IN with EVE Online
-          </a>
-        </div>
+      </div>
+      <div class="login-prompt" id="loginPrompt" style="margin-top:36px;">
+        <a id="eveLoginBtn" href="#" class="eve-login-sm" onclick="this.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname+window.location.search)">
+          <span class="eve-logo-sm">ΞVΞ</span>
+          <span class="eve-divider-sm"></span>
+          LOG IN with EVE Online
+        </a>
       </div>
     </div>
 
-    </div><!-- /.right-column -->
+    </div>
 
   </section>
 
   <!-- SHARE TOAST -->
   <div class="share-toast" id="shareToast">Link Copied!</div>
-  <div class="share-toast" id="validationToast"></div>
+  <div class="validation-toast" id="validationToast"></div>
+
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-modal">
+      <div class="confirm-modal-title">Confirm Your Rep</div>
+      <div class="confirm-modal-summary" id="confirmModalSummary"></div>
+      <label class="confirm-modal-check">
+        <input type="checkbox" id="confirmHideCheck"> Don't Show This Again
+      </label>
+      <div class="confirm-modal-actions">
+        <button type="button" class="confirm-cancel-btn" id="confirmCancelBtn">Cancel</button>
+        <button type="button" class="submit-btn" id="confirmSubmitBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
 
   <!-- FOOTER -->
   <footer class="site-footer">
     <div class="footer-grid">
       <a href="about.html">About</a>
-      <a href="subscriptions.html">Subscriptions</a>
-      <a href="my-pilotrep.html" id="myPilotRepLink">My PilotRep</a>
       <a href="/.netlify/functions/auth-start" id="footerAuthLink">Login</a>
-      <a href="faq.html">FAQ</a>
-      <a href="privacy.html">Privacy Policy</a>
-      <a href="terms.html">Terms Of Service</a>
+      <a href="my-pilotrep.html" id="myPilotRepLink">My PilotRep</a>
+      <a href="subscriptions.html">Subscribe</a>
+      <a href="support-us.html">Support Us</a>
       <a href="contact.html">Contact</a>
+      <a href="privacy-policy.html">Privacy Policy</a>
+      <a href="serviceterms.html">Terms Of Service</a>
+      <a href="faq.html">FAQ</a>
     </div>
     <div class="eve-time" id="eveTime" style="margin-top:28px;">EVE TIME 00:00:00</div>
     <div class="legal-note" style="margin-top:10px;">
@@ -1011,13 +1265,41 @@
     <div class="footer-copy">&copy; 2026 PilotRep. All rights reserved.</div>
   </footer>
 
-</div><!-- /.page -->
+</div>
 
 <script>
   // Disable submit immediately — re-enabled by loadSession() once session is known
   document.getElementById('submitBtn').disabled = true;
 
-  // ── Auth — real EVE SSO session check ──
+  // Grade slider: single-select
+  const dots = document.querySelectorAll('#gradeSlider .grade-dot');
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      dots.forEach(d => d.classList.remove('selected'));
+      dot.classList.add('selected');
+    });
+  });
+
+  // System buttons: single-select
+  const sysButtons = document.querySelectorAll('.system-btn');
+  sysButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      sysButtons.forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+  });
+
+  // Comment field: enforce 5 word / 30 letter limit
+  const commentInput = document.querySelector('.comment-input');
+  const anonRow = document.getElementById('anonRow');
+  commentInput.addEventListener('input', () => {
+    let words = commentInput.value.trim().split(/\s+/).filter(Boolean);
+    if (words.length > 5) {
+      commentInput.value = words.slice(0, 5).join(' ');
+    }
+  });
+
+  // ── AUTH GATE ──
   let currentUser = null;
   let currentUserCorpId = null;
   let currentUserAllianceId = null;
@@ -1035,6 +1317,7 @@
           submitterName.textContent = currentUser;
           if (data.characterId) submitterName.href = `my-pilotrep.html`;
         }
+        // Switch footer link to Logout
         const authLink = document.getElementById('footerAuthLink');
         if (authLink) {
           authLink.textContent = 'Logout';
@@ -1043,6 +1326,11 @@
         const myLink = document.getElementById('myPilotRepLink');
         if (myLink && data.characterId) {
           myLink.href = `my-pilotrep.html`;
+        }
+        // Load any reps this session's character has already left on this corp
+        const urlCorpId = new URLSearchParams(window.location.search).get('id');
+        if (data.characterId && urlCorpId) {
+          loadMyRepsForPilot(urlCorpId);
         }
         const navLoggedIn = document.getElementById('navLoggedInAs');
         const navLoggedInLink = document.getElementById('navLoggedInLink');
@@ -1055,16 +1343,15 @@
         if (navLoginPrompt) navLoginPrompt.style.display = 'none';
         // Logged in: hide the EVE login button, it's no longer needed
         document.getElementById('loginPrompt').classList.add('hide');
-        // Load any reps this session's character has already left on this corp
-        const urlCorpId = new URLSearchParams(window.location.search).get('id');
-        if (urlCorpId) loadMyRepsForPilot(urlCorpId);
+        // Logged in: hide the "Login With EVE Online To" hint above Submit A Rep
+        const submitRepLoginHint = document.getElementById('submitRepLoginHint');
+        if (submitRepLoginHint) submitRepLoginHint.style.display = 'none';
       }
     } catch (e) {
       console.warn('Session check failed:', e);
     }
     // Submitting-as / Remain Anonymous row: visible whenever logged in
-    const anonRowEl = document.getElementById('anonRow');
-    if (anonRowEl) anonRowEl.style.display = isLoggedIn() ? '' : 'none';
+    anonRow.style.display = isLoggedIn() ? '' : 'none';
     // Enable submit now that we know the session state
     document.getElementById('submitBtn').disabled = false;
   }
@@ -1082,14 +1369,44 @@
     });
   }
 
+  // ── ANONYMOUS CHECKBOX ──
+  const anonCheck = document.getElementById('anonCheck');
+  const submitterName = document.getElementById('submitterName');
+  submitterName.addEventListener('click', (e) => { if (!isLoggedIn()) e.preventDefault(); });
+  anonCheck.addEventListener('change', () => {
+    submitterName.textContent = anonCheck.checked ? 'Anonymous' : (currentUser || 'Unknown');
+  });
 
   loadSession();
+
+  // ── SHARE BUTTON ──
+  const shareBtn = document.getElementById('shareBtn');
+  const shareToast = document.getElementById('shareToast');
+  shareBtn.addEventListener('click', () => {
+    const url = window.location.href;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(showToast);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = url; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast();
+    }
+  });
+  function showToast() {
+    shareToast.classList.add('show');
+    setTimeout(() => shareToast.classList.remove('show'), 2200);
+  }
 
   // ── 13-POINT GRADE SCALE ──
   // Input dots map to these anchor values on a 0–12 scale:
   //   F=0  D=2  C=5  B=8  A=11  A+=12
   // Averaging then rounds to the nearest of 13 slots:
   //   0=F  1=D−  2=D  3=D+  4=C−  5=C  6=C+  7=B−  8=B  9=B+  10=A−  11=A  12=A+
+  // Anchors: F and A+ sit at the extremes; middle grades evenly spaced.
+  // Each grade maps to its exact anchor position on the 13-point scale,
+  // so a single submitted grade always displays as that exact letter.
   const INPUT_TO_NUM = { 'F': 0, 'D': 2, 'C': 5, 'B': 8, 'A': 11, 'A+': 12 };
   const GRADE_TABLE = [
     { html: 'F',                                    cls: 'grade-F' },  // 0
@@ -1107,20 +1424,16 @@
     { html: 'A<span class="modifier">+</span>',     cls: 'grade-A' },  // 12
   ];
 
-  let submittedReps    = [];
+  let submittedReps = [];
   let targetCorpId = null;
   let targetAllianceId = null;
-  let commentsExpanded = false;
-  const VISIBLE_LIMIT  = 5;
+  let targetName = null;
+  const VISIBLE_LIMIT = 5;
 
-  const repsCountEl        = document.getElementById('repsCount');
+  const pilotRepsCountEl        = document.getElementById('pilotRepsCount');
   const corpAllianceRepsCountEl = document.getElementById('corpAllianceRepsCount');
-  const commentsCountEl    = document.getElementById('commentsCount');
+  const totalRepsCountEl = document.getElementById('totalRepsCount');
   const gradeCircleLetterEl = document.getElementById('gradeCircleLetter');
-  const commentsListEl     = document.getElementById('commentsList');
-  const commentsEmptyEl    = document.getElementById('commentsEmpty');
-  const seeAllWrapEl       = document.getElementById('seeAllWrap');
-  const seeAllBtnEl        = document.getElementById('seeAllBtn');
 
   let noCommentRepsExpanded = false;
   let noCommentRepsOpen = false;
@@ -1129,16 +1442,17 @@
   const noCommentRepsListEl      = document.getElementById('noCommentRepsList');
   const noCommentRepsSeeAllWrapEl = document.getElementById('noCommentRepsSeeAllWrap');
   const noCommentRepsSeeAllBtnEl  = document.getElementById('noCommentRepsSeeAllBtn');
+  const pilotRepsPanelCountEl     = document.getElementById('pilotRepsPanelCount');
 
   const NO_COMMENT_OPEN_KEY = 'pilotRepsOpen';
   let noCommentStateInitialized = false;
 
-  function getNoCommentCount() {
-    return submittedReps.filter(r => !r.comment || !r.comment.trim()).length;
+  function getPilotRepsTotalCount() {
+    return submittedReps.filter(r => !r.isCorpAlliance).length;
   }
 
   function updatePilotRepsToggleState() {
-    const count = getNoCommentCount();
+    const count = getPilotRepsTotalCount();
     if (count === 0) {
       pilotRepsToggleEl.classList.add('disabled');
       if (noCommentRepsOpen) {
@@ -1149,10 +1463,47 @@
       pilotRepsToggleEl.classList.remove('disabled');
       if (!noCommentStateInitialized) {
         noCommentStateInitialized = true;
-        if (localStorage.getItem(NO_COMMENT_OPEN_KEY) === 'true') {
+        if (localStorage.getItem(NO_COMMENT_OPEN_KEY) !== 'false') {
           noCommentRepsOpen = true;
           noCommentRepsPanelEl.style.display = 'block';
           renderNoCommentReps();
+        }
+      }
+    }
+  }
+
+  let corpAllianceRepsExpanded = false;
+  let corpAllianceRepsOpen = false;
+  const corpAllianceRepsToggleEl     = document.getElementById('corpAllianceRepsToggle');
+  const corpAllianceRepsPanelEl      = document.getElementById('corpAllianceRepsPanel');
+  const corpAllianceRepsListEl       = document.getElementById('corpAllianceRepsList');
+  const corpAllianceRepsSeeAllWrapEl = document.getElementById('corpAllianceRepsSeeAllWrap');
+  const corpAllianceRepsSeeAllBtnEl  = document.getElementById('corpAllianceRepsSeeAllBtn');
+  const corpAllianceRepsPanelCountEl = document.getElementById('corpAllianceRepsPanelCount');
+
+  const CORP_ALLIANCE_OPEN_KEY = 'corpAllianceRepsOpen';
+  let corpAllianceStateInitialized = false;
+
+  function getCorpAllianceCount() {
+    return submittedReps.filter(r => r.isCorpAlliance).length;
+  }
+
+  function updateCorpAllianceRepsToggleState() {
+    const count = getCorpAllianceCount();
+    if (count === 0) {
+      corpAllianceRepsToggleEl.classList.add('disabled');
+      if (corpAllianceRepsOpen) {
+        corpAllianceRepsOpen = false;
+        corpAllianceRepsPanelEl.style.display = 'none';
+      }
+    } else {
+      corpAllianceRepsToggleEl.classList.remove('disabled');
+      if (!corpAllianceStateInitialized) {
+        corpAllianceStateInitialized = true;
+        if (localStorage.getItem(CORP_ALLIANCE_OPEN_KEY) !== 'false') {
+          corpAllianceRepsOpen = true;
+          corpAllianceRepsPanelEl.style.display = 'block';
+          renderCorpAllianceReps();
         }
       }
     }
@@ -1168,9 +1519,99 @@
       .replace(/'/g, '&#39;');
   }
 
-  function buildCommentRow(rep) {
+  function gradeToHtml(grade) {
+    if (!grade) return '';
+    const m = String(grade).match(/^([A-F])([+\-−]?)$/);
+    if (!m) return escapeHtml(grade);
+    return m[2] ? `${m[1]}<span class="modifier">${m[2]}</span>` : m[1];
+  }
+
+  // ── VOTE ICON (rotated three-dot "constellation" triangle, up = agree, down = disagree) ──
+  // Wired to vote-rep.js — optimistic UI update, reconciled with server response.
+  function voteIcon(direction, active) {
+    const pts = direction === 'up'
+      ? [[8, 3], [3, 13], [13, 13]]
+      : [[8, 13], [3, 3], [13, 3]];
+    const r = active ? 1.9 : 1.6;
+    const dotFill = active ? 'currentColor' : 'none';
+    return `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
+      <line x1="${pts[0][0]}" y1="${pts[0][1]}" x2="${pts[1][0]}" y2="${pts[1][1]}" stroke="currentColor" stroke-width="1.3"/>
+      <line x1="${pts[0][0]}" y1="${pts[0][1]}" x2="${pts[2][0]}" y2="${pts[2][1]}" stroke="currentColor" stroke-width="1.3"/>
+      <line x1="${pts[1][0]}" y1="${pts[1][1]}" x2="${pts[2][0]}" y2="${pts[2][1]}" stroke="currentColor" stroke-width="1.3"/>
+      <circle cx="${pts[0][0]}" cy="${pts[0][1]}" r="${r}" fill="${dotFill}" stroke="currentColor" stroke-width="1.3"/>
+      <circle cx="${pts[1][0]}" cy="${pts[1][1]}" r="${r}" fill="${dotFill}" stroke="currentColor" stroke-width="1.3"/>
+      <circle cx="${pts[2][0]}" cy="${pts[2][1]}" r="${r}" fill="${dotFill}" stroke="currentColor" stroke-width="1.3"/>
+    </svg>`;
+  }
+
+  function wireVoteButtons(row, rep) {
+    const upBtn = row.querySelector('.vote-up');
+    const downBtn = row.querySelector('.vote-down');
+    let upCount = rep.upvotes || 0;
+    let downCount = rep.downvotes || 0;
+    let voted = rep.userVote || null; // null | 'up' | 'down'
+    let busy = false;
+
+    function render() {
+      upBtn.innerHTML = voteIcon('up', voted === 'up') + `<span class="vote-count">${upCount}</span>`;
+      downBtn.innerHTML = voteIcon('down', voted === 'down') + `<span class="vote-count">${downCount}</span>`;
+    }
+
+    async function castVote(direction) {
+      if (!isLoggedIn()) { showValidation('Log In With EVE Online To Vote'); return; }
+      if (rep.isOwnRep) return;
+      if (busy || !rep.id) return;
+      busy = true;
+
+      // Optimistic update
+      const prevVoted = voted, prevUp = upCount, prevDown = downCount;
+      const newVoted = voted === direction ? null : direction;
+      if (voted === 'up') upCount--;
+      if (voted === 'down') downCount--;
+      if (newVoted === 'up') upCount++;
+      if (newVoted === 'down') downCount++;
+      voted = newVoted;
+      render();
+
+      try {
+        const res = await fetch('/.netlify/functions/vote-rep', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ repId: rep.id, voteType: newVoted })
+        });
+        let data = {};
+        try { data = await res.json(); } catch (_) {}
+        if (!res.ok) {
+          // Revert optimistic update on failure
+          voted = prevVoted; upCount = prevUp; downCount = prevDown;
+          render();
+          showValidation(data.error || 'Vote failed. Please try again.');
+        } else {
+          // Reconcile with authoritative server counts
+          upCount = data.upvotes;
+          downCount = data.downvotes;
+          voted = data.userVote;
+          render();
+        }
+      } catch (err) {
+        console.error('Vote error:', err);
+        voted = prevVoted; upCount = prevUp; downCount = prevDown;
+        render();
+        showValidation('Network error. Please try again.');
+      }
+
+      busy = false;
+    }
+
+    upBtn.addEventListener('click', () => castVote('up'));
+    downBtn.addEventListener('click', () => castVote('down'));
+
+    render();
+  }
+
+  function buildRepRow(rep) {
     const row = document.createElement('div');
-    row.className = 'comment-row ' + rep.tier;
+    row.className = 'comment-row has-votes ' + rep.tier;
     const dateLabel = rep.date || 'Just now';
     const authorLabel = rep.author
       ? (rep.reviewerId
@@ -1179,62 +1620,32 @@
       : 'Anonymous';
     row.innerHTML = `
       <div>
-        <div class="comment-meta">${dateLabel} · ${authorLabel}</div>
+        <div class="rep-row-date">${dateLabel}</div>
+        <div class="rep-row-meta">${authorLabel}</div>
         ${rep.comment && rep.comment.trim() ? `<div class="comment-text">${escapeHtml(rep.comment)}</div>` : ''}
       </div>
-      <span class="comment-system">${rep.system}</span>
-    `;
-    return row;
-  }
-
-  function renderComments() {
-    commentsListEl.innerHTML = '';
-    const commented = submittedReps.filter(r => r.comment && r.comment.trim());
-    if (commented.length === 0) {
-      commentsListEl.appendChild(commentsEmptyEl);
-      commentsEmptyEl.style.display = 'block';
-      seeAllWrapEl.style.display = 'none';
-      return;
-    }
-    const visible = commentsExpanded ? commented : commented.slice(0, VISIBLE_LIMIT);
-    visible.forEach(rep => commentsListEl.appendChild(buildCommentRow(rep)));
-    if (commented.length > VISIBLE_LIMIT) {
-      seeAllWrapEl.style.display = 'block';
-      seeAllBtnEl.textContent = commentsExpanded ? '▴ Show Less' : '▾ See All Comments';
-    } else {
-      seeAllWrapEl.style.display = 'none';
-    }
-  }
-
-  seeAllBtnEl.addEventListener('click', () => {
-    commentsExpanded = !commentsExpanded;
-    renderComments();
-  });
-
-  function buildNoCommentRepRow(rep) {
-    const row = document.createElement('div');
-    row.className = 'no-comment-rep-row';
-    const nameLabel = rep.author
-      ? (rep.reviewerId
-          ? `<a class="submitter-link" href="/pilot.html?id=${rep.reviewerId}">${escapeHtml(rep.author)}</a>`
-          : escapeHtml(rep.author))
-      : 'Anonymous';
-    row.innerHTML = `
-      <div>
-        <div class="comment-meta">${rep.date || 'Just now'}</div>
-        <span>${nameLabel}</span>
+      <div class="rep-row-right has-votes">
+        <div class="rep-vote-col">
+          <span class="comment-system">${rep.system}</span>
+          <div class="vote-row">
+            <button class="vote-btn vote-up" type="button" ${rep.isOwnRep ? 'disabled' : ''} title="${rep.isOwnRep ? 'You cannot vote on your own rep' : 'Agree'}" aria-label="Agree with this rep"></button>
+            <button class="vote-btn vote-down" type="button" ${rep.isOwnRep ? 'disabled' : ''} title="${rep.isOwnRep ? 'You cannot vote on your own rep' : 'Disagree'}" aria-label="Disagree with this rep"></button>
+          </div>
+        </div>
+        <span class="rep-grade-badge ${rep.tier}">${gradeToHtml(rep.grade)}</span>
       </div>
-      <span class="no-comment-rep-badge ${rep.tier}">${rep.grade}</span>
     `;
+    wireVoteButtons(row, rep);
     return row;
   }
 
   function renderNoCommentReps() {
     noCommentRepsListEl.innerHTML = '';
-    const noComment = submittedReps.filter(r => !r.comment || !r.comment.trim());
-    const visible = noCommentRepsExpanded ? noComment : noComment.slice(0, VISIBLE_LIMIT);
-    visible.forEach(rep => noCommentRepsListEl.appendChild(buildNoCommentRepRow(rep)));
-    if (noComment.length > VISIBLE_LIMIT) {
+    const pilotReps = submittedReps.filter(r => !r.isCorpAlliance);
+    pilotRepsPanelCountEl.textContent = pilotReps.length;
+    const visible = noCommentRepsExpanded ? pilotReps : pilotReps.slice(0, VISIBLE_LIMIT);
+    visible.forEach(rep => noCommentRepsListEl.appendChild(buildRepRow(rep)));
+    if (pilotReps.length > VISIBLE_LIMIT) {
       noCommentRepsSeeAllWrapEl.style.display = 'block';
       noCommentRepsSeeAllBtnEl.textContent = noCommentRepsExpanded ? '▴ Show Less' : '▾ See All Reps';
     } else {
@@ -1248,6 +1659,7 @@
     noCommentRepsPanelEl.style.display = noCommentRepsOpen ? 'block' : 'none';
     localStorage.setItem(NO_COMMENT_OPEN_KEY, noCommentRepsOpen);
     if (noCommentRepsOpen) renderNoCommentReps();
+    updateCollapseAllBtn();
   });
 
   noCommentRepsSeeAllBtnEl.addEventListener('click', () => {
@@ -1255,7 +1667,98 @@
     renderNoCommentReps();
   });
 
-  // ── LEFT REPS PANEL (reps this session's character has left on this corp) ──
+  // ── CORP / ALLIANCE REPS PANEL (all corp/alliance-mate reps, with or without a comment) ──
+  function renderCorpAllianceReps() {
+    corpAllianceRepsListEl.innerHTML = '';
+    const corpAlliance = submittedReps.filter(r => r.isCorpAlliance);
+    corpAllianceRepsPanelCountEl.textContent = corpAlliance.length;
+    const visible = corpAllianceRepsExpanded ? corpAlliance : corpAlliance.slice(0, VISIBLE_LIMIT);
+    visible.forEach(rep => corpAllianceRepsListEl.appendChild(buildRepRow(rep)));
+    if (corpAlliance.length > VISIBLE_LIMIT) {
+      corpAllianceRepsSeeAllWrapEl.style.display = 'block';
+      corpAllianceRepsSeeAllBtnEl.textContent = corpAllianceRepsExpanded ? '▴ Show Less' : '▾ See All Reps';
+    } else {
+      corpAllianceRepsSeeAllWrapEl.style.display = 'none';
+    }
+  }
+
+  corpAllianceRepsToggleEl.addEventListener('click', () => {
+    if (corpAllianceRepsToggleEl.classList.contains('disabled')) return;
+    corpAllianceRepsOpen = !corpAllianceRepsOpen;
+    corpAllianceRepsPanelEl.style.display = corpAllianceRepsOpen ? 'block' : 'none';
+    localStorage.setItem(CORP_ALLIANCE_OPEN_KEY, corpAllianceRepsOpen);
+    if (corpAllianceRepsOpen) renderCorpAllianceReps();
+    updateCollapseAllBtn();
+  });
+
+  corpAllianceRepsSeeAllBtnEl.addEventListener('click', () => {
+    corpAllianceRepsExpanded = !corpAllianceRepsExpanded;
+    renderCorpAllianceReps();
+  });
+
+  // ── COLLAPSE ALL / EXPAND ALL BUTTON (toggles both Pilot Reps and Corp/Alliance Reps panels) ──
+  const collapseAllRowEl = document.getElementById('collapseAllRow');
+  const collapseAllBtnEl = document.getElementById('collapseAllBtn');
+  const collapseAllRowBottomEl = document.getElementById('collapseAllRowBottom');
+  const collapseAllBtnBottomEl = document.getElementById('collapseAllBtnBottom');
+  function updateCollapseAllBtn() {
+    const anyOpen = noCommentRepsOpen || corpAllianceRepsOpen;
+    const anyReps = getPilotRepsTotalCount() > 0 || getCorpAllianceCount() > 0;
+    if (anyOpen) {
+      collapseAllRowEl.style.display = 'flex';
+      collapseAllBtnEl.textContent = 'Collapse All';
+      collapseAllRowBottomEl.style.display = 'flex';
+      collapseAllBtnBottomEl.textContent = 'Collapse All';
+    } else {
+      // Both panels closed: bottom button has nothing left to act on, so hide it
+      collapseAllRowBottomEl.style.display = 'none';
+      if (anyReps) {
+        collapseAllRowEl.style.display = 'flex';
+        collapseAllBtnEl.textContent = 'Expand All';
+      } else {
+        collapseAllRowEl.style.display = 'none';
+      }
+    }
+  }
+
+  function toggleAllReps() {
+    const anyOpen = noCommentRepsOpen || corpAllianceRepsOpen;
+    if (anyOpen) {
+      if (noCommentRepsOpen) {
+        noCommentRepsOpen = false;
+        noCommentRepsPanelEl.style.display = 'none';
+        localStorage.setItem(NO_COMMENT_OPEN_KEY, 'false');
+      }
+      if (corpAllianceRepsOpen) {
+        corpAllianceRepsOpen = false;
+        corpAllianceRepsPanelEl.style.display = 'none';
+        localStorage.setItem(CORP_ALLIANCE_OPEN_KEY, 'false');
+      }
+    } else {
+      if (!pilotRepsToggleEl.classList.contains('disabled')) {
+        noCommentRepsOpen = true;
+        noCommentRepsPanelEl.style.display = 'block';
+        localStorage.setItem(NO_COMMENT_OPEN_KEY, 'true');
+        renderNoCommentReps();
+      }
+      if (!corpAllianceRepsToggleEl.classList.contains('disabled')) {
+        corpAllianceRepsOpen = true;
+        corpAllianceRepsPanelEl.style.display = 'block';
+        localStorage.setItem(CORP_ALLIANCE_OPEN_KEY, 'true');
+        renderCorpAllianceReps();
+      }
+    }
+    updateCollapseAllBtn();
+  }
+
+  collapseAllBtnEl.addEventListener('click', toggleAllReps);
+  collapseAllBtnBottomEl.addEventListener('click', toggleAllReps);
+
+  // ── CLICKABLE PANEL HEADERS (click "Pilot Reps" / "Corp / Alliance Reps" label inside an open panel to close it) ──
+  document.getElementById('pilotRepsPanelLabel').addEventListener('click', () => pilotRepsToggleEl.click());
+  document.getElementById('corpAllianceRepsPanelLabel').addEventListener('click', () => corpAllianceRepsToggleEl.click());
+
+  // ── LEFT REPS PANEL (reps this session's character has left on this pilot) ──
   const LEFT_REPS_VISIBLE_LIMIT = 3;
   let myPilotReps = [];
   let leftRepsExpanded = false;
@@ -1264,6 +1767,8 @@
   const leftRepsListEl      = document.getElementById('leftRepsList');
   const leftRepsSeeAllWrapEl = document.getElementById('leftRepsSeeAllWrap');
   const leftRepsSeeAllBtnEl  = document.getElementById('leftRepsSeeAllBtn');
+  const leftRepsTopRowEl     = document.getElementById('leftRepsTopRow');
+  const leftRepsTopShowLessBtnEl = document.getElementById('leftRepsTopShowLessBtn');
 
   function buildLeftRepRow(rep) {
     const row = document.createElement('div');
@@ -1288,12 +1793,19 @@
     if (myPilotReps.length > LEFT_REPS_VISIBLE_LIMIT) {
       leftRepsSeeAllWrapEl.style.display = 'block';
       leftRepsSeeAllBtnEl.textContent = leftRepsExpanded ? '▴ Show Less' : '▾ Show More';
+      leftRepsTopRowEl.style.display = leftRepsExpanded ? 'flex' : 'none';
     } else {
       leftRepsSeeAllWrapEl.style.display = 'none';
+      leftRepsTopRowEl.style.display = 'none';
     }
   }
 
   leftRepsSeeAllBtnEl.addEventListener('click', () => {
+    leftRepsExpanded = !leftRepsExpanded;
+    renderLeftReps();
+  });
+
+  leftRepsTopShowLessBtnEl.addEventListener('click', () => {
     leftRepsExpanded = !leftRepsExpanded;
     renderLeftReps();
   });
@@ -1313,9 +1825,11 @@
   }
 
   function recalcAndRender() {
-    repsCountEl.textContent     = submittedReps.filter(r => !r.isCorpAlliance).length;
-    corpAllianceRepsCountEl.textContent = submittedReps.filter(r => r.isCorpAlliance).length;
-    commentsCountEl.textContent = submittedReps.filter(r => r.comment && r.comment.trim()).length;
+    const pilotCount = submittedReps.filter(r => !r.isCorpAlliance).length;
+    const corpAllianceCount = submittedReps.filter(r => r.isCorpAlliance).length;
+    pilotRepsCountEl.textContent        = pilotCount;
+    corpAllianceRepsCountEl.textContent = corpAllianceCount;
+    totalRepsCountEl.textContent        = pilotCount + corpAllianceCount;
 
     if (submittedReps.length === 0) {
       gradeCircleLetterEl.textContent = '–';
@@ -1327,12 +1841,15 @@
       gradeCircleLetterEl.innerHTML = grade.html;
       gradeCircleLetterEl.className = 'grade-circle-letter ' + grade.cls;
     }
-    renderComments();
     if (noCommentRepsOpen) renderNoCommentReps();
     updatePilotRepsToggleState();
+    if (corpAllianceRepsOpen) renderCorpAllianceReps();
+    updateCorpAllianceRepsToggleState();
+    updateCollapseAllBtn();
   }
 
-  const submitBtn = document.getElementById('submitBtn');
+  const submitBtn   = document.getElementById('submitBtn');
+  const loginPrompt = document.getElementById('loginPrompt');
 
   const validationToast = document.getElementById('validationToast');
   function showValidation(msg) {
@@ -1342,40 +1859,6 @@
     validationToast.classList.add('show');
     setTimeout(() => validationToast.classList.remove('show'), 2200);
   }
-
-  // Grade slider: single-select
-  const dots = document.querySelectorAll('#gradeSlider .grade-dot');
-  dots.forEach(dot => {
-    dot.addEventListener('click', () => {
-      dots.forEach(d => d.classList.remove('selected'));
-      dot.classList.add('selected');
-    });
-  });
-
-  // System buttons: single-select
-  const sysButtons = document.querySelectorAll('.system-btn');
-  sysButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      sysButtons.forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-    });
-  });
-
-  // Comment field: enforce 5 word / 30 letter limit
-  const commentInput = document.getElementById('commentInput');
-  const anonRow = document.getElementById('anonRow');
-  commentInput.addEventListener('input', () => {
-    let words = commentInput.value.trim().split(/\s+/).filter(Boolean);
-    if (words.length > 5) {
-      commentInput.value = words.slice(0, 5).join(' ');
-    }
-  });
-
-  // Anon toggle
-  document.getElementById('submitterName').addEventListener('click', function(e) { if (!currentUser) e.preventDefault(); });
-  document.getElementById('anonCheck').addEventListener('change', function() {
-    document.getElementById('submitterName').textContent = this.checked ? 'Anonymous' : (currentUser || 'Unknown');
-  });
 
   submitBtn.addEventListener('click', async (e) => {
     e.preventDefault();
@@ -1387,8 +1870,41 @@
     if (!selectedDot) { showValidation('Select A Grade'); return; }
     if (!selectedSys) { showValidation('Select A System'); return; }
 
+    if (localStorage.getItem('hideRepConfirm')) {
+      performSubmitRep(selectedDot, selectedSys);
+    } else {
+      openConfirmModal(selectedDot, selectedSys);
+    }
+  });
+
+  const confirmOverlay      = document.getElementById('confirmOverlay');
+  const confirmModalSummary = document.getElementById('confirmModalSummary');
+  const confirmHideCheck    = document.getElementById('confirmHideCheck');
+  const confirmCancelBtn    = document.getElementById('confirmCancelBtn');
+  const confirmSubmitBtn    = document.getElementById('confirmSubmitBtn');
+
+  function openConfirmModal(selectedDot, selectedSys) {
+    const grade   = selectedDot.dataset.grade;
+    const system  = selectedSys.textContent.trim();
+    const comment = commentInput.value.trim();
+    confirmModalSummary.innerHTML = `Grade: <strong>${grade}</strong> &nbsp;•&nbsp; System: <strong>${system}</strong>` +
+      (comment ? `<br>"${escapeHtml(comment)}"` : '');
+    confirmHideCheck.checked = false;
+    confirmOverlay.classList.add('show');
+    confirmSubmitBtn.onclick = () => {
+      if (confirmHideCheck.checked) localStorage.setItem('hideRepConfirm', 'true');
+      confirmOverlay.classList.remove('show');
+      performSubmitRep(selectedDot, selectedSys);
+    };
+  }
+
+  confirmCancelBtn.addEventListener('click', () => confirmOverlay.classList.remove('show'));
+  confirmOverlay.addEventListener('click', (e) => {
+    if (e.target === confirmOverlay) confirmOverlay.classList.remove('show');
+  });
+
+  async function performSubmitRep(selectedDot, selectedSys) {
     const grade = selectedDot.dataset.grade;
-    const anonymous = document.getElementById('anonCheck').checked;
 
     submitBtn.disabled = true;
     submitBtn.textContent = 'Submitting…';
@@ -1402,11 +1918,12 @@
           targetType: 'corporation',
           targetCorpId,
           targetAllianceId,
+          targetName,
           grade,
           gradeIndex: INPUT_TO_NUM[grade],
           systemType: selectedSys.textContent.trim(),
           comment:    commentInput.value.trim(),
-          anonymous
+          anonymous:  anonCheck.checked
         })
       });
       let data = {};
@@ -1424,11 +1941,13 @@
           tier: selectedDot.dataset.tier,
           system: selectedSys.textContent,
           comment: commentInput.value.trim(),
-          author: anonymous ? '' : currentUser,
+          author: anonCheck.checked ? '' : currentUser,
           isCorpAlliance
         };
         submittedReps.unshift(rep);
         recalcAndRender();
+        // Instant feedback above is approximate (doesn't apply the monthly cap);
+        // refresh from the server moments later for the authoritative grade/counts.
         loadRepsData(new URLSearchParams(window.location.search).get('id'));
         dots.forEach(d => d.classList.remove('selected'));
         sysButtons.forEach(b => b.classList.remove('selected'));
@@ -1442,44 +1961,146 @@
 
     submitBtn.disabled = false;
     submitBtn.textContent = 'Submit A Rep';
-  });
+  }
 
-  document.getElementById('shareBtn').addEventListener('click', () => {
-    const url = window.location.href;
-    const shareToast = document.getElementById('shareToast');
-    function showShareToast() {
-      shareToast.classList.add('show');
-      setTimeout(() => shareToast.classList.remove('show'), 2200);
+  // ── LOAD PILOT DATA FROM ESI + SUPABASE ──────────────────────────────────
+  (async () => {
+    const params = new URLSearchParams(window.location.search);
+    const corpId = params.get('id');
+    if (!corpId) return; // no ID in URL — leave placeholder
+
+    // Load ESI corporation data
+    try {
+      const esiRes = await fetch(`/.netlify/functions/esi-proxy?action=corporation&id=${corpId}`);
+      const esi = await esiRes.json();
+      if (esi && esi.name) {
+        targetCorpId = corpId;
+        targetAllianceId = esi.alliance_id || null;
+        targetName = esi.name || null;
+        document.getElementById('corpName').textContent = esi.name;
+        const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const lines = [];
+        if (esi.ceo_name) {
+          const ceoLabel = esi.ceo_id ? `<a href="pilot.html?id=${esi.ceo_id}">${escapeHtml(esi.ceo_name)}</a>` : escapeHtml(esi.ceo_name);
+          lines.push(`<span class="detail-label">CEO</span> &bull; ${ceoLabel}`);
+        }
+        if (esi.alliance_name) {
+          const allianceLabel = esi.alliance_id ? `<a href="alliance.html?id=${esi.alliance_id}">${escapeHtml(esi.alliance_name)}</a>` : escapeHtml(esi.alliance_name);
+          lines.push(`<span class="detail-label">Alliance</span> &bull; ${allianceLabel}`);
+        }
+        if (esi.date_founded) {
+          const foundedDate = new Date(esi.date_founded);
+          const ordinal = n => {
+            const s = ['th', 'st', 'nd', 'rd'], v = n % 100;
+            return n + (s[(v - 20) % 10] || s[v] || s[0]);
+          };
+          const year = foundedDate.getFullYear();
+          const month = foundedDate.toLocaleDateString('en-GB', { month: 'long' });
+          const day = ordinal(foundedDate.getDate());
+          lines.push(`<span class="detail-label">Founded</span> &bull; ${year} ${month} ${day}`);
+        }
+        if (esi.member_count) lines.push(`<span class="detail-label">Members</span> &bull; ${esi.member_count.toLocaleString()}`);
+        document.getElementById('corpDetails').innerHTML = lines.join('<br>');
+        if (esi.logo) {
+          const img = document.getElementById('corpLogo');
+          const placeholder = document.getElementById('corpLogoPlaceholder');
+          img.onload = () => {
+            img.style.display = '';
+            placeholder.style.display = 'none';
+          };
+          img.onerror = () => { img.style.display = 'none'; };
+          img.src = esi.logo;
+        }
+      }
+    } catch (e) {
+      console.warn('ESI load failed:', e);
     }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(url).then(showShareToast);
-    } else {
-      const ta = document.createElement('textarea');
-      ta.value = url; document.body.appendChild(ta);
-      ta.select(); document.execCommand('copy');
-      document.body.removeChild(ta);
-      showShareToast();
+
+    // Load reps from Supabase
+    await loadRepsData(corpId);
+  })();
+
+  async function loadRepsData(corpId) {
+    if (!corpId) return;
+    try {
+      const repsRes = await fetch(`/.netlify/functions/get-reps?id=${corpId}&type=corporation`);
+      const data = await repsRes.json();
+      if (data.repCount > 0) {
+        // Update stats
+        pilotRepsCountEl.textContent        = data.pilotRepsCount;
+        corpAllianceRepsCountEl.textContent = data.corpAllianceRepsCount;
+        totalRepsCountEl.textContent        = data.pilotRepsCount + data.corpAllianceRepsCount;
+        // Update grade circle
+        gradeCircleLetterEl.innerHTML = data.repScoreHtml || '–';
+        const tierCls = data.repScoreTier === 'pos' ? 'grade-A' : data.repScoreTier === 'neg' ? 'grade-F' : 'grade-B';
+        gradeCircleLetterEl.className = 'grade-circle-letter ' + tierCls;
+        // Load reps
+        submittedReps = data.reps.map(r => ({
+          id:       r.id,
+          grade:    r.grade,
+          gradeNum: r.gradeIndex,
+          tier:     r.tier,
+          system:   r.system,
+          comment:  r.comment,
+          author:     r.author,
+          reviewerId: r.reviewerId,
+          isCorpAlliance: r.isCorpAlliance,
+          date:     r.date,
+          upvotes:   r.upvotes,
+          downvotes: r.downvotes,
+          userVote:  r.userVote,
+          isOwnRep:  r.isOwnRep
+        }));
+        if (noCommentRepsOpen) renderNoCommentReps();
+        updatePilotRepsToggleState();
+        if (corpAllianceRepsOpen) renderCorpAllianceReps();
+        updateCorpAllianceRepsToggleState();
+        updateCollapseAllBtn();
+      } else {
+        pilotRepsToggleEl.classList.add('disabled');
+        corpAllianceRepsToggleEl.classList.add('disabled');
+      }
+    } catch (e) {
+      console.warn('Reps load failed:', e);
     }
-  });
+  }
 
   // ── SEARCH BAR ────────────────────────────────────────────────────────────
   const searchInput    = document.getElementById('navSearchInput');
   const searchBtn      = document.getElementById('navSearchBtn');
+  const searchClearBtn = document.getElementById('navSearchClear');
   const searchDropdown = document.getElementById('searchDropdown');
+
+
   let searchTimer;
 
   searchInput.addEventListener('input', () => {
+    searchClearBtn.style.display = searchInput.value.length ? 'block' : 'none';
     clearTimeout(searchTimer);
     const q = searchInput.value.trim();
     if (q.length < 3) { searchDropdown.style.display = 'none'; return; }
     searchTimer = setTimeout(() => runSearch(), 300);
   });
 
-  searchInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') runSearch();
+  searchClearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    searchClearBtn.style.display = 'none';
+    searchDropdown.style.display = 'none';
+    searchInput.focus();
   });
 
-  searchBtn.addEventListener('click', runSearch);
+  function goToSearchPage() {
+    const q = searchInput.value.trim();
+    if (q.length < 3) return;
+    window.location.href = `/search.html?q=${encodeURIComponent(q)}`;
+  }
+
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') goToSearchPage();
+  });
+
+  searchBtn.addEventListener('click', goToSearchPage);
+
 
   async function runSearch() {
     const q = searchInput.value.trim();
@@ -1494,17 +2115,19 @@
   }
 
   function renderDropdown(data, q) {
-    const { characters = [], corporations = [], alliances = [] } = data;
+    const { characters = [], corporations = [], alliances = [], mode = 'authenticated' } = data;
     const total = characters.length + corporations.length + alliances.length;
+    const advancedSearchNote = `<div class="search-drop-note">For Advanced Search<br><a href="/.netlify/functions/auth-start">Log In With EVE Online</a></div>`;
     if (total === 0) {
-      if (!isLoggedIn()) {
-        searchDropdown.innerHTML = `<div style="padding:14px 16px;font-size:12px;letter-spacing:0.08em;color:var(--muted);text-align:center;">ADVANCED SEARCH. &nbsp;<a href="/.netlify/functions/auth-start" style="color:var(--cyan);text-decoration:none;font-weight:600;">LOG IN WITH EVE ONLINE.</a></div>`;
+      if (mode === 'community' || mode === 'fallback') {
+        searchDropdown.innerHTML = advancedSearchNote;
         searchDropdown.style.display = 'block';
       } else {
         searchDropdown.style.display = 'none';
       }
       return;
     }
+
     let html = '';
     if (characters.length) {
       html += `<div class="search-drop-label">Pilots</div>`;
@@ -1533,104 +2156,22 @@
         </a>`;
       });
     }
-    html += `<a class="search-drop-item" href="/search.html?q=${encodeURIComponent(q)}" style="color:var(--cyan);justify-content:center;">
-      See all results for "${q}" →
-    </a>`;
+    if (mode === 'community' || mode === 'fallback') {
+      html += advancedSearchNote;
+    } else {
+      html += `<a class="search-drop-item" href="/search.html?q=${encodeURIComponent(q)}" style="color:var(--cyan);justify-content:center;">
+        See all results for "${q}" →
+      </a>`;
+    }
+
     searchDropdown.innerHTML = html;
     searchDropdown.style.display = 'block';
   }
 
+  // Close dropdown when clicking outside
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.nav-search')) searchDropdown.style.display = 'none';
   });
-
-  // ── LOAD CORPORATION DATA FROM ESI + SUPABASE ─────────────────────────────
-  (async () => {
-    const params = new URLSearchParams(window.location.search);
-    const corpId = params.get('id');
-    if (!corpId) return;
-    targetCorpId = corpId;
-
-    // Load ESI identity
-    try {
-      const res  = await fetch(`/.netlify/functions/esi-proxy?action=corporation&id=${corpId}`);
-      const esi  = await res.json();
-      targetAllianceId = esi.alliance_id || null;
-      document.getElementById('corpName').textContent = esi.name || '—';
-      const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-      const lines = [];
-      if (esi.ceo_name) {
-        const ceoLabel = esi.ceo_id
-          ? `<a href="pilot.html?id=${esi.ceo_id}" class="corp-alliance-link">${escapeHtml(esi.ceo_name)}</a>`
-          : escapeHtml(esi.ceo_name);
-        lines.push(`<span class="detail-label">CEO</span> &bull; ${ceoLabel}`);
-      }
-      if (esi.alliance_name) {
-        const allianceLabel = esi.alliance_id
-          ? `<a href="alliance.html?id=${esi.alliance_id}" class="corp-alliance-link">${escapeHtml(esi.alliance_name)}</a>`
-          : escapeHtml(esi.alliance_name);
-        lines.push(`<span class="detail-label">ALLIANCE</span> &bull; ${allianceLabel}`);
-      }
-      if (esi.date_founded) {
-        const foundedDate = new Date(esi.date_founded);
-        const ordinal = n => {
-          const s = ['th', 'st', 'nd', 'rd'], v = n % 100;
-          return n + (s[(v - 20) % 10] || s[v] || s[0]);
-        };
-        const year  = foundedDate.getFullYear();
-        const month = foundedDate.toLocaleDateString('en-GB', { month: 'long' });
-        const day   = ordinal(foundedDate.getDate());
-        lines.push(`<span class="detail-label">FOUNDED</span> &bull; ${year} ${month} ${day}`);
-      }
-      if (esi.member_count) lines.push(`<span class="detail-label">MEMBERS</span> &bull; ${esi.member_count.toLocaleString()}`);
-      document.getElementById('corpDetails').innerHTML = lines.join('<br>');
-      const img = document.getElementById('corpLogo');
-      const placeholder = document.getElementById('corpLogoPlaceholder');
-      img.onload  = () => { img.style.display = ''; placeholder.style.display = 'none'; };
-      img.onerror = () => { img.style.display = 'none'; };
-      img.src = esi.logo || '';
-    } catch (e) {
-      console.warn('ESI corporation load failed:', e);
-    }
-
-    // Load reps from Supabase
-    await loadRepsData(corpId);
-  })();
-
-  async function loadRepsData(corpId) {
-    if (!corpId) return;
-    try {
-      const repsRes = await fetch(`/.netlify/functions/get-reps?id=${corpId}&type=corporation`);
-      const data    = await repsRes.json();
-      if (data.repCount > 0) {
-        repsCountEl.textContent = data.pilotRepsCount;
-        corpAllianceRepsCountEl.textContent = data.corpAllianceRepsCount;
-        document.getElementById('commentsCount').textContent = data.commentCount;
-        const gradeEl = document.getElementById('gradeCircleLetter');
-        gradeEl.innerHTML = data.repScoreHtml || '–';
-        const tierCls = data.repScoreTier === 'pos' ? 'grade-A' : data.repScoreTier === 'neg' ? 'grade-F' : 'grade-B';
-        gradeEl.className = 'grade-circle-letter ' + tierCls;
-        submittedReps = data.reps.map(r => ({
-          grade:    r.grade,
-          gradeNum: r.gradeIndex,
-          tier:     r.tier,
-          system:   r.system,
-          comment:  r.comment,
-          author:     r.author,
-          reviewerId: r.reviewerId,
-          isCorpAlliance: r.isCorpAlliance,
-          date:     r.date
-        }));
-        renderComments();
-        if (noCommentRepsOpen) renderNoCommentReps();
-        updatePilotRepsToggleState();
-      } else {
-        pilotRepsToggleEl.classList.add('disabled');
-      }
-    } catch (e) {
-      console.warn('Reps load failed:', e);
-    }
-  }
 
   // ── EVE TIME CLOCK ──
   function updateEveTime() {

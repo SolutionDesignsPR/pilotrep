@@ -371,6 +371,29 @@
     }
     .legal-panel ul li:last-child { margin-bottom: 0; }
 
+    .legal-panel .feature-list {
+      text-align: left;
+      margin: 0 0 1.2em;
+    }
+    .legal-panel .feature-list p {
+      margin-bottom: 0.9em;
+    }
+    .legal-panel .feature-list p:last-child { margin-bottom: 0; }
+    .legal-panel .feature-list .feature-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--cyan);
+      margin-bottom: 0.25em;
+    }
+    .legal-panel .feature-list .feature-desc {
+      font-size: 0.9rem;
+      line-height: calc(0.9rem + 4px);
+      color: #8aaabb;
+      margin-bottom: 1.1em;
+    }
+    .legal-panel .feature-list .feature-desc:last-child { margin-bottom: 0; }
+
     .collapse-all-row {
       display: flex;
       justify-content: center;
@@ -589,11 +612,14 @@
           <p>
             To provide our services, we use EVE Online's Single Sign-On (SSO) to verify your identity and pull limited public character data via the ESI API. This includes:
           </p>
-          <ul>
-            <li><strong>Public Character Data:</strong> Character Name, Character ID, Corporation and Alliance affiliations, Security Status, Character Creation Date and Portrait.</li>
-            <li><strong>Authentication Tokens:</strong> We securely store the refresh token provided by EVE SSO to maintain your session. <strong>We never see, collect or store your EVE Online account username or password.</strong></li>
-            <li><strong>Reputation Data:</strong> Reps and votes you submit are stored and associated with your verified character identity.</li>
-          </ul>
+          <div class="feature-list">
+            <p class="feature-title">Public Character Data</p>
+            <p class="feature-desc">Character Name, Character ID, Corporation and Alliance affiliations, Security Status, Character Creation Date and Portrait.</p>
+            <p class="feature-title">Authentication Tokens</p>
+            <p class="feature-desc">We securely store the refresh token provided by EVE SSO to maintain your session. <strong>We never see, collect or store your EVE Online account username or password.</strong></p>
+            <p class="feature-title">Reputation Data</p>
+            <p class="feature-desc">Reps and votes you submit are stored and associated with your verified character identity.</p>
+          </div>
         </div>
       </div>
 
@@ -623,10 +649,12 @@
           <p>
             We understand the competitive nature of EVE Online. We implement measures to protect your data:
           </p>
-          <ul>
-            <li><strong>Access Control:</strong> Reputation submissions are tied to your verified character identity only when you choose not to submit anonymously.</li>
-            <li><strong>No Third-Party Sharing:</strong> We do not sell, rent or lease your character data to anyone.</li>
-          </ul>
+          <div class="feature-list">
+            <p class="feature-title">Access Control</p>
+            <p class="feature-desc">Reputation submissions are tied to your verified character identity only when you choose not to submit anonymously.</p>
+            <p class="feature-title">No Third-Party Sharing</p>
+            <p class="feature-desc">We do not sell, rent or lease your character data to anyone.</p>
+          </div>
         </div>
       </div>
 
