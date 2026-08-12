@@ -39,7 +39,7 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: 'Invalid request body' }) };
   }
 
-  const { subject, message, 'suggestion-hp': suggestionHp } = body;
+  const { category, subject, message, 'suggestion-hp': suggestionHp } = body;
 
   // 2b. Honeypot — hidden field, real users never fill it. Silently pretend success
   // so a bot doesn't learn it was caught.
@@ -48,6 +48,8 @@ exports.handler = async (event) => {
   }
 
   // 3. Validate required fields
+  const VALID_CATEGORIES = ['General Feedback', 'Bug Report', 'Feature Request', 'Dispute A Rep', 'Report Abuse', 'Account Issue'];
+  const trimmedCategory = VALID_CATEGORIES.includes(category) ? category : 'General Feedback';
   const trimmedSubject = (subject && subject.trim()) ? subject.trim() : null;
   const trimmedMessage = (message && message.trim()) ? message.trim() : null;
 
@@ -82,6 +84,7 @@ exports.handler = async (event) => {
   const { error } = await supabase.from('suggestions').insert({
     character_id:   characterId,
     character_name: characterName,
+    category:       trimmedCategory,
     subject:        trimmedSubject,
     message:        trimmedMessage
   });

@@ -413,6 +413,7 @@
     .suggestion-sending-as strong { color: var(--cyan); font-weight: 700; letter-spacing: 0.04em; }
 
     .suggestion-form input[type="text"],
+    .suggestion-form select,
     .suggestion-form textarea {
       width: 100%;
       background: rgba(79,195,247,0.08);
@@ -426,10 +427,25 @@
       transition: border-color 0.2s, background 0.2s;
       resize: vertical;
     }
+    .suggestion-form select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%234fc3f7' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+    .suggestion-form select option {
+      background: var(--bg2);
+      color: var(--white);
+    }
     .suggestion-form textarea { min-height: 110px; line-height: 1.5; }
     .suggestion-form input::placeholder,
     .suggestion-form textarea::placeholder { color: var(--muted); }
     .suggestion-form input:focus,
+    .suggestion-form select:focus,
     .suggestion-form textarea:focus {
       border-color: var(--cyan);
       background: rgba(79,195,247,0.13);
@@ -628,6 +644,14 @@
 
         <div class="suggestion-sending-as">Sending As: <strong id="suggestionCharacterName">—</strong></div>
 
+        <select id="suggestionCategory">
+          <option value="General Feedback">General Feedback</option>
+          <option value="Bug Report">Bug Report</option>
+          <option value="Feature Request">Feature Request</option>
+          <option value="Dispute A Rep">Dispute A Rep</option>
+          <option value="Report Abuse">Report Abuse</option>
+          <option value="Account Issue">Account Issue</option>
+        </select>
         <input type="text" id="suggestionSubject" placeholder="Subject" autocomplete="off" maxlength="120" />
         <textarea id="suggestionComment" placeholder="Your suggestion..." maxlength="2000"></textarea>
 
@@ -848,6 +872,7 @@
   // ── SUGGESTION BOX: BACKEND SUBMIT ──
   const suggestionForm      = document.getElementById('suggestionForm');
   const suggestionHoneypot  = document.getElementById('suggestionHoneypot');
+  const suggestionCategory  = document.getElementById('suggestionCategory');
   const suggestionSubject   = document.getElementById('suggestionSubject');
   const suggestionComment   = document.getElementById('suggestionComment');
   const suggestionError     = document.getElementById('suggestionError');
@@ -886,6 +911,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          category: suggestionCategory.value,
           subject,
           message: comment,
           'suggestion-hp': suggestionHoneypot.value

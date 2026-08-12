@@ -419,15 +419,6 @@
       gap: 6px;
       text-align: center;
     }
-    .stats-row .total-reps-line { margin-top: 12px; }
-    .stat-total-label {
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-    .stat-count-total { color: var(--white); }
     .collapse-all-row {
       display: flex;
       justify-content: flex-end;
@@ -1118,9 +1109,7 @@
       </div>
 
       <div class="stats-row">
-        <span class="stat-label-inline"><span class="stat-label-link" id="pilotRepsToggle">Pilot Reps</span><span class="stat-count-inline" id="pilotRepsCount">0</span></span>
-        <span class="stat-label-inline"><span class="stat-label-link" id="corpAllianceRepsToggle">Corp / Alliance Reps</span><span class="stat-count-inline" id="corpAllianceRepsCount">0</span></span>
-        <span class="stat-label-inline total-reps-line"><span class="stat-total-label">Total Reps</span><span class="stat-count-inline stat-count-total" id="totalRepsCount">0</span></span>
+        <span class="stat-label-inline"><span class="stat-label-link" id="pilotRepsToggle">Reps</span><span class="stat-count-inline" id="pilotRepsCount">0</span></span>
       </div>
 
       <div class="collapse-all-row" id="collapseAllRow" style="display:none;">
@@ -1132,14 +1121,6 @@
         <div class="no-comment-reps-list" id="noCommentRepsList"></div>
         <div class="see-all-wrap" id="noCommentRepsSeeAllWrap" style="display:none;">
           <button class="see-all-btn" id="noCommentRepsSeeAllBtn">▾ See All Reps</button>
-        </div>
-      </div>
-
-      <div class="no-comment-reps-panel" id="corpAllianceRepsPanel" style="display:none;">
-        <div class="reps-panel-headrow"><span class="reps-panel-label" id="corpAllianceRepsPanelLabel">Corp / Alliance Reps</span><span class="reps-panel-count" id="corpAllianceRepsPanelCount">0</span></div>
-        <div class="no-comment-reps-list" id="corpAllianceRepsList"></div>
-        <div class="see-all-wrap" id="corpAllianceRepsSeeAllWrap" style="display:none;">
-          <button class="see-all-btn" id="corpAllianceRepsSeeAllBtn">▾ See All Reps</button>
         </div>
       </div>
 
@@ -1435,8 +1416,6 @@
   const VISIBLE_LIMIT = 5;
 
   const pilotRepsCountEl        = document.getElementById('pilotRepsCount');
-  const corpAllianceRepsCountEl = document.getElementById('corpAllianceRepsCount');
-  const totalRepsCountEl = document.getElementById('totalRepsCount');
   const gradeCircleLetterEl = document.getElementById('gradeCircleLetter');
 
   let noCommentRepsExpanded = false;
@@ -1452,7 +1431,7 @@
   let noCommentStateInitialized = false;
 
   function getPilotRepsTotalCount() {
-    return submittedReps.filter(r => !r.isCorpAlliance).length;
+    return submittedReps.length;
   }
 
   function updatePilotRepsToggleState() {
@@ -1471,43 +1450,6 @@
           noCommentRepsOpen = true;
           noCommentRepsPanelEl.style.display = 'block';
           renderNoCommentReps();
-        }
-      }
-    }
-  }
-
-  let corpAllianceRepsExpanded = false;
-  let corpAllianceRepsOpen = false;
-  const corpAllianceRepsToggleEl     = document.getElementById('corpAllianceRepsToggle');
-  const corpAllianceRepsPanelEl      = document.getElementById('corpAllianceRepsPanel');
-  const corpAllianceRepsListEl       = document.getElementById('corpAllianceRepsList');
-  const corpAllianceRepsSeeAllWrapEl = document.getElementById('corpAllianceRepsSeeAllWrap');
-  const corpAllianceRepsSeeAllBtnEl  = document.getElementById('corpAllianceRepsSeeAllBtn');
-  const corpAllianceRepsPanelCountEl = document.getElementById('corpAllianceRepsPanelCount');
-
-  const CORP_ALLIANCE_OPEN_KEY = 'corpAllianceRepsOpen';
-  let corpAllianceStateInitialized = false;
-
-  function getCorpAllianceCount() {
-    return submittedReps.filter(r => r.isCorpAlliance).length;
-  }
-
-  function updateCorpAllianceRepsToggleState() {
-    const count = getCorpAllianceCount();
-    if (count === 0) {
-      corpAllianceRepsToggleEl.classList.add('disabled');
-      if (corpAllianceRepsOpen) {
-        corpAllianceRepsOpen = false;
-        corpAllianceRepsPanelEl.style.display = 'none';
-      }
-    } else {
-      corpAllianceRepsToggleEl.classList.remove('disabled');
-      if (!corpAllianceStateInitialized) {
-        corpAllianceStateInitialized = true;
-        if (localStorage.getItem(CORP_ALLIANCE_OPEN_KEY) !== 'false') {
-          corpAllianceRepsOpen = true;
-          corpAllianceRepsPanelEl.style.display = 'block';
-          renderCorpAllianceReps();
         }
       }
     }
@@ -1645,7 +1587,7 @@
 
   function renderNoCommentReps() {
     noCommentRepsListEl.innerHTML = '';
-    const pilotReps = submittedReps.filter(r => !r.isCorpAlliance);
+    const pilotReps = submittedReps;
     pilotRepsPanelCountEl.textContent = pilotReps.length;
     const visible = noCommentRepsExpanded ? pilotReps : pilotReps.slice(0, VISIBLE_LIMIT);
     visible.forEach(rep => noCommentRepsListEl.appendChild(buildRepRow(rep)));
@@ -1671,43 +1613,14 @@
     renderNoCommentReps();
   });
 
-  // ── CORP / ALLIANCE REPS PANEL (all corp/alliance-mate reps, with or without a comment) ──
-  function renderCorpAllianceReps() {
-    corpAllianceRepsListEl.innerHTML = '';
-    const corpAlliance = submittedReps.filter(r => r.isCorpAlliance);
-    corpAllianceRepsPanelCountEl.textContent = corpAlliance.length;
-    const visible = corpAllianceRepsExpanded ? corpAlliance : corpAlliance.slice(0, VISIBLE_LIMIT);
-    visible.forEach(rep => corpAllianceRepsListEl.appendChild(buildRepRow(rep)));
-    if (corpAlliance.length > VISIBLE_LIMIT) {
-      corpAllianceRepsSeeAllWrapEl.style.display = 'block';
-      corpAllianceRepsSeeAllBtnEl.textContent = corpAllianceRepsExpanded ? '▴ Show Less' : '▾ See All Reps';
-    } else {
-      corpAllianceRepsSeeAllWrapEl.style.display = 'none';
-    }
-  }
-
-  corpAllianceRepsToggleEl.addEventListener('click', () => {
-    if (corpAllianceRepsToggleEl.classList.contains('disabled')) return;
-    corpAllianceRepsOpen = !corpAllianceRepsOpen;
-    corpAllianceRepsPanelEl.style.display = corpAllianceRepsOpen ? 'block' : 'none';
-    localStorage.setItem(CORP_ALLIANCE_OPEN_KEY, corpAllianceRepsOpen);
-    if (corpAllianceRepsOpen) renderCorpAllianceReps();
-    updateCollapseAllBtn();
-  });
-
-  corpAllianceRepsSeeAllBtnEl.addEventListener('click', () => {
-    corpAllianceRepsExpanded = !corpAllianceRepsExpanded;
-    renderCorpAllianceReps();
-  });
-
-  // ── COLLAPSE ALL / EXPAND ALL BUTTON (toggles both Pilot Reps and Corp/Alliance Reps panels) ──
+  // ── COLLAPSE ALL / EXPAND ALL BUTTON ──
   const collapseAllRowEl = document.getElementById('collapseAllRow');
   const collapseAllBtnEl = document.getElementById('collapseAllBtn');
   const collapseAllRowBottomEl = document.getElementById('collapseAllRowBottom');
   const collapseAllBtnBottomEl = document.getElementById('collapseAllBtnBottom');
   function updateCollapseAllBtn() {
-    const anyOpen = noCommentRepsOpen || corpAllianceRepsOpen;
-    const anyReps = getPilotRepsTotalCount() > 0 || getCorpAllianceCount() > 0;
+    const anyOpen = noCommentRepsOpen;
+    const anyReps = getPilotRepsTotalCount() > 0;
     if (anyOpen) {
       collapseAllRowEl.style.display = 'flex';
       collapseAllBtnEl.textContent = 'Collapse All';
@@ -1726,31 +1639,16 @@
   }
 
   function toggleAllReps() {
-    const anyOpen = noCommentRepsOpen || corpAllianceRepsOpen;
+    const anyOpen = noCommentRepsOpen;
     if (anyOpen) {
-      if (noCommentRepsOpen) {
-        noCommentRepsOpen = false;
-        noCommentRepsPanelEl.style.display = 'none';
-        localStorage.setItem(NO_COMMENT_OPEN_KEY, 'false');
-      }
-      if (corpAllianceRepsOpen) {
-        corpAllianceRepsOpen = false;
-        corpAllianceRepsPanelEl.style.display = 'none';
-        localStorage.setItem(CORP_ALLIANCE_OPEN_KEY, 'false');
-      }
-    } else {
-      if (!pilotRepsToggleEl.classList.contains('disabled')) {
-        noCommentRepsOpen = true;
-        noCommentRepsPanelEl.style.display = 'block';
-        localStorage.setItem(NO_COMMENT_OPEN_KEY, 'true');
-        renderNoCommentReps();
-      }
-      if (!corpAllianceRepsToggleEl.classList.contains('disabled')) {
-        corpAllianceRepsOpen = true;
-        corpAllianceRepsPanelEl.style.display = 'block';
-        localStorage.setItem(CORP_ALLIANCE_OPEN_KEY, 'true');
-        renderCorpAllianceReps();
-      }
+      noCommentRepsOpen = false;
+      noCommentRepsPanelEl.style.display = 'none';
+      localStorage.setItem(NO_COMMENT_OPEN_KEY, 'false');
+    } else if (!pilotRepsToggleEl.classList.contains('disabled')) {
+      noCommentRepsOpen = true;
+      noCommentRepsPanelEl.style.display = 'block';
+      localStorage.setItem(NO_COMMENT_OPEN_KEY, 'true');
+      renderNoCommentReps();
     }
     updateCollapseAllBtn();
   }
@@ -1758,9 +1656,8 @@
   collapseAllBtnEl.addEventListener('click', toggleAllReps);
   collapseAllBtnBottomEl.addEventListener('click', toggleAllReps);
 
-  // ── CLICKABLE PANEL HEADERS (click "Pilot Reps" / "Corp / Alliance Reps" label inside an open panel to close it) ──
+  // ── CLICKABLE PANEL HEADER (click "Reps" label inside an open panel to close it) ──
   document.getElementById('pilotRepsPanelLabel').addEventListener('click', () => pilotRepsToggleEl.click());
-  document.getElementById('corpAllianceRepsPanelLabel').addEventListener('click', () => corpAllianceRepsToggleEl.click());
 
   // ── LEFT REPS PANEL (reps this session's character has left on this pilot) ──
   const LEFT_REPS_VISIBLE_LIMIT = 3;
@@ -1829,11 +1726,7 @@
   }
 
   function recalcAndRender() {
-    const pilotCount = submittedReps.filter(r => !r.isCorpAlliance).length;
-    const corpAllianceCount = submittedReps.filter(r => r.isCorpAlliance).length;
-    pilotRepsCountEl.textContent        = pilotCount;
-    corpAllianceRepsCountEl.textContent = corpAllianceCount;
-    totalRepsCountEl.textContent        = pilotCount + corpAllianceCount;
+    pilotRepsCountEl.textContent = submittedReps.length;
 
     if (submittedReps.length === 0) {
       gradeCircleLetterEl.textContent = '–';
@@ -1847,8 +1740,6 @@
     }
     if (noCommentRepsOpen) renderNoCommentReps();
     updatePilotRepsToggleState();
-    if (corpAllianceRepsOpen) renderCorpAllianceReps();
-    updateCorpAllianceRepsToggleState();
     updateCollapseAllBtn();
   }
 
@@ -1935,22 +1826,17 @@
       if (!res.ok) {
         showValidation(data.error || 'Submission failed. Please try again.');
       } else {
-        const isCorpAlliance = !!(
-          (targetCorpId && currentUserCorpId && String(targetCorpId) === String(currentUserCorpId)) ||
-          (targetAllianceId && currentUserAllianceId && String(targetAllianceId) === String(currentUserAllianceId))
-        );
         const rep = {
           grade,
           gradeNum: INPUT_TO_NUM[grade],
           tier: selectedDot.dataset.tier,
           system: selectedSys.textContent,
           comment: commentInput.value.trim(),
-          author: anonCheck.checked ? '' : currentUser,
-          isCorpAlliance
+          author: anonCheck.checked ? '' : currentUser
         };
         submittedReps.unshift(rep);
         recalcAndRender();
-        // Instant feedback above is approximate (doesn't apply the monthly cap);
+        // Instant feedback above is approximate;
         // refresh from the server moments later for the authoritative grade/counts.
         loadRepsData(new URLSearchParams(window.location.search).get('id'));
         dots.forEach(d => d.classList.remove('selected'));
@@ -2027,9 +1913,7 @@
       const data = await repsRes.json();
       if (data.repCount > 0) {
         // Update stats
-        pilotRepsCountEl.textContent        = data.pilotRepsCount;
-        corpAllianceRepsCountEl.textContent = data.corpAllianceRepsCount;
-        totalRepsCountEl.textContent        = data.pilotRepsCount + data.corpAllianceRepsCount;
+        pilotRepsCountEl.textContent = data.pilotRepsCount + data.corpAllianceRepsCount;
         // Update grade circle
         gradeCircleLetterEl.innerHTML = data.repScoreHtml || '–';
         const tierCls = data.repScoreTier === 'pos' ? 'grade-A' : data.repScoreTier === 'neg' ? 'grade-F' : 'grade-B';
@@ -2044,7 +1928,6 @@
           comment:  r.comment,
           author:     r.author,
           reviewerId: r.reviewerId,
-          isCorpAlliance: r.isCorpAlliance,
           date:     r.date,
           upvotes:   r.upvotes,
           downvotes: r.downvotes,
@@ -2053,12 +1936,9 @@
         }));
         if (noCommentRepsOpen) renderNoCommentReps();
         updatePilotRepsToggleState();
-        if (corpAllianceRepsOpen) renderCorpAllianceReps();
-        updateCorpAllianceRepsToggleState();
         updateCollapseAllBtn();
       } else {
         pilotRepsToggleEl.classList.add('disabled');
-        corpAllianceRepsToggleEl.classList.add('disabled');
       }
     } catch (e) {
       console.warn('Reps load failed:', e);

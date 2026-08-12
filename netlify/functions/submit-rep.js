@@ -95,6 +95,11 @@ exports.handler = async (event) => {
     return { statusCode: 403, body: JSON.stringify({ error: 'You cannot rep yourself' }) };
   }
 
+  // 4b. Block corp/alliance-mates from repping their own corporation or alliance
+  if ((targetType === 'corporation' || targetType === 'alliance') && isCorpAlliance) {
+    return { statusCode: 403, body: JSON.stringify({ error: 'You cannot rep your own Corporation or Alliance' }) };
+  }
+
   // 5. Enforce 6-month cooldown
   // ⚠️ TESTING MODE: cooldown disabled — remove 'false &&' before launch!
   const sixMonthsAgo = new Date();
