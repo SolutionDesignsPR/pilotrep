@@ -111,9 +111,9 @@ exports.handler = async (event) => {
         if (searchRes.ok) {
           const searchData = await searchRes.json();
           const allIds = [
-            ...(searchData.character   || []).slice(0, Math.max(50, limit)),
-            ...(searchData.corporation || []).slice(0, Math.max(50, limit)),
-            ...(searchData.alliance    || []).slice(0, Math.max(50, limit))
+            ...(searchData.character   || []).slice(0, 300),
+            ...(searchData.corporation || []).slice(0, 300),
+            ...(searchData.alliance    || []).slice(0, 300)
           ];
           if (allIds.length === 0) {
             return { statusCode: 200, headers: withRefreshedCookie(headers, refreshedCookie), body: JSON.stringify({ mode: 'authenticated', characters: [], corporations: [], alliances: [] }) };
