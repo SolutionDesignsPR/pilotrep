@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PilotRep | Search Results</title>
+  <title>PilotRep | Corp Members</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="alternate icon" href="/favicon.ico" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -1056,6 +1056,9 @@
       text-transform: uppercase;
       color: var(--cyan-dim);
     }
+    .result-item-type.tier-pos { color: var(--grade-a); }
+    .result-item-type.tier-neutral { color: var(--grade-b); }
+    .result-item-type.tier-neg { color: var(--grade-d); }
   </style>
 </head>
 <body>
@@ -1091,31 +1094,18 @@
   </header>
 
   <!-- PAGE TITLE -->
-  <h1 class="page-title" id="pageTitle">
-    <img class="page-title-img page-title-desktop" id="pageTitleDesktop" src="assets/images/PR_Search_Results.svg" alt="Search Results" style="aspect-ratio: 329.17 / 22.16;" />
-    <img class="page-title-img page-title-mobile" id="pageTitleMobile" src="assets/images/PR_Search_Results_M.svg" alt="Search Results" style="aspect-ratio: 168.87 / 52.13;" />
-  </h1>
+  <h1 class="page-title" id="pageTitle">Corp Members</h1>
 
-  <!-- SEARCH RESULTS -->
+  <!-- MEMBERS LIST -->
   <section class="results-section">
-    <p class="results-subtitle" id="resultsSubtitle">Searching...</p>
+    <p class="results-subtitle" id="membersSubtitle">Loading members...</p>
 
-    <div id="loginBanner" class="login-banner" style="display:none;">
-      <div class="login-banner-text">For Advanced Search</div>
-      <a href="/.netlify/functions/auth-start" class="login-banner-link">Log In With EVE Online</a>
+    <div id="membersEmpty" class="results-empty" style="display:none;">
+      No pilots in this corporation have received a Rep yet.
     </div>
 
-    <div id="resultsEmpty" class="results-empty" style="display:none;">
-      No results found for "<span id="resultsEmptyQuery"></span>". Try a different name, or check the spelling.
-    </div>
-
-    <div id="resultsPanel" class="results-panel" style="display:none;">
-      <div class="tab-row" id="resultsTabRow"></div>
-      <div class="results-list" id="resultsList"></div>
-    </div>
-
-    <div class="see-all-wrap" id="resultsSeeAllWrap" style="display:none;">
-      <button class="see-all-btn" id="resultsSeeAllBtn">▾ Show More</button>
+    <div id="membersPanel" class="results-panel" style="display:none;">
+      <div class="results-list" id="membersList"></div>
     </div>
   </section>
 
@@ -1139,7 +1129,6 @@
   </footer>
 
 </div>
-
 <script>
   // ── AUTH GATE ──
   let currentUser = null;
@@ -1293,124 +1282,54 @@
     if (!e.target.closest('.nav-search')) searchDropdown.style.display = 'none';
   });
 
-  // ── MAIN RESULTS (this page's actual job) ──
-  const initialQuery = (new URLSearchParams(window.location.search).get('q') || '').trim();
-  searchInput.value = initialQuery;
-
+  // ── CORP MEMBERS (this page's actual job) ──
   const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-  const CATEGORY_META = {
-    pilot:       { label: 'Pilots',        page: 'pilot',       itemLabel: 'Pilot' },
-    corporation: { label: 'Corporations',  page: 'corporation', itemLabel: 'Corp' },
-    alliance:    { label: 'Alliances',     page: 'alliance',    itemLabel: 'Alliance' }
-  };
-  const RESULTS_VISIBLE_LIMIT = 25;
-  const RESULTS_STEP = 25;
+  const params = new URLSearchParams(window.location.search);
+  const corpId = params.get('id');
+  const corpName = params.get('name');
 
-  let resultsData = { pilot: [], corporation: [], alliance: [] };
-  let activeCategory = null;
-  let visibleCounts = { pilot: RESULTS_VISIBLE_LIMIT, corporation: RESULTS_VISIBLE_LIMIT, alliance: RESULTS_VISIBLE_LIMIT };
+  const membersSubtitleEl = document.getElementById('membersSubtitle');
+  const membersEmptyEl = document.getElementById('membersEmpty');
+  const membersPanelEl = document.getElementById('membersPanel');
+  const membersListEl = document.getElementById('membersList');
 
-  const resultsPanelEl    = document.getElementById('resultsPanel');
-  const resultsTabRowEl   = document.getElementById('resultsTabRow');
-  const resultsListEl     = document.getElementById('resultsList');
-  const resultsSeeAllWrapEl = document.getElementById('resultsSeeAllWrap');
-  const resultsSeeAllBtnEl  = document.getElementById('resultsSeeAllBtn');
-
-  function renderResultsList() {
-    const items = resultsData[activeCategory] || [];
-    const meta = CATEGORY_META[activeCategory];
-    const visibleCount = visibleCounts[activeCategory];
-    const visible = items.slice(0, visibleCount);
-
-    if (items.length === 0) {
-      resultsListEl.innerHTML = `<div class="results-empty">No ${meta.label} Found For This Search.</div>`;
-      resultsSeeAllWrapEl.style.display = 'none';
-      return;
-    }
-
-    resultsListEl.innerHTML = visible.map(item => `
-      <a class="result-item" href="/${meta.page}.html?id=${item.id}">
-        <span>${escapeHtml(item.name)}</span>
-        <span class="result-item-type">${meta.itemLabel}</span>
-      </a>
-    `).join('');
-
-    if (items.length > visibleCount) {
-      resultsSeeAllWrapEl.style.display = 'block';
-      resultsSeeAllBtnEl.textContent = '▾ Show More';
-    } else if (items.length > RESULTS_VISIBLE_LIMIT) {
-      resultsSeeAllWrapEl.style.display = 'block';
-      resultsSeeAllBtnEl.textContent = '▴ Show Less';
-    } else {
-      resultsSeeAllWrapEl.style.display = 'none';
-    }
+  if (corpName) {
+    document.getElementById('pageTitle').textContent = `${corpName} — Members`;
+    document.title = `PilotRep | ${corpName} Members`;
   }
 
-  function switchCategory(key) {
-    activeCategory = key;
-    resultsTabRowEl.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.type === key));
-    renderResultsList();
-  }
-
-  resultsSeeAllBtnEl.addEventListener('click', () => {
-    const items = resultsData[activeCategory] || [];
-    if (visibleCounts[activeCategory] < items.length) {
-      visibleCounts[activeCategory] = Math.min(visibleCounts[activeCategory] + RESULTS_STEP, items.length);
-    } else {
-      visibleCounts[activeCategory] = RESULTS_VISIBLE_LIMIT;
-    }
-    renderResultsList();
-  });
-
-  async function runMainSearch() {
-    const subtitle    = document.getElementById('resultsSubtitle');
-    const loginBanner = document.getElementById('loginBanner');
-    const emptyEl      = document.getElementById('resultsEmpty');
-    const emptyQueryEl = document.getElementById('resultsEmptyQuery');
-
-    if (initialQuery.length < 3) {
-      subtitle.textContent = 'Enter at least 3 characters to search.';
+  async function loadCorpMembers() {
+    if (!corpId) {
+      membersSubtitleEl.textContent = 'No corporation specified.';
       return;
     }
-    subtitle.innerHTML = `Showing results for &ldquo;<strong>${escapeHtml(initialQuery)}</strong>&rdquo;`;
-
     try {
-      const res = await fetch(`/.netlify/functions/esi-proxy?action=search&query=${encodeURIComponent(initialQuery)}&limit=75`);
+      const res = await fetch(`/.netlify/functions/get-corp-members?corpId=${corpId}`);
       const data = await res.json();
-      const { characters = [], corporations = [], alliances = [], mode = 'authenticated' } = data;
-      const total = characters.length + corporations.length + alliances.length;
+      const members = data.members || [];
 
-      if (mode === 'community' || mode === 'fallback') {
-        loginBanner.style.display = 'block';
-      }
-
-      if (total === 0) {
-        emptyQueryEl.textContent = initialQuery;
-        emptyEl.style.display = 'block';
+      if (members.length === 0) {
+        membersSubtitleEl.textContent = `0 Pilots With Reps`;
+        membersEmptyEl.style.display = 'block';
         return;
       }
 
-      resultsData = { pilot: characters, corporation: corporations, alliance: alliances };
-
-      const allCats = Object.keys(CATEGORY_META);
-      const defaultCat = allCats.find(key => resultsData[key].length > 0) || allCats[0];
-      resultsTabRowEl.innerHTML = allCats.map(key => `
-        <button class="tab-btn${key === defaultCat ? ' active' : ''}" data-type="${key}">${CATEGORY_META[key].label}</button>
+      membersSubtitleEl.textContent = `${members.length.toLocaleString()} Pilot${members.length === 1 ? '' : 's'} With Reps`;
+      membersListEl.innerHTML = members.map(m => `
+        <a class="result-item" href="/pilot.html?id=${m.id}">
+          <span>${escapeHtml(m.name)}</span>
+          <span class="result-item-type tier-${m.gradeTier}">${m.gradeHtml} &bull; ${m.repCount} Rep${m.repCount === 1 ? '' : 's'}</span>
+        </a>
       `).join('');
-      resultsTabRowEl.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => switchCategory(btn.dataset.type));
-      });
-
-      resultsPanelEl.style.display = 'block';
-      switchCategory(defaultCat);
+      membersPanelEl.style.display = 'block';
     } catch (e) {
-      subtitle.textContent = 'Something went wrong loading results. Please try again.';
-      console.warn('Main search failed:', e);
+      console.warn('Failed to load corp members:', e);
+      membersSubtitleEl.textContent = 'Failed to load members. Please try again.';
     }
   }
 
-  runMainSearch();
+  loadCorpMembers();
 
   // ── EVE TIME CLOCK ──
   function updateEveTime() {

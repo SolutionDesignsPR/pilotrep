@@ -126,22 +126,22 @@ exports.handler = async (event) => {
           if (namesRes.ok) {
             const namesData = await namesRes.json();
             const byName = (a, b) => a.name.localeCompare(b.name);
-            const startsWithQuery = n => n.name.toLowerCase().startsWith(query.toLowerCase());
+            const matchesQuery = n => n.name.toLowerCase().includes(query.toLowerCase());
             return {
               statusCode: 200,
               headers: withRefreshedCookie(headers, refreshedCookie),
               body: JSON.stringify({
                 mode:         'authenticated',
-                characters:   namesData.filter(n => n.category === 'character').filter(startsWithQuery).sort(byName).slice(0, limit),
-                corporations: namesData.filter(n => n.category === 'corporation').filter(startsWithQuery).sort(byName).slice(0, limit),
-                alliances:    namesData.filter(n => n.category === 'alliance').filter(startsWithQuery).sort(byName).slice(0, limit)
+                characters:   namesData.filter(n => n.category === 'character').filter(matchesQuery).sort(byName).slice(0, limit),
+                corporations: namesData.filter(n => n.category === 'corporation').filter(matchesQuery).sort(byName).slice(0, limit),
+                alliances:    namesData.filter(n => n.category === 'alliance').filter(matchesQuery).sort(byName).slice(0, limit)
               })
             };
           }
         }
       }
 
-      // Community search — unauthenticated, prefix-match against pilots/corps/alliances
+      // Community search — unauthenticated, substring-match against pilots/corps/alliances
       // that already have at least one rep on PilotRep. Tries this before falling back
       // to ESI's exact-match-only endpoint, since it supports real predictive search.
       try {
@@ -149,7 +149,7 @@ exports.handler = async (event) => {
           .from('reps')
           .select('target_id, target_type, target_name')
           .not('target_name', 'is', null)
-          .ilike('target_name', `${query}%`)
+          .ilike('target_name', `%${query}%`)
           .limit(Math.max(150, limit * 20));
 
         if (!repMatchError && repMatches && repMatches.length > 0) {

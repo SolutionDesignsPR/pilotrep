@@ -328,6 +328,8 @@
       transition: color 0.15s;
     }
     .pilot-header-details a:hover { color: var(--cyan); text-decoration: underline; }
+    .pilot-header-details a.members-link { color: var(--white); font-weight: 700; }
+    .pilot-header-details a.members-link:hover { color: var(--cyan); text-decoration: underline; }
 
     /* ── PANELS ── */
     .panels-section {
@@ -1113,7 +1115,7 @@
       </div>
 
       <div class="collapse-all-row" id="collapseAllRow" style="display:none;">
-        <button class="collapse-all-btn" id="collapseAllBtn">Collapse All</button>
+        <button class="collapse-all-btn" id="collapseAllBtn">Collapse</button>
       </div>
 
       <div class="no-comment-reps-panel" id="noCommentRepsPanel" style="display:none;">
@@ -1125,7 +1127,7 @@
       </div>
 
       <div class="collapse-all-row-bottom" id="collapseAllRowBottom" style="display:none;">
-        <button class="collapse-all-btn" id="collapseAllBtnBottom">Collapse All</button>
+        <button class="collapse-all-btn" id="collapseAllBtnBottom">Collapse</button>
       </div>
     </div>
 
@@ -1262,6 +1264,7 @@
     dot.addEventListener('click', () => {
       dots.forEach(d => d.classList.remove('selected'));
       dot.classList.add('selected');
+      hideValidationIfPersistent();
     });
   });
 
@@ -1271,6 +1274,7 @@
     btn.addEventListener('click', () => {
       sysButtons.forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
+      hideValidationIfPersistent();
     });
   });
 
@@ -1623,15 +1627,15 @@
     const anyReps = getPilotRepsTotalCount() > 0;
     if (anyOpen) {
       collapseAllRowEl.style.display = 'flex';
-      collapseAllBtnEl.textContent = 'Collapse All';
+      collapseAllBtnEl.textContent = 'Collapse';
       collapseAllRowBottomEl.style.display = 'flex';
-      collapseAllBtnBottomEl.textContent = 'Collapse All';
+      collapseAllBtnBottomEl.textContent = 'Collapse';
     } else {
       // Both panels closed: bottom button has nothing left to act on, so hide it
       collapseAllRowBottomEl.style.display = 'none';
       if (anyReps) {
         collapseAllRowEl.style.display = 'flex';
-        collapseAllBtnEl.textContent = 'Expand All';
+        collapseAllBtnEl.textContent = 'Expand';
       } else {
         collapseAllRowEl.style.display = 'none';
       }
@@ -1747,12 +1751,24 @@
   const loginPrompt = document.getElementById('loginPrompt');
 
   const validationToast = document.getElementById('validationToast');
-  function showValidation(msg) {
+  let validationHideTimer = null;
+  let validationPersistent = false;
+  function showValidation(msg, persist) {
     validationToast.textContent = msg;
     validationToast.style.background = 'var(--cyan)';
     validationToast.style.color = 'var(--bg)';
     validationToast.classList.add('show');
-    setTimeout(() => validationToast.classList.remove('show'), 2200);
+    if (validationHideTimer) { clearTimeout(validationHideTimer); validationHideTimer = null; }
+    validationPersistent = !!persist;
+    if (!persist) {
+      validationHideTimer = setTimeout(() => validationToast.classList.remove('show'), 2200);
+    }
+  }
+  function hideValidationIfPersistent() {
+    if (validationPersistent) {
+      validationToast.classList.remove('show');
+      validationPersistent = false;
+    }
   }
 
   submitBtn.addEventListener('click', async (e) => {
@@ -1762,8 +1778,8 @@
     const selectedDot = document.querySelector('#gradeSlider .grade-dot.selected');
     const selectedSys = document.querySelector('.system-btn.selected');
 
-    if (!selectedDot) { showValidation('Select A Grade'); return; }
-    if (!selectedSys) { showValidation('Select A System'); return; }
+    if (!selectedDot) { showValidation('Select A Grade', true); return; }
+    if (!selectedSys) { showValidation('Select A System', true); return; }
 
     if (localStorage.getItem('hideRepConfirm')) {
       performSubmitRep(selectedDot, selectedSys);
@@ -1889,7 +1905,9 @@
           const day = ordinal(foundedDate.getDate());
           lines.push(`<span class="detail-label">Founded</span> &bull; ${year} ${month} ${day}`);
         }
-        if (esi.member_count) lines.push(`<span class="detail-label">Members</span> &bull; ${esi.member_count.toLocaleString()}`);
+        if (esi.member_count) {
+          lines.push(`<a class="detail-label members-link" href="corp-members.html?id=${corpId}&name=${encodeURIComponent(esi.name)}">Members</a> &bull; ${esi.member_count.toLocaleString()}`);
+        }
         document.getElementById('corpDetails').innerHTML = lines.join('<br>');
         if (esi.logo) {
           const img = document.getElementById('corpLogo');

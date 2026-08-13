@@ -427,15 +427,25 @@
       transition: border-color 0.2s, background 0.2s;
       resize: vertical;
     }
+    .suggestion-select-wrap {
+      position: relative;
+      width: 100%;
+    }
     .suggestion-form select {
       appearance: none;
       -webkit-appearance: none;
       -moz-appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%234fc3f7' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 14px center;
       padding-right: 36px;
       cursor: pointer;
+    }
+    .suggestion-select-arrow {
+      position: absolute;
+      top: 50%;
+      right: 14px;
+      transform: translateY(-50%);
+      color: var(--cyan);
+      font-size: 12px;
+      pointer-events: none;
     }
     .suggestion-form select option {
       background: var(--bg2);
@@ -644,16 +654,19 @@
 
         <div class="suggestion-sending-as">Sending As: <strong id="suggestionCharacterName">—</strong></div>
 
-        <select id="suggestionCategory">
-          <option value="General Feedback">General Feedback</option>
-          <option value="Bug Report">Bug Report</option>
-          <option value="Feature Request">Feature Request</option>
-          <option value="Dispute A Rep">Dispute A Rep</option>
-          <option value="Report Abuse">Report Abuse</option>
-          <option value="Account Issue">Account Issue</option>
-        </select>
+        <div class="suggestion-select-wrap">
+          <select id="suggestionCategory">
+            <option value="General Feedback">General Feedback</option>
+            <option value="Bug Report">Bug Report</option>
+            <option value="Feature Request">Feature Request</option>
+            <option value="Dispute A Rep">Dispute A Rep</option>
+            <option value="Report Abuse">Report Abuse</option>
+            <option value="Account Issue">Account Issue</option>
+          </select>
+          <span class="suggestion-select-arrow">▾</span>
+        </div>
         <input type="text" id="suggestionSubject" placeholder="Subject" autocomplete="off" maxlength="120" />
-        <textarea id="suggestionComment" placeholder="Your suggestion..." maxlength="2000"></textarea>
+        <textarea id="suggestionComment" placeholder="Type Your Message" maxlength="2000"></textarea>
 
         <div class="suggestion-error" id="suggestionError"></div>
         <button type="submit" class="suggestion-submit" id="suggestionSubmit">Submit</button>

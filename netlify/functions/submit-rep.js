@@ -128,6 +128,7 @@ exports.handler = async (event) => {
     target_id:     String(targetId),
     target_type:   targetType,
     target_name:   targetName || null,
+    target_corporation_id: targetType === 'pilot' && targetCorpId ? String(targetCorpId) : null,
     reviewer_id:   reviewerId,
     reviewer_name: reviewerName,
     grade,

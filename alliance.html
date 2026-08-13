@@ -1113,7 +1113,7 @@
       </div>
 
       <div class="collapse-all-row" id="collapseAllRow" style="display:none;">
-        <button class="collapse-all-btn" id="collapseAllBtn">Collapse All</button>
+        <button class="collapse-all-btn" id="collapseAllBtn">Collapse</button>
       </div>
 
       <div class="no-comment-reps-panel" id="noCommentRepsPanel" style="display:none;">
@@ -1125,7 +1125,7 @@
       </div>
 
       <div class="collapse-all-row-bottom" id="collapseAllRowBottom" style="display:none;">
-        <button class="collapse-all-btn" id="collapseAllBtnBottom">Collapse All</button>
+        <button class="collapse-all-btn" id="collapseAllBtnBottom">Collapse</button>
       </div>
     </div>
 
@@ -1262,6 +1262,7 @@
     dot.addEventListener('click', () => {
       dots.forEach(d => d.classList.remove('selected'));
       dot.classList.add('selected');
+      hideValidationIfPersistent();
     });
   });
 
@@ -1271,6 +1272,7 @@
     btn.addEventListener('click', () => {
       sysButtons.forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
+      hideValidationIfPersistent();
     });
   });
 
@@ -1623,15 +1625,15 @@
     const anyReps = getPilotRepsTotalCount() > 0;
     if (anyOpen) {
       collapseAllRowEl.style.display = 'flex';
-      collapseAllBtnEl.textContent = 'Collapse All';
+      collapseAllBtnEl.textContent = 'Collapse';
       collapseAllRowBottomEl.style.display = 'flex';
-      collapseAllBtnBottomEl.textContent = 'Collapse All';
+      collapseAllBtnBottomEl.textContent = 'Collapse';
     } else {
       // Both panels closed: bottom button has nothing left to act on, so hide it
       collapseAllRowBottomEl.style.display = 'none';
       if (anyReps) {
         collapseAllRowEl.style.display = 'flex';
-        collapseAllBtnEl.textContent = 'Expand All';
+        collapseAllBtnEl.textContent = 'Expand';
       } else {
         collapseAllRowEl.style.display = 'none';
       }
@@ -1747,12 +1749,24 @@
   const loginPrompt = document.getElementById('loginPrompt');
 
   const validationToast = document.getElementById('validationToast');
-  function showValidation(msg) {
+  let validationHideTimer = null;
+  let validationPersistent = false;
+  function showValidation(msg, persist) {
     validationToast.textContent = msg;
     validationToast.style.background = 'var(--cyan)';
     validationToast.style.color = 'var(--bg)';
     validationToast.classList.add('show');
-    setTimeout(() => validationToast.classList.remove('show'), 2200);
+    if (validationHideTimer) { clearTimeout(validationHideTimer); validationHideTimer = null; }
+    validationPersistent = !!persist;
+    if (!persist) {
+      validationHideTimer = setTimeout(() => validationToast.classList.remove('show'), 2200);
+    }
+  }
+  function hideValidationIfPersistent() {
+    if (validationPersistent) {
+      validationToast.classList.remove('show');
+      validationPersistent = false;
+    }
   }
 
   submitBtn.addEventListener('click', async (e) => {
@@ -1762,8 +1776,8 @@
     const selectedDot = document.querySelector('#gradeSlider .grade-dot.selected');
     const selectedSys = document.querySelector('.system-btn.selected');
 
-    if (!selectedDot) { showValidation('Select A Grade'); return; }
-    if (!selectedSys) { showValidation('Select A System'); return; }
+    if (!selectedDot) { showValidation('Select A Grade', true); return; }
+    if (!selectedSys) { showValidation('Select A System', true); return; }
 
     if (localStorage.getItem('hideRepConfirm')) {
       performSubmitRep(selectedDot, selectedSys);
