@@ -110,6 +110,13 @@ exports.handler = async (event) => {
         });
         if (searchRes.ok) {
           const searchData = await searchRes.json();
+          console.log('[DEBUG esi-proxy] raw ESI search categories:', {
+            query,
+            characterCount:   (searchData.character || []).length,
+            corporationCount: (searchData.corporation || []).length,
+            allianceCount:    (searchData.alliance || []).length,
+            corporationIds:   searchData.corporation || []
+          });
           const allIds = [
             ...(searchData.character   || []).slice(0, 300),
             ...(searchData.corporation || []).slice(0, 300),
@@ -125,6 +132,11 @@ exports.handler = async (event) => {
           });
           if (namesRes.ok) {
             const namesData = await namesRes.json();
+            console.log('[DEBUG esi-proxy] universe/names resolved categories:', {
+              totalResolved: namesData.length,
+              corporationResolved: namesData.filter(n => n.category === 'corporation').length,
+              categoriesSeen: [...new Set(namesData.map(n => n.category))]
+            });
             const byName = (a, b) => a.name.localeCompare(b.name);
             const matchesQuery = n => n.name.toLowerCase().includes(query.toLowerCase());
             return {
@@ -137,7 +149,11 @@ exports.handler = async (event) => {
                 alliances:    namesData.filter(n => n.category === 'alliance').filter(matchesQuery).sort(byName).slice(0, limit)
               })
             };
+          } else {
+            console.log('[DEBUG esi-proxy] universe/names FAILED:', namesRes.status, await namesRes.text());
           }
+        } else {
+          console.log('[DEBUG esi-proxy] ESI search request FAILED:', searchRes.status, await searchRes.text());
         }
       }
 
