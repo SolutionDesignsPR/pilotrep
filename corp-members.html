@@ -268,14 +268,30 @@
     /* ── PAGE TITLE ── */
     .page-title {
       text-align: center;
-      margin: 36px 0 50px;
+      margin: 36px 0 14px;
     }
     .page-title-img { display: block; max-width: 100%; margin: 0 auto; }
-    .page-title-desktop { height: clamp(28px, 4vw, 40px); width: auto; aspect-ratio: 307.56 / 22.16; }
+    .page-title-desktop { height: clamp(28px, 4vw, 40px); width: auto; aspect-ratio: 259.04 / 22.13; }
     .page-title-mobile { display: none; }
     @media (max-width: 640px) {
       .page-title-desktop { display: none; }
-      .page-title-mobile { display: block; height: clamp(60px, 15vw, 90px); width: auto; aspect-ratio: 194.9 / 50.16; }
+      .page-title-mobile { display: block; height: clamp(60px, 15vw, 90px); width: auto; aspect-ratio: 151.69 / 52.13; }
+    }
+    .corp-subtitle {
+      text-align: center;
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      color: var(--white);
+      text-transform: uppercase;
+      margin: 0 auto 40px;
+      padding: 0 24px;
+    }
+    .member-rep-count {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--white);
+      white-space: nowrap;
     }
 
     /* ── PILOT HEADER ── */
@@ -1073,9 +1089,9 @@
     </div>
 
     <nav class="nav-links">
-      <a href="pilot.html">Pilots</a>
-      <a href="corporation.html">Corporations</a>
-      <a href="alliance.html">Alliances</a>
+      <a href="pilot-landing.html">Pilots</a>
+      <a href="corporation-landing.html">Corporations</a>
+      <a href="alliance-landing.html">Alliances</a>
     </nav>
 
     <div class="nav-right">
@@ -1094,7 +1110,11 @@
   </header>
 
   <!-- PAGE TITLE -->
-  <h1 class="page-title" id="pageTitle">Corp Members</h1>
+  <h1 class="page-title" id="pageTitle">
+    <img class="page-title-img page-title-desktop" id="pageTitleDesktop" src="assets/images/PR_Member_Reps.svg" alt="Member Reps" />
+    <img class="page-title-img page-title-mobile" id="pageTitleMobile" src="assets/images/PR_Member_Reps_M.svg" alt="Member Reps" />
+  </h1>
+  <p class="corp-subtitle" id="corpSubtitle"></p>
 
   <!-- MEMBERS LIST -->
   <section class="results-section">
@@ -1295,7 +1315,7 @@
   const membersListEl = document.getElementById('membersList');
 
   if (corpName) {
-    document.getElementById('pageTitle').textContent = `${corpName} — Members`;
+    document.getElementById('corpSubtitle').textContent = corpName;
     document.title = `PilotRep | ${corpName} Members`;
   }
 
@@ -1317,9 +1337,15 @@
 
       membersSubtitleEl.textContent = `${members.length.toLocaleString()} Pilot${members.length === 1 ? '' : 's'} With Reps`;
       membersListEl.innerHTML = members.map(m => `
-        <a class="result-item" href="/pilot.html?id=${m.id}">
-          <span>${escapeHtml(m.name)}</span>
-          <span class="result-item-type tier-${m.gradeTier}">${m.gradeHtml} &bull; ${m.repCount} Rep${m.repCount === 1 ? '' : 's'}</span>
+        <a class="comment-row ${m.gradeTier}" href="/pilot.html?id=${m.id}" style="text-decoration:none;color:inherit;">
+          <div>
+            ${m.date ? `<div class="rep-row-date">${m.date}</div>` : ''}
+            <div class="rep-row-meta">${escapeHtml(m.name)}</div>
+          </div>
+          <div class="rep-row-right">
+            <span class="member-rep-count">${m.repCount} Rep${m.repCount === 1 ? '' : 's'}</span>
+            <span class="rep-grade-badge ${m.gradeTier}">${m.gradeHtml}</span>
+          </div>
         </a>
       `).join('');
       membersPanelEl.style.display = 'block';

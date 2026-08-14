@@ -37,7 +37,7 @@ exports.handler = async (event) => {
     // (target_corporation_id is captured at submission time — see submit-rep.js).
     const { data: reps, error } = await supabase
       .from('reps')
-      .select('target_id, target_name, grade_index')
+      .select('target_id, target_name, grade_index, created_at')
       .eq('target_type', 'pilot')
       .eq('target_corporation_id', String(corpId));
 
@@ -51,10 +51,11 @@ exports.handler = async (event) => {
     const byPilot = {};
     for (const r of reps) {
       const key = r.target_id;
-      if (!byPilot[key]) byPilot[key] = { id: key, name: r.target_name, repCount: 0, indexSum: 0 };
+      if (!byPilot[key]) byPilot[key] = { id: key, name: r.target_name, repCount: 0, indexSum: 0, mostRecent: r.created_at };
       const agg = byPilot[key];
       agg.repCount += 1;
       agg.indexSum += r.grade_index;
+      if (new Date(r.created_at) > new Date(agg.mostRecent)) agg.mostRecent = r.created_at;
     }
 
     const members = Object.values(byPilot)
@@ -67,7 +68,8 @@ exports.handler = async (event) => {
           repCount: agg.repCount,
           grade:    gradeEntry.grade,
           gradeHtml: gradeEntry.html,
-          gradeTier: gradeEntry.tier
+          gradeTier: gradeEntry.tier,
+          date:     formatDate(agg.mostRecent)
         };
       })
       .sort((a, b) => a.name.localeCompare(b.name));
@@ -79,3 +81,9 @@ exports.handler = async (event) => {
     return { statusCode: 500, headers, body: JSON.stringify({ error: 'Failed to load corp members' }) };
   }
 };
+
+function formatDate(isoString) {
+  if (!isoString) return '';
+  const d = new Date(isoString);
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase();
+}
