@@ -53,6 +53,39 @@ function withRefreshedCookie(headers, refreshedCookie) {
   };
 }
 
+// ESI's authenticated /characters/{id}/search/ endpoint does not reliably return
+// corporation matches (confirmed empty even for queries that clearly match real
+// corp names — appears to be a CCP-side restriction on this endpoint's corporation
+// category, likely tied to their past crackdowns on corp/structure discovery abuse).
+// This backfills corp results from PilotRep's own data: corporations that already
+// have at least one rep here. Same substring-match approach as the unauthenticated
+// community search below, just scoped to corporations only.
+async function communityCorpSearch(query, limit) {
+  try {
+    const { data, error } = await supabase
+      .from('reps')
+      .select('target_id, target_name')
+      .eq('target_type', 'corporation')
+      .not('target_name', 'is', null)
+      .ilike('target_name', `%${query}%`)
+      .limit(Math.max(150, limit * 20));
+
+    if (error || !data) return [];
+
+    const seenIds = new Set();
+    const out = [];
+    for (const r of data) {
+      if (seenIds.has(r.target_id)) continue;
+      seenIds.add(r.target_id);
+      out.push({ id: Number(r.target_id), name: r.target_name });
+    }
+    return out.sort((a, b) => a.name.localeCompare(b.name)).slice(0, limit);
+  } catch (err) {
+    console.warn('communityCorpSearch failed (non-fatal):', err);
+    return [];
+  }
+}
+
 exports.handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -110,50 +143,43 @@ exports.handler = async (event) => {
         });
         if (searchRes.ok) {
           const searchData = await searchRes.json();
-          console.log('[DEBUG esi-proxy] raw ESI search categories:', {
-            query,
-            characterCount:   (searchData.character || []).length,
-            corporationCount: (searchData.corporation || []).length,
-            allianceCount:    (searchData.alliance || []).length,
-            corporationIds:   searchData.corporation || []
-          });
           const allIds = [
             ...(searchData.character   || []).slice(0, 300),
             ...(searchData.corporation || []).slice(0, 300),
             ...(searchData.alliance    || []).slice(0, 300)
           ];
-          if (allIds.length === 0) {
-            return { statusCode: 200, headers: withRefreshedCookie(headers, refreshedCookie), body: JSON.stringify({ mode: 'authenticated', characters: [], corporations: [], alliances: [] }) };
-          }
-          const namesRes = await fetch('https://esi.evetech.net/latest/universe/names/?datasource=tranquility', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(allIds)
-          });
-          if (namesRes.ok) {
-            const namesData = await namesRes.json();
-            console.log('[DEBUG esi-proxy] universe/names resolved categories:', {
-              totalResolved: namesData.length,
-              corporationResolved: namesData.filter(n => n.category === 'corporation').length,
-              categoriesSeen: [...new Set(namesData.map(n => n.category))]
+
+          let characters = [];
+          let corporations = [];
+          let alliances = [];
+
+          if (allIds.length > 0) {
+            const namesRes = await fetch('https://esi.evetech.net/latest/universe/names/?datasource=tranquility', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(allIds)
             });
-            const byName = (a, b) => a.name.localeCompare(b.name);
-            const matchesQuery = n => n.name.toLowerCase().includes(query.toLowerCase());
-            return {
-              statusCode: 200,
-              headers: withRefreshedCookie(headers, refreshedCookie),
-              body: JSON.stringify({
-                mode:         'authenticated',
-                characters:   namesData.filter(n => n.category === 'character').filter(matchesQuery).sort(byName).slice(0, limit),
-                corporations: namesData.filter(n => n.category === 'corporation').filter(matchesQuery).sort(byName).slice(0, limit),
-                alliances:    namesData.filter(n => n.category === 'alliance').filter(matchesQuery).sort(byName).slice(0, limit)
-              })
-            };
-          } else {
-            console.log('[DEBUG esi-proxy] universe/names FAILED:', namesRes.status, await namesRes.text());
+            if (namesRes.ok) {
+              const namesData = await namesRes.json();
+              const byName = (a, b) => a.name.localeCompare(b.name);
+              const matchesQuery = n => n.name.toLowerCase().includes(query.toLowerCase());
+              characters   = namesData.filter(n => n.category === 'character').filter(matchesQuery).sort(byName).slice(0, limit);
+              corporations = namesData.filter(n => n.category === 'corporation').filter(matchesQuery).sort(byName).slice(0, limit);
+              alliances    = namesData.filter(n => n.category === 'alliance').filter(matchesQuery).sort(byName).slice(0, limit);
+            }
           }
-        } else {
-          console.log('[DEBUG esi-proxy] ESI search request FAILED:', searchRes.status, await searchRes.text());
+
+          // ESI's corporation category comes back empty far more often than not —
+          // backfill from PilotRep's own community data whenever that happens.
+          if (corporations.length === 0) {
+            corporations = await communityCorpSearch(query, limit);
+          }
+
+          return {
+            statusCode: 200,
+            headers: withRefreshedCookie(headers, refreshedCookie),
+            body: JSON.stringify({ mode: 'authenticated', characters, corporations, alliances })
+          };
         }
       }
 
