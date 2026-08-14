@@ -981,6 +981,12 @@
       font-size: 14px;
       padding: 40px 20px;
     }
+    .results-empty-hint {
+      display: block;
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--cyan-dim);
+    }
     .results-panel {
       background: var(--panel);
       border: 1px solid var(--border);
@@ -1324,7 +1330,10 @@
     const visible = items.slice(0, visibleCount);
 
     if (items.length === 0) {
-      resultsListEl.innerHTML = `<div class="results-empty">No ${meta.label} Found For This Search.</div>`;
+      const hint = activeCategory === 'corporation'
+        ? `<span class="results-empty-hint">Try including more words in your search.</span>`
+        : '';
+      resultsListEl.innerHTML = `<div class="results-empty">No ${meta.label} Found For This Search.${hint}</div>`;
       resultsSeeAllWrapEl.style.display = 'none';
       return;
     }
