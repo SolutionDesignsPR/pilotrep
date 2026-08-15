@@ -37,11 +37,21 @@ exports.handler = async (event) => {
 
   // 1b. Check ban status — banned characters can still log in and browse,
   // they're just blocked from submitting new reps.
-  const { data: pilotRecord } = await supabase
+  const { data: pilotRecord, error: banLookupError } = await supabase
     .from('pilots')
     .select('banned')
     .eq('character_id', session.characterId)
     .maybeSingle();
+
+  // Fail closed: an unanswered lookup is not the same as "no ban on record".
+  // Without this, a failed query looks identical to a clean pilot.
+  if (banLookupError) {
+    console.error('Supabase ban lookup error:', banLookupError);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Could not verify your account status. Please try again.' })
+    };
+  }
 
   if (pilotRecord && pilotRecord.banned) {
     return { statusCode: 403, body: JSON.stringify({ error: 'This character is no longer able to submit reps on PilotRep.' }) };
@@ -101,19 +111,31 @@ exports.handler = async (event) => {
   }
 
   // 5. Enforce 6-month cooldown
-  // ⚠️ TESTING MODE: cooldown disabled — remove 'false &&' before launch!
   const sixMonthsAgo = new Date();
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-  const { data: existing } = await supabase
+  const { data: existingRows, error: cooldownError } = await supabase
     .from('reps')
     .select('id, created_at')
     .eq('reviewer_id', reviewerId)
     .eq('target_id', String(targetId))
     .gte('created_at', sixMonthsAgo.toISOString())
-    .maybeSingle();
+    .order('created_at', { ascending: false })
+    .limit(1);
 
-  if (false && existing) {
+  // Fail closed: if we can't verify eligibility, refuse the rep rather than
+  // silently letting it through.
+  if (cooldownError) {
+    console.error('Supabase cooldown query error:', cooldownError);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Could not verify rep eligibility. Please try again.' })
+    };
+  }
+
+  const existing = existingRows && existingRows[0];
+
+  if (existing) {
     const nextEligible = new Date(existing.created_at);
     nextEligible.setMonth(nextEligible.getMonth() + 6);
     const formatted = nextEligible.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
