@@ -23,7 +23,8 @@ exports.handler = async function (event) {
       body: new URLSearchParams({
         grant_type:   'authorization_code',
         code:         code,
-        redirect_uri: 'https://curious-chaja-a3235b.netlify.app/.netlify/functions/auth-callback',
+        // ⚠️ Must match auth-start.js and the EVE developer app callback EXACTLY.
+        redirect_uri: 'https://pilotrep.com/.netlify/functions/auth-callback',
       }),
     });
     if (!tokenRes.ok) {

@@ -5,7 +5,9 @@ exports.handler = async function (event) {
   const nonce  = Math.random().toString(36).substring(2, 15);
   const state  = Buffer.from(JSON.stringify({ nonce, origin })).toString('base64');
 
-  const callbackUrl = 'https://curious-chaja-a3235b.netlify.app/.netlify/functions/auth-callback';
+  // ⚠️ Must match the Callback URL registered on the EVE developer app EXACTLY,
+  // and the redirect_uri sent during token exchange in auth-callback.js.
+  const callbackUrl = 'https://pilotrep.com/.netlify/functions/auth-callback';
 
   const params = new URLSearchParams({
     response_type: 'code',
