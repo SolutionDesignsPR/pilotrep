@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const { verifySession, signSession, SESSION_COOKIE_ATTRS } = require('./lib/session');
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
@@ -49,7 +50,7 @@ function withRefreshedCookie(headers, refreshedCookie) {
   if (!refreshedCookie) return headers;
   return {
     ...headers,
-    'Set-Cookie': `pilotrep_session=${refreshedCookie}; Path=/; HttpOnly; SameSite=Lax; Max-Age=7200`,
+    'Set-Cookie': `pilotrep_session=${refreshedCookie}; ${SESSION_COOKIE_ATTRS}`,
   };
 }
 
@@ -111,12 +112,14 @@ exports.handler = async (event) => {
       let refreshedCookie = null; // set if we mint a new token; forwarded via Set-Cookie
       if (match) {
         try {
-          session = JSON.parse(Buffer.from(match[1], 'base64').toString('utf8'));
-          accessToken = session.accessToken || null;
+          // Signed-cookie check. null = forged, edited, or legacy unsigned cookie;
+          // we then fall through to the unauthenticated search path below.
+          session = verifySession(match[1]);
+          accessToken = session ? (session.accessToken || null) : null;
 
           // Access tokens live ~20 min; the 8hr site session outlives that easily.
           // If it's expired (with a 60s buffer) and we have a refresh token, mint a new one.
-          const isExpired = session.accessTokenExpiresAt && Date.now() > (session.accessTokenExpiresAt - 60000);
+          const isExpired = session && session.accessTokenExpiresAt && Date.now() > (session.accessTokenExpiresAt - 60000);
           if (isExpired && session.refreshToken) {
             const refreshed = await refreshAccessToken(session.refreshToken);
             if (refreshed) {
@@ -124,7 +127,9 @@ exports.handler = async (event) => {
               session.accessToken          = refreshed.accessToken;
               session.refreshToken         = refreshed.refreshToken;
               session.accessTokenExpiresAt = refreshed.accessTokenExpiresAt;
-              refreshedCookie = Buffer.from(JSON.stringify(session)).toString('base64');
+              // Must be re-signed, or every other function would reject this
+              // cookie ~20 minutes into the session and log the pilot out.
+              refreshedCookie = signSession(session);
             } else {
               // Refresh token itself is dead/revoked — fail gracefully into the
               // unauthenticated fallback below rather than erroring. Do NOT touch

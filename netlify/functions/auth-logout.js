@@ -3,7 +3,7 @@ exports.handler = async () => {
     statusCode: 302,
     headers: {
       Location: '/index.html',
-      'Set-Cookie': 'pilotrep_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0',
+      'Set-Cookie': 'pilotrep_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0',
     },
     body: '',
   };

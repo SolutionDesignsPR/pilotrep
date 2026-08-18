@@ -3,7 +3,7 @@ exports.handler = async (event) => {
     statusCode: 200,
     headers: {
       'Content-Type': 'application/json',
-      'Set-Cookie': 'pilotrep_mod_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0',
+      'Set-Cookie': 'pilotrep_mod_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0',
     },
     body: JSON.stringify({ success: true })
   };

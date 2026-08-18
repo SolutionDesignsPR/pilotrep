@@ -1,10 +1,25 @@
 const { createClient } = require('@supabase/supabase-js');
+const { signSession, safeEqual, readCookie, SESSION_COOKIE_ATTRS } = require('./lib/session');
+
+const REDIRECT_URI = 'https://pilotrep.com/.netlify/functions/auth-callback';
 
 exports.handler = async function (event) {
   const { code, state, error } = event.queryStringParameters || {};
 
   if (error) return redirect('/index.html?login=error');
   if (!code)  return redirect('/index.html?login=error');
+
+  // ── 0. Validate state against the nonce cookie set by auth-start ───────────
+  // Without this, anyone can hand a victim a login.eveonline.com URL carrying a
+  // state blob they authored. The cookie name must match auth-start.js exactly.
+  const stateData = decodeState(state);
+  if (!stateData) return redirect('/index.html?login=error');
+
+  const expectedNonce = readCookie(event.headers, 'eve_nonce');
+  if (!expectedNonce || !safeEqual(String(stateData.nonce || ''), expectedNonce)) {
+    console.error('State nonce mismatch — possible login CSRF');
+    return redirect('/index.html?login=error');
+  }
 
   // ── 1. Exchange code for access token ──────────────────────────────────────
   const clientId     = process.env.EVE_CLIENT_ID;
@@ -24,7 +39,7 @@ exports.handler = async function (event) {
         grant_type:   'authorization_code',
         code:         code,
         // ⚠️ Must match auth-start.js and the EVE developer app callback EXACTLY.
-        redirect_uri: 'https://pilotrep.com/.netlify/functions/auth-callback',
+        redirect_uri: REDIRECT_URI,
       }),
     });
     if (!tokenRes.ok) {
@@ -37,24 +52,27 @@ exports.handler = async function (event) {
     return redirect('/index.html?login=error');
   }
 
-  // ── 2. Verify token & get character identity ───────────────────────────────
-  let characterData;
-  try {
-    const verifyRes = await fetch('https://login.eveonline.com/oauth/verify', {
-      headers: { Authorization: `Bearer ${tokenData.access_token}` },
-    });
-    if (!verifyRes.ok) {
-      console.error('Verify failed:', await verifyRes.text());
-      return redirect('/index.html?login=error');
-    }
-    characterData = await verifyRes.json();
-  } catch (err) {
-    console.error('Verify fetch error:', err);
+  // ── 2. Read character identity from the access token JWT ───────────────────
+  // Replaces the deprecated https://login.eveonline.com/oauth/verify call, which
+  // CCP deprecated on 1 November 2021 and may remove at any time.
+  // The token came straight from CCP over TLS in step 1, so decoding the claims
+  // is sufficient here. (If a token is ever accepted from anywhere else, verify
+  // its signature against https://login.eveonline.com/oauth/jwks first.)
+  const claims = decodeJwtPayload(tokenData.access_token);
+  if (!claims || typeof claims.sub !== 'string') {
+    console.error('Could not read claims from access token');
     return redirect('/index.html?login=error');
   }
 
-  const characterId   = characterData.CharacterID;
-  const characterName = characterData.CharacterName;
+  // sub looks like "CHARACTER:EVE:2112625428"
+  const subMatch = claims.sub.match(/^CHARACTER:EVE:(\d+)$/);
+  if (!subMatch) {
+    console.error('Unexpected sub claim:', claims.sub);
+    return redirect('/index.html?login=error');
+  }
+
+  const characterId   = Number(subMatch[1]);
+  const characterName = claims.name;
 
   // ── 3. Fetch corp & alliance from public ESI ───────────────────────────────
   let corpId = null, allianceId = null;
@@ -93,48 +111,85 @@ exports.handler = async function (event) {
     return redirect('/index.html?login=error');
   }
 
-  // ── 5. Set session cookie & redirect ─────────────────────────────────────
-  // Store access token + refresh token in session so esi-proxy can use them for
-  // authenticated search. EVE SSO access tokens expire in ~20 min (tokenData.expires_in);
-  // the refresh_token lets esi-proxy silently mint a new one without re-login.
-  const session = JSON.stringify({
-    characterId,
-    characterName,
-    corpId,
-    allianceId,
-    accessToken: tokenData.access_token,
-    refreshToken: tokenData.refresh_token,
-    accessTokenExpiresAt: Date.now() + (tokenData.expires_in || 1200) * 1000,
-    createdAt: Date.now()
-  });
-  const encoded = Buffer.from(session).toString('base64');
-
-  let destination = '/index.html?login=success';
+  // ── 5. Set signed session cookie ───────────────────────────────────────────
+  // The payload is still readable base64, but the HMAC means it cannot be
+  // edited. Unsigned, anyone could hand-craft a cookie for any character_id.
+  let cookieValue;
   try {
-    const stateData = JSON.parse(Buffer.from(state || '', 'base64').toString('utf8'));
-    if (stateData.origin) {
-      // If the origin was the pilot's own pilot.html page (they logged in from
-      // their own profile), send them to my-pilotrep.html instead.
-      const ownPageMatch = stateData.origin.match(/\/pilot\.html\?id=(\d+)/);
-      if (ownPageMatch && ownPageMatch[1] === String(characterId)) {
-        destination = '/my-pilotrep.html?login=success';
-      } else {
-        const separator = stateData.origin.includes('?') ? '&' : '?';
-        destination = stateData.origin + separator + 'login=success';
-      }
+    cookieValue = signSession({
+      characterId,
+      characterName,
+      corpId,
+      allianceId,
+      accessToken:  tokenData.access_token,
+      refreshToken: tokenData.refresh_token,
+      accessTokenExpiresAt: Date.now() + (tokenData.expires_in || 1200) * 1000,
+      createdAt: Date.now(),
+    });
+  } catch (err) {
+    // Almost certainly SESSION_SECRET missing from the Netlify env vars.
+    console.error('Could not sign session:', err.message);
+    return redirect('/index.html?login=error');
+  }
+
+  // ── 6. Work out where to send them, safely ─────────────────────────────────
+  let destination = '/index.html?login=success';
+  const origin = safeInternalPath(stateData.origin);
+  if (origin) {
+    // If the origin was the pilot's own pilot.html page (they logged in from
+    // their own profile), send them to my-pilotrep.html instead.
+    const ownPageMatch = origin.match(/\/pilot\.html\?id=(\d+)/);
+    if (ownPageMatch && ownPageMatch[1] === String(characterId)) {
+      destination = '/my-pilotrep.html?login=success';
+    } else {
+      const separator = origin.includes('?') ? '&' : '?';
+      destination = origin + separator + 'login=success';
     }
-  } catch (_) {}
+  }
 
   return {
     statusCode: 302,
-    headers: {
-      Location: destination,
-      'Set-Cookie': `pilotrep_session=${encoded}; Path=/; HttpOnly; SameSite=Lax; Max-Age=7200`,
+    multiValueHeaders: {
+      Location: [destination],
+      'Set-Cookie': [
+        `pilotrep_session=${cookieValue}; ${SESSION_COOKIE_ATTRS}`,
+        // Burn the nonce so the state blob cannot be replayed.
+        'eve_nonce=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0',
+      ],
     },
     body: '',
   };
 };
 
+// ───────────────────────────── helpers ──────────────────────────────────────
+
 function redirect(url) {
   return { statusCode: 302, headers: { Location: url }, body: '' };
+}
+
+function decodeState(state) {
+  try {
+    const parsed = JSON.parse(Buffer.from(state || '', 'base64').toString('utf8'));
+    return parsed && typeof parsed === 'object' ? parsed : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function decodeJwtPayload(jwt) {
+  try {
+    const part = String(jwt).split('.')[1];
+    return JSON.parse(Buffer.from(part, 'base64url').toString('utf8'));
+  } catch (_) {
+    return null;
+  }
+}
+
+// Only allow same-site relative paths. Blocks "https://evil.com",
+// "//evil.com" and "/\evil.com", all of which browsers treat as off-site.
+function safeInternalPath(path) {
+  if (typeof path !== 'string' || path.length === 0) return null;
+  if (path[0] !== '/') return null;
+  if (path[1] === '/' || path[1] === '\\') return null;
+  return path;
 }

@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const { verifySession } = require('./lib/session');
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
@@ -10,14 +11,13 @@ function getModSession(cookieHeader) {
   if (!cookieHeader) return null;
   const match = cookieHeader.match(/pilotrep_mod_session=([^;]+)/);
   if (!match) return null;
-  try {
-    const session = JSON.parse(Buffer.from(match[1], 'base64').toString('utf8'));
-    if (!session.isModerator) return null;
-    if (!session.createdAt || Date.now() - session.createdAt > SESSION_MAX_AGE_MS) return null;
-    return session;
-  } catch {
-    return null;
-  }
+  // Signature must be valid. Unsigned, anyone could set isModerator themselves
+  // and bypass MODERATOR_PASSWORD entirely.
+  const session = verifySession(match[1]);
+  if (!session) return null;
+  if (!session.isModerator) return null;
+  if (!session.createdAt || Date.now() - session.createdAt > SESSION_MAX_AGE_MS) return null;
+  return session;
 }
 
 exports.handler = async (event) => {
