@@ -495,7 +495,12 @@
       }
       .hero { padding: 60px 16px 40px; }
       .stats-section { grid-template-columns: 1fr; }
-      .stats-section .stats-btn { justify-self: center; width: fit-content; max-width: 92%; }
+      /* Must repeat :nth-child here to match the specificity of the desktop
+         end/start rules above — a plain .stats-section .stats-btn selector
+         loses to them regardless of source order, leaving the two buttons
+         pinned to opposite edges when stacked. */
+      .stats-section .stats-btn:nth-child(1),
+      .stats-section .stats-btn:nth-child(2) { justify-self: center; width: fit-content; max-width: 92%; }
     }
     .search-drop-item {
       display: flex;
