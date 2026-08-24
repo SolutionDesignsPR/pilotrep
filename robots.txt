@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /moderate.html
+
+Sitemap: https://www.pilotrep.com/sitemap.xml
