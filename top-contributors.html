@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Top 20 Contributors — PilotRep</title>
+
+  <meta name="description" content="The pilots who have left the most reputation reports on PilotRep this month." />
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="alternate icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #04080f;
+      --panel:     #0e1a2b;
+      --border:    rgba(100,180,255,0.10);
+      --cyan:      #4fc3f7;
+      --cyan-dim:  #2a8bbf;
+      --white:     #e8eef5;
+      --muted:     #5a7490;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: Helvetica, Arial, sans-serif;
+      font-weight: 400;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .page { position: relative; z-index: 1; }
+
+    .topnav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      padding: 26px 24px 0;
+      flex-wrap: nowrap;
+    }
+    .topnav a {
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      color: var(--white);
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1.5px solid var(--border);
+      padding: 8px 18px;
+      margin-left: -1.5px;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .topnav a:first-child { border-radius: 4px 0 0 4px; margin-left: 0; }
+    .topnav a:last-child  { border-radius: 0 4px 4px 0; }
+    .topnav a:hover { color: var(--cyan); border-color: var(--cyan-dim); }
+
+    .tc-header {
+      text-align: center;
+      padding: 56px 24px 8px;
+    }
+    .tc-title {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+    .tc-reset {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    .tc-my-rank {
+      max-width: 520px;
+      margin: 28px auto 0;
+      padding: 0 24px;
+    }
+    .tc-my-rank-inner {
+      background: rgba(79,195,247,0.06);
+      border: 1.5px solid var(--cyan-dim);
+      border-radius: 8px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+    .tc-my-rank-label { color: var(--muted); }
+    .tc-my-rank-value { color: var(--cyan); font-weight: 700; }
+
+    .tc-list-wrap {
+      max-width: 520px;
+      margin: 32px auto 0;
+      padding: 0 24px 60px;
+    }
+    .tc-panel {
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .tc-row-header, .tc-row {
+      display: grid;
+      grid-template-columns: 32px 1fr 70px;
+      align-items: center;
+      padding: 12px 18px;
+    }
+    .tc-row-header {
+      border-bottom: 1.5px solid var(--border);
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .tc-row { border-bottom: 1px solid rgba(100,180,255,0.06); }
+    .tc-row:last-child { border-bottom: none; }
+    .tc-row:nth-child(even) { background: rgba(79,195,247,0.03); }
+    .tc-rank { font-size: 14px; font-weight: 700; color: var(--muted); }
+    .tc-rank.gold   { color: #f0c542; }
+    .tc-rank.silver { color: #c7cdd6; }
+    .tc-rank.bronze { color: #a9744a; }
+    .tc-pilot { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .tc-pilot-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: rgba(79,195,247,0.15); flex-shrink: 0;
+    }
+    .tc-pilot-name {
+      font-size: 13.5px; font-weight: 700; color: var(--white);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .tc-count { font-size: 14px; font-weight: 700; color: var(--cyan); text-align: right; }
+    .tc-empty { padding: 40px 18px; text-align: center; color: var(--muted); font-size: 13px; }
+
+    .site-footer {
+      margin-top: 40px;
+      padding: 32px 24px 40px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+    .footer-grid {
+      display: inline-grid;
+      grid-template-columns: repeat(3, auto);
+      gap: 20px 48px;
+      justify-content: center;
+      text-align: center;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 28px;
+    }
+    .footer-grid a {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .footer-grid a:hover { color: var(--cyan); }
+    .eve-time {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      color: var(--cyan-dim);
+      text-transform: uppercase;
+    }
+    .legal-note {
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.03em;
+      line-height: 1.6;
+    }
+    .footer-copy {
+      margin-top: 16px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <nav class="topnav">
+    <a href="pilot-landing.html">Pilots</a>
+    <a href="corporation-landing.html">Corporations</a>
+    <a href="alliance-landing.html">Alliances</a>
+  </nav>
+
+  <div class="tc-header">
+    <div class="tc-title">Top 20 contributors</div>
+    <div class="tc-reset" id="tcResetLine">Until —</div>
+  </div>
+
+  <div class="tc-my-rank" id="tcMyRank" style="display:none;">
+    <div class="tc-my-rank-inner">
+      <span class="tc-my-rank-label">Your rank this month</span>
+      <span class="tc-my-rank-value" id="tcMyRankValue">—</span>
+    </div>
+  </div>
+
+  <div class="tc-list-wrap">
+    <div class="tc-panel">
+      <div class="tc-row-header">
+        <div>#</div>
+        <div>Pilot</div>
+        <div style="text-align:right;">Reps left</div>
+      </div>
+      <div id="tcRows">
+        <div class="tc-empty">Loading…</div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="my-pilotrep.html" id="myPilotRepLink">My PilotRep</a>
+      <a href="/.netlify/functions/auth-start" id="footerAuthLink">Login</a>
+      <a href="support-us.html">Support Us</a>
+      <a href="faq.html">FAQ</a>
+      <a href="privacy-policy.html">Privacy Policy</a>
+      <a href="serviceterms.html">Terms Of Service</a>
+      <a href="top-contributors.html">Top Contributors</a>
+    </div>
+    <div class="eve-time" id="eveTime" style="margin-top:28px;">EVE TIME 00:00:00</div>
+    <div class="legal-note" style="margin-top:10px;">
+      EVE Online and all related materials are property of Fenris Creations.<br>PilotRep is a third-party fan site and is not affiliated with Fenris Creations.
+    </div>
+    <div class="footer-copy">&copy; 2026 PilotRep. All rights reserved.</div>
+  </footer>
+
+</div>
+
+<script src="login-success-modal.js"></script>
+<script>
+  function updateEveTime() {
+    const now = new Date();
+    const h = String(now.getUTCHours()).padStart(2, '0');
+    const m = String(now.getUTCMinutes()).padStart(2, '0');
+    const s = String(now.getUTCSeconds()).padStart(2, '0');
+    document.getElementById('eveTime').textContent = `EVE TIME  ${h}:${m}:${s}`;
+  }
+  updateEveTime();
+  setInterval(updateEveTime, 1000);
+
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const now = new Date();
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  document.getElementById('tcResetLine').textContent =
+    'Until ' + months[lastDay.getMonth()] + ' ' + lastDay.getDate();
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function rankClass(rank) {
+    if (rank === 1) return 'gold';
+    if (rank === 2) return 'silver';
+    if (rank === 3) return 'bronze';
+    return '';
+  }
+
+  (async () => {
+    try {
+      const res = await fetch('/.netlify/functions/top-contributors');
+      const data = await res.json();
+      const rowsEl = document.getElementById('tcRows');
+
+      if (!res.ok || !data.top || data.top.length === 0) {
+        rowsEl.innerHTML = '<div class="tc-empty">No qualifying reps yet this month. Be the first on the board.</div>';
+        return;
+      }
+
+      rowsEl.innerHTML = data.top.map(row => `
+        <div class="tc-row">
+          <div class="tc-rank ${rankClass(row.rank)}">${row.rank}</div>
+          <div class="tc-pilot">
+            <div class="tc-pilot-avatar"></div>
+            <div class="tc-pilot-name">${escapeHtml(row.reviewer_name || 'Unknown Pilot')}</div>
+          </div>
+          <div class="tc-count">${row.qualifying_reps}</div>
+        </div>
+      `).join('');
+
+      if (data.myRank) {
+        document.getElementById('tcMyRank').style.display = 'block';
+        document.getElementById('tcMyRankValue').textContent =
+          '#' + data.myRank.rank + ' — ' + data.myRank.qualifying_reps + ' reps left';
+      }
+    } catch (err) {
+      console.error('Top contributors load error:', err);
+      document.getElementById('tcRows').innerHTML = '<div class="tc-empty">Could not load the leaderboard. Please try again.</div>';
+    }
+  })();
+
+  (async () => {
+    try {
+      const res = await fetch('/.netlify/functions/auth-me');
+      const data = await res.json();
+      if (data.loggedIn) {
+        const authLink = document.getElementById('footerAuthLink');
+        if (authLink) {
+          authLink.textContent = 'Logout';
+          authLink.href = '/.netlify/functions/auth-logout';
+        }
+      }
+    } catch (_) {}
+  })();
+</script>
+</body>
+</html>
