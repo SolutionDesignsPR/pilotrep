@@ -663,6 +663,9 @@
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
+      text-align: center;
+      max-width: 320px;
+      line-height: 1.6;
       padding: 9px 20px;
       border-radius: 5px;
       opacity: 0;
@@ -2009,15 +2012,18 @@
   const validationToast = document.getElementById('validationToast');
   let validationHideTimer = null;
   let validationPersistent = false;
-  function showValidation(msg, persist) {
-    validationToast.textContent = msg;
+  function showValidation(msg, persist, duration) {
+    const breakIdx = msg.indexOf('. ');
+    validationToast.innerHTML = breakIdx !== -1
+      ? msg.slice(0, breakIdx + 1) + '<br>' + msg.slice(breakIdx + 2)
+      : msg;
     validationToast.style.background = 'var(--cyan)';
     validationToast.style.color = 'var(--bg)';
     validationToast.classList.add('show');
     if (validationHideTimer) { clearTimeout(validationHideTimer); validationHideTimer = null; }
     validationPersistent = !!persist;
     if (!persist) {
-      validationHideTimer = setTimeout(() => validationToast.classList.remove('show'), 2200);
+      validationHideTimer = setTimeout(() => validationToast.classList.remove('show'), duration || 2200);
     }
   }
   function hideValidationIfPersistent() {
@@ -2096,7 +2102,7 @@
       let data = {};
       try { data = await res.json(); } catch (_) {}
       if (!res.ok) {
-        showValidation(data.error || 'Submission failed. Please try again.');
+        showValidation(data.error || 'Submission failed. Please try again.', false, 6000);
       } else {
         const isCorpAlliance = !!(
           (targetCorpId && currentUserCorpId && targetCorpId === currentUserCorpId) ||

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="ga4.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PilotRep</title>
@@ -440,7 +441,7 @@
     }
     .footer-grid {
       display: inline-grid;
-      grid-template-columns: repeat(4, auto);
+      grid-template-columns: repeat(3, auto);
       gap: 20px 48px;
       justify-content: center;
       text-align: center;
@@ -482,6 +483,23 @@
       padding: 11px 18px;
     }
     .stats-section .stats-btn:nth-child(1) { justify-self: end; }
+    .top-contrib-btn {
+      display: block;
+      width: fit-content;
+      margin: 24px auto 0;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 5px;
+      padding: 11px 24px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .top-contrib-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
     .stats-section .stats-btn:nth-child(2) { justify-self: start; }
     .stats-label {
       font-size: 12px;
@@ -663,13 +681,16 @@
     </div>
   </section>
 
+  <a href="top-contributors.html" class="top-contrib-btn">PilotRep Top Contributors</a>
+
   <!-- FOOTER -->
   <footer class="site-footer">
     <div class="footer-grid">
       <a href="about.html">About</a>
-      <a href="contact.html">Contact</a>
       <a href="my-pilotrep.html" id="myPilotRepLink">My PilotRep</a>
       <a href="/.netlify/functions/auth-start" id="footerAuthLink">Login</a>
+      <a href="top-contributors.html">Top Contributors</a>
+      <a href="contact.html">Contact</a>
       <a href="support-us.html">Support Us</a>
       <a href="faq.html">FAQ</a>
       <a href="privacy-policy.html">Privacy Policy</a>

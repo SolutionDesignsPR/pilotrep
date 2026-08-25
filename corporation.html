@@ -582,6 +582,69 @@
     }
     .share-toast.show { opacity: 1; }
 
+    .rep-share-toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 240px;
+      background: var(--panel);
+      border: 1.5px solid var(--cyan);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      z-index: 9999;
+    }
+    .rep-share-toast.show { opacity: 1; pointer-events: auto; }
+    .rep-share-toast-close {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 3px;
+    }
+    .rep-share-toast-close:hover { color: var(--white); }
+    .rep-share-toast-headline {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+    .rep-share-toast-sub { font-size: 11px; color: var(--muted); }
+    .rep-share-toast-btn {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      color: var(--white);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 7px 16px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: border-color 0.15s;
+    }
+    .rep-share-toast-btn:hover, .rep-share-toast-btn:focus-visible { border-color: var(--cyan-dim); }
+    .rep-share-toast-btn svg { width: 11px; height: 11px; flex-shrink: 0; }
+
     .validation-toast {
       position: fixed;
       bottom: 28px;
@@ -593,6 +656,9 @@
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
+      text-align: center;
+      max-width: 320px;
+      line-height: 1.6;
       padding: 9px 20px;
       border-radius: 5px;
       opacity: 0;
@@ -1231,6 +1297,22 @@
   <div class="share-toast" id="shareToast">Link Copied!</div>
   <div class="validation-toast" id="validationToast"></div>
 
+  <div class="rep-share-toast" id="repShareToast">
+    <button class="rep-share-toast-close" id="repShareToastClose" aria-label="Close">&times;</button>
+    <div>
+      <div class="rep-share-toast-headline">Rep Submitted!</div>
+      <div class="rep-share-toast-sub">Consider Sharing It In Local</div>
+    </div>
+    <button class="rep-share-toast-btn" id="repShareToastBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+      </svg>
+      <span id="repShareToastBtnLabel">Share</span>
+    </button>
+  </div>
+
   <div class="confirm-overlay" id="confirmOverlay">
     <div class="confirm-modal">
       <div class="confirm-modal-title">Confirm Your Rep</div>
@@ -1399,6 +1481,58 @@
     shareToast.classList.add('show');
     setTimeout(() => shareToast.classList.remove('show'), 2200);
   }
+
+  // ── REP SUBMITTED SHARE TOAST ──
+  const repShareToast      = document.getElementById('repShareToast');
+  const repShareToastClose = document.getElementById('repShareToastClose');
+  const repShareToastBtn   = document.getElementById('repShareToastBtn');
+  const repShareToastBtnLabel = document.getElementById('repShareToastBtnLabel');
+  let repShareDismissTimer = null;
+
+  function clearRepShareTimer() {
+    if (repShareDismissTimer) { clearTimeout(repShareDismissTimer); repShareDismissTimer = null; }
+  }
+
+  function closeRepShareToast() {
+    clearRepShareTimer();
+    repShareToast.classList.remove('show');
+  }
+
+  function showRepShareToast() {
+    repShareToast.classList.add('show');
+    clearRepShareTimer();
+    repShareToastBtn.focus({ preventScroll: true });
+    repShareDismissTimer = setTimeout(closeRepShareToast, 6000);
+  }
+
+  repShareToastClose.addEventListener('click', closeRepShareToast);
+
+  repShareToastBtn.addEventListener('mouseenter', clearRepShareTimer);
+  repShareToastBtn.addEventListener('mouseleave', () => {
+    clearRepShareTimer();
+    repShareDismissTimer = setTimeout(closeRepShareToast, 1500);
+  });
+
+  repShareToastBtn.addEventListener('click', () => {
+    const author = currentUser || 'A fellow capsuleer';
+    const url = window.location.href;
+    const shareText = author + ' Left You A Rep On PilotRep.com — ' + url;
+
+    function onCopied() {
+      repShareToastBtnLabel.textContent = 'Copied!';
+      setTimeout(() => { repShareToastBtnLabel.textContent = 'Share'; }, 1500);
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(shareText).then(onCopied);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = shareText; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy');
+      document.body.removeChild(ta);
+      onCopied();
+    }
+  });
 
   // ── 13-POINT GRADE SCALE ──
   // Input dots map to these anchor values on a 0–12 scale:
@@ -1765,15 +1899,18 @@
   const validationToast = document.getElementById('validationToast');
   let validationHideTimer = null;
   let validationPersistent = false;
-  function showValidation(msg, persist) {
-    validationToast.textContent = msg;
+  function showValidation(msg, persist, duration) {
+    const breakIdx = msg.indexOf('. ');
+    validationToast.innerHTML = breakIdx !== -1
+      ? msg.slice(0, breakIdx + 1) + '<br>' + msg.slice(breakIdx + 2)
+      : msg;
     validationToast.style.background = 'var(--cyan)';
     validationToast.style.color = 'var(--bg)';
     validationToast.classList.add('show');
     if (validationHideTimer) { clearTimeout(validationHideTimer); validationHideTimer = null; }
     validationPersistent = !!persist;
     if (!persist) {
-      validationHideTimer = setTimeout(() => validationToast.classList.remove('show'), 2200);
+      validationHideTimer = setTimeout(() => validationToast.classList.remove('show'), duration || 2200);
     }
   }
   function hideValidationIfPersistent() {
@@ -1852,7 +1989,7 @@
       let data = {};
       try { data = await res.json(); } catch (_) {}
       if (!res.ok) {
-        showValidation(data.error || 'Submission failed. Please try again.');
+        showValidation(data.error || 'Submission failed. Please try again.', false, 6000);
       } else {
         const rep = {
           grade,
@@ -1870,7 +2007,7 @@
         dots.forEach(d => d.classList.remove('selected'));
         sysButtons.forEach(b => b.classList.remove('selected'));
         commentInput.value = '';
-        showValidation('Rep submitted!');
+        showRepShareToast();
       }
     } catch (err) {
       console.error('Submit rep error:', err);
