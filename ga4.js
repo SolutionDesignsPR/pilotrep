@@ -101,7 +101,7 @@
 
   // No prior choice yet — only UK/EU visitors need to be asked; everyone
   // else gets GA4 running as before with no interruption.
-  fetch('/.netlify/functions/geo-check')
+  fetch('/geo-check')
     .then(function (res) { return res.json(); })
     .then(function (data) { start(!!data.requireConsent); })
     .catch(function () { start(true); }); // fail closed: assume UK/EU on error
