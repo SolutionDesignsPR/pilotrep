@@ -7,9 +7,12 @@ document.write(
       '<a href="top-contributors.html">Top Contributors</a>' +
       '<a href="contact.html">Contact</a>' +
       '<a href="support-us.html">Support Us</a>' +
+    '</div>' +
+    '<div class="footer-legal-links">' +
       '<a href="faq.html">FAQ</a>' +
       '<a href="privacy-policy.html">Privacy Policy</a>' +
       '<a href="serviceterms.html">Terms Of Service</a>' +
+      '<a href="#" id="cookieSettingsLink">Cookie Settings</a>' +
     '</div>' +
     '<div class="eve-time" id="eveTime" style="margin-top:28px;">EVE TIME 00:00:00</div>' +
     '<div class="legal-note" style="margin-top:10px;">' +
@@ -44,4 +47,12 @@ document.write(
       }
     })
     .catch(function () {});
+
+  var cookieLink = document.getElementById('cookieSettingsLink');
+  if (cookieLink) {
+    cookieLink.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (window.pilotrepOpenCookieSettings) window.pilotrepOpenCookieSettings();
+    });
+  }
 })();

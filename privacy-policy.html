@@ -648,7 +648,10 @@
         </button>
         <div class="accordion-body" id="privacySection4">
           <p>
-            We may use standard web infrastructure (such as hosting providers or minimal site analytics) to keep the site running efficiently. These services only see standard web logs (IP addresses, browser types) and have no access to your EVE Online ESI data.
+            We use Google Analytics (GA4), provided by Google LLC, to help us understand how visitors use PilotRep and improve the site. Google Analytics uses cookies and similar technologies to collect information such as your IP address, browser and device type, and the pages you visit. This data is aggregated for traffic analysis only and does not include your EVE Online character data, ESI information, or anything you submit through PilotRep.
+          </p>
+          <p>
+            If you are visiting from the European Union or United Kingdom, you will be shown a cookie consent banner on your first visit, letting you accept or reject analytics cookies. You can change your choice at any time using the "Cookie Settings" link in the footer of any page. If you are visiting from outside the EU or UK, you can still opt out of Google Analytics tracking at any time using the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">Google Analytics Opt-out Browser Add-on</a>.
           </p>
         </div>
       </div>
@@ -849,6 +852,7 @@
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.nav-search')) searchDropdown.style.display = 'none';
   });
+
   // ── PRIVACY POLICY ACCORDION TWIRL-DOWN ──
   const accordionHeaders = document.querySelectorAll('.accordion-header');
   accordionHeaders.forEach(btn => {
@@ -876,7 +880,5 @@
     updateCollapseAllBtn();
   });
 </script>
-
-<script src="login-success-modal.js"></script>
 </body>
 </html>
