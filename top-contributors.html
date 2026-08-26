@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="ga4.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Top 20 Contributors — PilotRep</title>
@@ -10,6 +11,7 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="alternate icon" href="/favicon.ico" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="stylesheet" href="site-footer.css" />
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -70,7 +72,7 @@
       font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: var(--white);
+      color: var(--cyan);
       margin-bottom: 8px;
     }
     .tc-reset {
@@ -132,62 +134,18 @@
     .tc-pilot-avatar {
       width: 28px; height: 28px; border-radius: 50%;
       background: rgba(79,195,247,0.15); flex-shrink: 0;
+      object-fit: cover;
     }
     .tc-pilot-name {
       font-size: 13.5px; font-weight: 700; color: var(--white);
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
-    .tc-count { font-size: 14px; font-weight: 700; color: var(--cyan); text-align: right; }
-    .tc-empty { padding: 40px 18px; text-align: center; color: var(--muted); font-size: 13px; }
-
-    .site-footer {
-      margin-top: 40px;
-      padding: 32px 24px 40px;
-      border-top: 1px solid var(--border);
-      text-align: center;
-    }
-    .footer-grid {
-      display: inline-grid;
-      grid-template-columns: repeat(3, auto);
-      gap: 20px 48px;
-      justify-content: center;
-      text-align: center;
-      padding-bottom: 28px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 28px;
-    }
-    .footer-grid a {
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-      text-transform: uppercase;
       text-decoration: none;
       transition: color 0.15s;
     }
-    .footer-grid a:hover { color: var(--cyan); }
-    .eve-time {
-      text-align: center;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.18em;
-      color: var(--cyan-dim);
-      text-transform: uppercase;
-    }
-    .legal-note {
-      text-align: center;
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: 0.03em;
-      line-height: 1.6;
-    }
-    .footer-copy {
-      margin-top: 16px;
-      text-align: center;
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: 0.05em;
-    }
+    .tc-pilot-name:hover { color: var(--cyan); }
+    .tc-count { font-size: 14px; font-weight: 700; color: var(--cyan); text-align: right; }
+    .tc-empty { padding: 40px 18px; text-align: center; color: var(--muted); font-size: 13px; }
+
   </style>
 </head>
 <body>
@@ -224,39 +182,12 @@
     </div>
   </div>
 
-  <footer class="site-footer">
-    <div class="footer-grid">
-      <a href="about.html">About</a>
-      <a href="contact.html">Contact</a>
-      <a href="my-pilotrep.html" id="myPilotRepLink">My PilotRep</a>
-      <a href="/.netlify/functions/auth-start" id="footerAuthLink">Login</a>
-      <a href="support-us.html">Support Us</a>
-      <a href="faq.html">FAQ</a>
-      <a href="privacy-policy.html">Privacy Policy</a>
-      <a href="serviceterms.html">Terms Of Service</a>
-      <a href="top-contributors.html">Top Contributors</a>
-    </div>
-    <div class="eve-time" id="eveTime" style="margin-top:28px;">EVE TIME 00:00:00</div>
-    <div class="legal-note" style="margin-top:10px;">
-      EVE Online and all related materials are property of Fenris Creations.<br>PilotRep is a third-party fan site and is not affiliated with Fenris Creations.
-    </div>
-    <div class="footer-copy">&copy; 2026 PilotRep. All rights reserved.</div>
-  </footer>
+  <script src="site-footer.js"></script>
 
 </div>
 
 <script src="login-success-modal.js"></script>
 <script>
-  function updateEveTime() {
-    const now = new Date();
-    const h = String(now.getUTCHours()).padStart(2, '0');
-    const m = String(now.getUTCMinutes()).padStart(2, '0');
-    const s = String(now.getUTCSeconds()).padStart(2, '0');
-    document.getElementById('eveTime').textContent = `EVE TIME  ${h}:${m}:${s}`;
-  }
-  updateEveTime();
-  setInterval(updateEveTime, 1000);
-
   const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const now = new Date();
   const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
@@ -291,8 +222,8 @@
         <div class="tc-row">
           <div class="tc-rank ${rankClass(row.rank)}">${row.rank}</div>
           <div class="tc-pilot">
-            <div class="tc-pilot-avatar"></div>
-            <div class="tc-pilot-name">${escapeHtml(row.reviewer_name || 'Unknown Pilot')}</div>
+            <img class="tc-pilot-avatar" src="https://images.evetech.net/characters/${row.reviewer_id}/portrait?size=64" alt="" />
+            <a class="tc-pilot-name" href="pilot.html?id=${row.reviewer_id}">${escapeHtml(row.reviewer_name || 'Unknown Pilot')}</a>
           </div>
           <div class="tc-count">${row.qualifying_reps}</div>
         </div>

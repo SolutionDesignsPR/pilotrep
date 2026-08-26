@@ -11,6 +11,13 @@ const profanityFilter = new Filter();
 
 const SESSION_MAX_AGE_MS = 2 * 60 * 60 * 1000; // 2 hours
 
+// Authoritative grade set — must match INPUT_TO_NUM in pilot.html.
+// Server is the source of truth; the client map is just for UI display.
+const GRADE_TO_INDEX = { 'F': 0, 'D': 2, 'C': 5, 'B': 8, 'A': 11, 'A+': 12 };
+const VALID_SYSTEM_TYPES = ['Highsec', 'Lowsec', 'Nullsec', 'Wormhole', 'Pochven', 'N/A'];
+const COMMENT_MAX_CHARS = 30;
+const COMMENT_MAX_WORDS = 5;
+
 // Simple session cookie parser
 function getSession(cookieHeader) {
   if (!cookieHeader) return null;
@@ -75,8 +82,28 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: 'Invalid target type' }) };
   }
 
+  // 3b. Validate grade against the authoritative set, and require gradeIndex
+  // to match it exactly — the client sends both, but the server decides.
+  if (!Object.prototype.hasOwnProperty.call(GRADE_TO_INDEX, grade) || GRADE_TO_INDEX[grade] !== gradeIndex) {
+    return { statusCode: 400, body: JSON.stringify({ error: 'Invalid grade' }) };
+  }
+
+  // 3c. Validate systemType against the allowed list (optional field, but if
+  // present it must be one of the real options).
+  if (systemType !== undefined && systemType !== null && systemType !== '' && !VALID_SYSTEM_TYPES.includes(systemType)) {
+    return { statusCode: 400, body: JSON.stringify({ error: 'Invalid system type' }) };
+  }
+
   const trimmedComment = (comment && comment.trim()) ? comment.trim() : null;
   if (trimmedComment) {
+    // 3d. Enforce the real 5-word / 30-character limit server-side. The
+    // front-end's maxlength/word-truncation is UX only — this is what
+    // actually stops a bypassed or direct-POST submission.
+    const wordCount = trimmedComment.split(/\s+/).filter(Boolean).length;
+    if (trimmedComment.length > COMMENT_MAX_CHARS || wordCount > COMMENT_MAX_WORDS) {
+      return { statusCode: 400, body: JSON.stringify({ error: `Comment must be ${COMMENT_MAX_WORDS} words / ${COMMENT_MAX_CHARS} characters or fewer` }) };
+    }
+
     // Normalize separator characters (underscores, hyphens, dots, etc.) to spaces so
     // "fuck_shit_ass" is treated the same as "fuck shit ass", then also run a raw
     // substring check so concatenated bypasses like "FUCKINAWESOMEGUY" are caught too.
