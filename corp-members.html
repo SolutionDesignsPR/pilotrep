@@ -294,15 +294,18 @@
       .page-title-mobile { display: block; height: clamp(60px, 15vw, 90px); width: auto; aspect-ratio: 151.69 / 52.13; }
     }
     .corp-subtitle {
+      display: block;
       text-align: center;
       font-size: clamp(20px, 3vw, 28px);
       font-weight: 400;
       letter-spacing: 0.04em;
       color: var(--white);
       text-transform: uppercase;
-      margin: 0 auto 40px;
+      text-decoration: none;
+      margin: 28px auto 40px;
       padding: 0 24px;
     }
+    .corp-subtitle:hover { color: var(--cyan); }
     .member-rep-count {
       font-size: 14px;
       font-weight: 700;
@@ -1096,7 +1099,7 @@
     <img class="page-title-img page-title-desktop" id="pageTitleDesktop" src="assets/images/PR_Member_Reps.svg" alt="Member Reps" />
     <img class="page-title-img page-title-mobile" id="pageTitleMobile" src="assets/images/PR_Member_Reps_M.svg" alt="Member Reps" />
   </h1>
-  <p class="corp-subtitle" id="corpSubtitle"></p>
+  <a class="corp-subtitle" id="corpSubtitle" href="#"></a>
 
   <!-- MEMBERS LIST -->
   <section class="results-section">
@@ -1280,7 +1283,9 @@
   const membersListEl = document.getElementById('membersList');
 
   if (corpName) {
-    document.getElementById('corpSubtitle').textContent = corpName;
+    const corpSubtitleEl = document.getElementById('corpSubtitle');
+    corpSubtitleEl.textContent = corpName;
+    if (corpId) corpSubtitleEl.href = `corporation.html?id=${encodeURIComponent(corpId)}`;
     document.title = `PilotRep | ${corpName} Members`;
   }
 
