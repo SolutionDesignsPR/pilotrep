@@ -5,19 +5,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PilotRep</title>
+  <link rel="canonical" href="https://www.pilotrep.com/" />
 
-  <meta name="description" content="A neutral, community-driven reputation platform for EVE Online pilots, corporations, and alliances. Check a pilot's rep before you trust them." />
+  <meta name="description" content="A neutral, community-driven reputation platform for EVE Online pilots, corporations and alliances. Check a pilot's rep before you trust them." />
 
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://www.pilotrep.com/" />
   <meta property="og:title" content="PilotRep — Reputation Precedes You" />
-  <meta property="og:description" content="A neutral, community-driven reputation platform for EVE Online pilots, corporations, and alliances." />
+  <meta property="og:description" content="A neutral, community-driven reputation platform for EVE Online pilots, corporations and alliances." />
   <meta property="og:image" content="https://www.pilotrep.com/assets/images/og-preview.jpg" />
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="PilotRep — Reputation Precedes You" />
-  <meta name="twitter:description" content="A neutral, community-driven reputation platform for EVE Online pilots, corporations, and alliances." />
+  <meta name="twitter:description" content="A neutral, community-driven reputation platform for EVE Online pilots, corporations and alliances." />
   <meta name="twitter:image" content="https://www.pilotrep.com/assets/images/og-preview.jpg" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "PilotRep",
+    "alternateName": "PilotRep — Reputation Precedes You",
+    "url": "https://www.pilotrep.com/",
+    "description": "A neutral, community-driven reputation platform for EVE Online pilots, corporations and alliances."
+  }
+  </script>
 
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="alternate icon" href="/favicon.ico" />
@@ -859,8 +871,8 @@
 
   // Each panel (Recent Reps / Most Reps) tracks and switches its own type independently
   const PANEL_CONFIG = {
-    recentlyRated: { containerId: 'recentlyRatedRows', dataKey: 'recentlyReviewed' },
-    mostReviewed:  { containerId: 'mostReviewedRows',  dataKey: 'mostReviewed' }
+    recentlyRated: { containerId: 'recentlyRatedRows', dataKey: 'recentlyReviewed', activeType: 'pilot' },
+    mostReviewed:  { containerId: 'mostReviewedRows',  dataKey: 'mostReviewed',    activeType: 'pilot' }
   };
 
   document.querySelectorAll('.tab-row').forEach(row => {
@@ -874,12 +886,19 @@
       const type = btn.dataset.type;
 
       row.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+      config.activeType = type;
       loadPanel(panelKey, config.containerId, config.dataKey, type);
     });
   });
 
-  loadPanel('recentlyRated', 'recentlyRatedRows', 'recentlyReviewed', 'pilot');
-  loadPanel('mostReviewed', 'mostReviewedRows', 'mostReviewed', 'pilot');
+  function refreshPanels() {
+    Object.entries(PANEL_CONFIG).forEach(([panelKey, config]) => {
+      loadPanel(panelKey, config.containerId, config.dataKey, config.activeType);
+    });
+  }
+
+  refreshPanels();
+  setInterval(refreshPanels, 5 * 60 * 1000);
 
   // ── SITE STATS (Total Reps / Total Comments) ──────────────────────────────
   function animateCount(el, target, duration = 1200) {
@@ -893,20 +912,26 @@
     requestAnimationFrame(tick);
   }
 
-  async function loadSiteStats() {
+  function snapCount(el, target) {
+    el.textContent = target.toLocaleString();
+  }
+
+  async function loadSiteStats(animate = true) {
     try {
       const res = await fetch('/.netlify/functions/get-site-stats');
       const data = await res.json();
       const repsEl = document.getElementById('statTotalReps');
       const commentsEl = document.getElementById('statTotalComments');
-      if (repsEl && typeof data.totalReps === 'number') animateCount(repsEl, data.totalReps);
-      if (commentsEl && typeof data.totalComments === 'number') animateCount(commentsEl, data.totalComments);
+      const apply = animate ? animateCount : snapCount;
+      if (repsEl && typeof data.totalReps === 'number') apply(repsEl, data.totalReps);
+      if (commentsEl && typeof data.totalComments === 'number') apply(commentsEl, data.totalComments);
     } catch (e) {
       console.warn('Site stats fetch failed (non-fatal):', e);
     }
   }
 
-  loadSiteStats();
+  loadSiteStats(true);
+  setInterval(() => loadSiteStats(false), 5 * 60 * 1000);
 
 </script>
 
