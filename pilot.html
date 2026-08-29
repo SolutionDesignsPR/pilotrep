@@ -1483,8 +1483,11 @@
 
   repShareToastBtn.addEventListener('click', () => {
     const pilotDisplayName = targetName || document.getElementById('pilotName').textContent || 'this pilot';
-    const url = window.location.href;
-    const shareText = `I Left ~ ${pilotDisplayName} ~ A Rep On PilotRep.com \u2014 ${url}`;
+    const pilotId = new URLSearchParams(window.location.search).get('id');
+    const shortUrl = pilotId
+      ? `${window.location.origin}/p/${pilotId}`
+      : window.location.href;
+    const shareText = `I left ${pilotDisplayName} a Rep on ${shortUrl}`;
 
     function onCopied() {
       repShareToastBtnLabel.textContent = 'Copied!';

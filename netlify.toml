@@ -1,0 +1,4 @@
+[[redirects]]
+  from = "/p/:id"
+  to = "/pilot.html?id=:id"
+  status = 200
