@@ -95,6 +95,21 @@ exports.handler = async function (event) {
     process.env.SUPABASE_SERVICE_KEY
   );
 
+  // Read the pilot's last_login BEFORE we overwrite it below — this is the
+  // only chance to know "since when" for the new-rep check further down.
+  // A null result here just means this is their first-ever login.
+  let previousLastLogin = null;
+  try {
+    const { data: existingPilot } = await supabase
+      .from('pilots')
+      .select('last_login')
+      .eq('character_id', characterId)
+      .maybeSingle();
+    previousLastLogin = existingPilot?.last_login || null;
+  } catch (err) {
+    console.warn('Could not read previous last_login (non-fatal):', err);
+  }
+
   const { error: dbError } = await supabase.from('pilots').upsert(
     {
       character_id:   characterId,
@@ -109,6 +124,31 @@ exports.handler = async function (event) {
   if (dbError) {
     console.error('Supabase upsert error:', dbError);
     return redirect('/index.html?login=error');
+  }
+
+  // ── 4b. Has this pilot received a rep since their last login? ──────────────
+  // No previousLastLogin means this is their first-ever login — in that case,
+  // any rep at all (even one left before they ever logged in) counts as new.
+  let hasNewRep = false;
+  try {
+    let repQuery = supabase
+      .from('reps')
+      .select('id', { count: 'exact', head: true })
+      .eq('target_type', 'pilot')
+      .eq('target_id', String(characterId));
+
+    if (previousLastLogin) {
+      repQuery = repQuery.gt('created_at', previousLastLogin);
+    }
+
+    const { count, error: repError } = await repQuery;
+    if (repError) {
+      console.warn('New-rep check failed (non-fatal):', repError);
+    } else {
+      hasNewRep = (count || 0) > 0;
+    }
+  } catch (err) {
+    console.warn('New-rep check failed (non-fatal):', err);
   }
 
   // ── 5. Set signed session cookie ───────────────────────────────────────────
@@ -145,6 +185,10 @@ exports.handler = async function (event) {
       const separator = origin.includes('?') ? '&' : '?';
       destination = origin + separator + 'login=success';
     }
+  }
+
+  if (hasNewRep) {
+    destination += (destination.includes('?') ? '&' : '?') + 'newRep=1';
   }
 
   return {

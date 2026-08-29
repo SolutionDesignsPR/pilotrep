@@ -1482,9 +1482,9 @@
   });
 
   repShareToastBtn.addEventListener('click', () => {
-    const author = currentUser || 'A fellow capsuleer';
+    const pilotDisplayName = targetName || document.getElementById('pilotName').textContent || 'this pilot';
     const url = window.location.href;
-    const shareText = `${author} Left You A Rep On PilotRep.com \u2014 ${url}`;
+    const shareText = `I Left "${pilotDisplayName}" A Rep On PilotRep.com \u2014 ${url}`;
 
     function onCopied() {
       repShareToastBtnLabel.textContent = 'Copied!';
