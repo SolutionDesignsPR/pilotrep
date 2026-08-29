@@ -1312,6 +1312,18 @@
 </div>
 
 <script>
+  // Resolves the pilot ID whether the page was reached via pilot.html?id=123
+  // or the short link pilotrep.com/p/123. The short link is a Netlify rewrite
+  // (status 200) — invisible to the network, but the browser's own
+  // window.location still reports the original /p/123 path with no query
+  // string at all, so anything reading only window.location.search misses it.
+  function getPilotIdFromUrl() {
+    const fromQuery = new URLSearchParams(window.location.search).get('id');
+    if (fromQuery) return fromQuery;
+    const pathMatch = window.location.pathname.match(/^\/p\/(\d+)$/);
+    return pathMatch ? pathMatch[1] : null;
+  }
+
   // Disable submit immediately — re-enabled by loadSession() once session is known
   document.getElementById('submitBtn').disabled = true;
 
@@ -1374,7 +1386,7 @@
           myLink.href = `my-pilotrep.html`;
         }
         // If viewing own profile, redirect to My PilotRep instead of the public pilot page
-        const urlPilotId = new URLSearchParams(window.location.search).get('id');
+        const urlPilotId = getPilotIdFromUrl();
         if (data.characterId && urlPilotId && String(urlPilotId) === String(data.characterId)) {
           window.location.replace('my-pilotrep.html');
           return;
@@ -1484,7 +1496,7 @@
 
   repShareToastBtn.addEventListener('click', () => {
     const pilotDisplayName = targetName || document.getElementById('pilotName').textContent || 'this pilot';
-    const pilotId = new URLSearchParams(window.location.search).get('id');
+    const pilotId = getPilotIdFromUrl();
     const shortUrl = pilotId
       ? `${window.location.origin}/p/${pilotId}`
       : window.location.href;
@@ -2036,7 +2048,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          targetId:   new URLSearchParams(window.location.search).get('id') || 'unknown',
+          targetId:   getPilotIdFromUrl() || 'unknown',
           targetType: 'pilot',
           targetCorpId,
           targetAllianceId,
@@ -2070,7 +2082,7 @@
         recalcAndRender();
         // Instant feedback above is approximate (doesn't apply the monthly cap);
         // refresh from the server moments later for the authoritative grade/counts.
-        loadRepsData(new URLSearchParams(window.location.search).get('id'));
+        loadRepsData(getPilotIdFromUrl());
         dots.forEach(d => d.classList.remove('selected'));
         sysButtons.forEach(b => b.classList.remove('selected'));
         commentInput.value = '';
@@ -2087,8 +2099,7 @@
 
   // ── LOAD PILOT DATA FROM ESI + SUPABASE ──────────────────────────────────
   (async () => {
-    const params = new URLSearchParams(window.location.search);
-    const pilotId = params.get('id');
+    const pilotId = getPilotIdFromUrl();
     if (!pilotId) return; // no ID in URL — leave placeholder
 
     // Load ESI character data
