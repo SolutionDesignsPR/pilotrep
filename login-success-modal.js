@@ -26,8 +26,9 @@
     '.pr-modal-eyebrow{font-size:12px;letter-spacing:0.15em;color:var(--cyan);' +
     'text-transform:uppercase;margin-bottom:18px;}' +
     '.pr-modal-title{font-size:20px;font-weight:700;color:var(--white);' +
-    'margin-bottom:10px;line-height:1.3;}' +
-    '.pr-modal-sub{font-size:14px;color:var(--muted);margin-bottom:24px;}' +
+    'margin:0;line-height:1.3;}' +
+    '.pr-modal-sub{font-size:18px;color:var(--cyan);font-weight:700;' +
+    'text-transform:uppercase;letter-spacing:0.06em;margin:35px 0 14px;}' +
     '.pr-modal-steps{text-align:left;display:flex;flex-direction:column;gap:14px;margin-bottom:28px;}' +
     '.pr-modal-step{display:flex;gap:12px;align-items:flex-start;}' +
     '.pr-modal-num{flex-shrink:0;width:22px;height:22px;border-radius:50%;' +
@@ -35,19 +36,19 @@
     'display:flex;align-items:center;justify-content:center;}' +
     '.pr-modal-step p{font-size:13.5px;color:var(--white);line-height:1.5;margin:0;}' +
     '.pr-modal-step p .pr-hl{color:var(--cyan);font-weight:700;}' +
-    '.pr-modal-actions{display:flex;flex-direction:column;gap:12px;}' +
-    '.pr-modal-btn{width:100%;background:var(--cyan);border:none;border-radius:4px;' +
+    '.pr-modal-actions{display:flex;flex-direction:column;align-items:center;gap:32px;}' +
+    '.pr-modal-btn{width:auto;background:var(--cyan);border:none;border-radius:4px;' +
     'color:var(--bg);font-size:13px;font-weight:700;letter-spacing:0.08em;' +
-    'text-transform:uppercase;padding:12px;cursor:pointer;font-family:inherit;}' +
+    'text-transform:uppercase;padding:11px 14px;cursor:pointer;font-family:inherit;}' +
     '.pr-modal-btn:hover{background:#7dd8fa;}' +
-    '.pr-modal-btn-secondary{width:auto;min-width:140px;margin:0 auto;background:transparent;' +
-    'border:1.5px solid var(--border);border-radius:4px;color:var(--white);font-size:13px;' +
-    'font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:11px 24px;' +
+    '.pr-modal-btn-secondary{width:auto;background:transparent;' +
+    'border:1.5px solid var(--cyan-dim);border-radius:4px;color:var(--white);font-size:13px;' +
+    'font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:11px 14px;' +
     'cursor:pointer;font-family:inherit;}' +
-    '.pr-modal-btn-secondary:hover{border-color:var(--cyan-dim);}';
+    '.pr-modal-btn-secondary:hover{border-color:var(--cyan);background:rgba(79,195,247,0.08);}';
   document.head.appendChild(style);
 
-  var boxClass = 'pr-modal-box' + (showOnboarding && hasNewRep ? ' pr-modal-wide' : '');
+  var boxClass = 'pr-modal-box' + (showOnboarding ? ' pr-modal-wide' : '');
 
   var innerHtml = '<button class="pr-modal-close" id="prModalClose" aria-label="Close">&times;</button>';
 
@@ -58,7 +59,7 @@
       '<p class="pr-modal-sub">Ready to leave your first Rep?</p>' +
       '<div class="pr-modal-steps">' +
         '<div class="pr-modal-step"><div class="pr-modal-num">1</div>' +
-          '<p>Search for the pilot, corporation or alliance you want to rate</p></div>' +
+          '<p style="white-space:nowrap;">Search for the Pilot, Corporation or Alliance you want to <span class="pr-hl">Rep</span></p></div>' +
         '<div class="pr-modal-step"><div class="pr-modal-num">2</div>' +
           '<p>Click their name and find the <span class="pr-hl">Leave A Rep</span> section</p></div>' +
         '<div class="pr-modal-step"><div class="pr-modal-num">3</div>' +
