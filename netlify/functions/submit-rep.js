@@ -136,60 +136,45 @@ exports.handler = async (event) => {
     return { statusCode: 403, body: JSON.stringify({ error: 'You cannot rep your own Corporation or Alliance' }) };
   }
 
-  // 5. Enforce 6-month cooldown
-  const sixMonthsAgo = new Date();
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-  const { data: existingRows, error: cooldownError } = await supabase
-    .from('reps')
-    .select('id, created_at')
-    .eq('reviewer_id', reviewerId)
-    .eq('target_id', String(targetId))
-    .gte('created_at', sixMonthsAgo.toISOString())
-    .order('created_at', { ascending: false })
-    .limit(1);
+  // 5 & 6. Enforce the 6-month cooldown and insert the rep atomically.
+  // A prior version checked the cooldown, then inserted, as two separate
+  // calls — two near-simultaneous submissions (e.g. from two tabs/devices)
+  // could both pass the check before either insert landed. This single RPC
+  // does both inside one Postgres transaction, serialized per reviewer+target
+  // pair, so that race window is closed.
+  const { data: rpcResult, error: rpcError } = await supabase.rpc('submit_rep_atomic', {
+    p_target_id: String(targetId),
+    p_target_type: targetType,
+    p_target_name: targetName || null,
+    p_target_corporation_id: targetType === 'pilot' && targetCorpId ? String(targetCorpId) : null,
+    p_reviewer_id: reviewerId,
+    p_reviewer_name: reviewerName,
+    p_grade: grade,
+    p_grade_index: gradeIndex,
+    p_system_type: systemType || null,
+    p_comment: trimmedComment,
+    p_anonymous: anonymous || false,
+    p_is_corp_alliance: isCorpAlliance
+  });
 
   // Fail closed: if we can't verify eligibility, refuse the rep rather than
   // silently letting it through.
-  if (cooldownError) {
-    console.error('Supabase cooldown query error:', cooldownError);
+  if (rpcError) {
+    console.error('Supabase submit_rep_atomic error:', rpcError);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Could not verify rep eligibility. Please try again.' })
     };
   }
 
-  const existing = existingRows && existingRows[0];
+  const result = Array.isArray(rpcResult) ? rpcResult[0] : rpcResult;
 
-  if (existing) {
-    const nextEligible = new Date(existing.created_at);
-    nextEligible.setMonth(nextEligible.getMonth() + 6);
-    const formatted = nextEligible.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  if (result && result.blocked) {
+    const formatted = new Date(result.next_eligible).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
     return {
       statusCode: 429,
       body: JSON.stringify({ error: `You have already submitted a rep for this target. You can rep them again after ${formatted}.` })
     };
-  }
-
-  // 6. Insert rep
-  const { error } = await supabase.from('reps').insert({
-    target_id:     String(targetId),
-    target_type:   targetType,
-    target_name:   targetName || null,
-    target_corporation_id: targetType === 'pilot' && targetCorpId ? String(targetCorpId) : null,
-    reviewer_id:   reviewerId,
-    reviewer_name: reviewerName,
-    grade,
-    grade_index:   gradeIndex,
-    system_type:   systemType || null,
-    comment:       trimmedComment,
-    anonymous:     anonymous || false,
-    is_corp_alliance: isCorpAlliance
-  });
-
-  if (error) {
-    console.error('Supabase insert error:', error);
-    return { statusCode: 500, body: JSON.stringify({ error: 'Failed to save rep' }) };
   }
 
   return {
@@ -197,3 +182,4 @@ exports.handler = async (event) => {
     body: JSON.stringify({ success: true })
   };
 };
+
