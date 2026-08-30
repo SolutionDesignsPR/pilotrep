@@ -249,16 +249,42 @@ exports.handler = async (event) => {
       const charRes = await fetch(`https://esi.evetech.net/latest/characters/${id}/?datasource=tranquility`);
       if (!charRes.ok) throw new Error(`ESI character failed: ${charRes.status}`);
       const char = await charRes.json();
-      const idsToResolve = [char.corporation_id];
-      if (char.alliance_id) idsToResolve.push(char.alliance_id);
+
+      // The /characters/{id}/ endpoint's corporation_id/alliance_id can lag well behind
+      // reality — CCP caches it far longer than actual affiliation changes. The dedicated
+      // affiliation endpoint refreshes hourly and is the correct source for "what corp/
+      // alliance is this character in right now."
+      let corporationId = char.corporation_id;
+      let allianceId = char.alliance_id || null;
+      try {
+        const affRes = await fetch('https://esi.evetech.net/latest/characters/affiliation/?datasource=tranquility', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify([Number(id)])
+        });
+        if (affRes.ok) {
+          const affData = await affRes.json();
+          const affiliation = affData[0];
+          if (affiliation) {
+            corporationId = affiliation.corporation_id || corporationId;
+            allianceId = affiliation.alliance_id || null;
+          }
+        }
+      } catch (affErr) {
+        // Non-fatal — falls back to the char record's own corp/alliance fields above.
+        console.warn('esi-proxy character affiliation lookup failed (non-fatal):', affErr);
+      }
+
+      const idsToResolve = [corporationId];
+      if (allianceId) idsToResolve.push(allianceId);
       const namesRes = await fetch('https://esi.evetech.net/latest/universe/names/?datasource=tranquility', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(idsToResolve)
       });
       const names = namesRes.ok ? await namesRes.json() : [];
-      const corpName     = names.find(n => n.id === char.corporation_id)?.name || '';
-      const allianceName = char.alliance_id ? names.find(n => n.id === char.alliance_id)?.name || '' : '';
+      const corpName     = names.find(n => n.id === corporationId)?.name || '';
+      const allianceName = allianceId ? names.find(n => n.id === allianceId)?.name || '' : '';
       return {
         statusCode: 200,
         headers,
@@ -266,9 +292,9 @@ exports.handler = async (event) => {
           id:               Number(id),
           name:             char.name,
           security_status:  parseFloat((char.security_status || 0).toFixed(1)),
-          corporation_id:   char.corporation_id,
+          corporation_id:   corporationId,
           corporation_name: corpName,
-          alliance_id:      char.alliance_id || null,
+          alliance_id:      allianceId,
           alliance_name:    allianceName,
           birthday:         char.birthday || null,
           portrait:         `https://images.evetech.net/characters/${id}/portrait?size=256`

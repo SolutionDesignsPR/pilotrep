@@ -33,13 +33,15 @@ exports.handler = async (event) => {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing corpId' }) };
     }
 
-    // Pull every pilot-target rep whose target belongs to this corporation
-    // (target_corporation_id is captured at submission time — see submit-rep.js).
+    // Pull every pilot-target rep, regardless of stored corp. target_corporation_id
+    // is a permanent historical snapshot from submission time (see submit-rep.js) —
+    // it stays on the rep forever, but it is NOT used to decide today's roster.
+    // Membership in this corp's Members list is resolved live below instead, so a
+    // pilot who has since left (or joined) shows up correctly either way.
     const { data: reps, error } = await supabase
       .from('reps')
-      .select('target_id, target_name, grade_index, created_at')
-      .eq('target_type', 'pilot')
-      .eq('target_corporation_id', String(corpId));
+      .select('target_id, target_name, grade_index, created_at, target_corporation_id')
+      .eq('target_type', 'pilot');
 
     if (error) throw new Error(error.message);
 
@@ -58,7 +60,40 @@ exports.handler = async (event) => {
       if (new Date(r.created_at) > new Date(agg.mostRecent)) agg.mostRecent = r.created_at;
     }
 
+    // Resolve each pilot's CURRENT corp live via ESI's batch affiliation endpoint
+    // (accepts up to 1000 character IDs per call, chunked below just in case).
+    const pilotIds = Object.keys(byPilot).map(Number).filter(Number.isFinite);
+    let currentCorpByPilot = {};
+    let affiliationResolved = false;
+    try {
+      const chunks = [];
+      for (let i = 0; i < pilotIds.length; i += 1000) chunks.push(pilotIds.slice(i, i + 1000));
+      for (const chunk of chunks) {
+        const affRes = await fetch('https://esi.evetech.net/latest/characters/affiliation/?datasource=tranquility', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(chunk)
+        });
+        if (affRes.ok) {
+          const affData = await affRes.json();
+          for (const a of affData) currentCorpByPilot[a.character_id] = a.corporation_id;
+        }
+      }
+      affiliationResolved = true;
+    } catch (affErr) {
+      // Non-fatal — falls back to the old snapshot-based membership check below
+      // so the page still works even if ESI's affiliation endpoint is down.
+      console.warn('get-corp-members affiliation lookup failed (non-fatal):', affErr);
+    }
+
     const members = Object.values(byPilot)
+      .filter(agg => {
+        if (affiliationResolved) {
+          return String(currentCorpByPilot[Number(agg.id)]) === String(corpId);
+        }
+        const original = reps.find(r => r.target_id === agg.id);
+        return original && String(original.target_corporation_id) === String(corpId);
+      })
       .map(agg => {
         const roundedIndex = Math.max(0, Math.min(12, Math.round(agg.indexSum / agg.repCount)));
         const gradeEntry = GRADE_TABLE[roundedIndex];
