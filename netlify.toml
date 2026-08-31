@@ -2,3 +2,6 @@
   from = "/p/:id"
   to = "/pilot.html?id=:id"
   status = 200
+
+[functions."capture-monthly-leaderboard"]
+  schedule = "5 0 1 * *"

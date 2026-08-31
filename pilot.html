@@ -1495,6 +1495,12 @@
   });
 
   repShareToastBtn.addEventListener('click', () => {
+    if (typeof gtag === 'function') {
+      gtag('event', 'share_in_local_click', {
+        pilot_id: getPilotIdFromUrl() || undefined
+      });
+    }
+
     const pilotDisplayName = targetName || document.getElementById('pilotName').textContent || 'this pilot';
     const pilotId = getPilotIdFromUrl();
     const shortUrl = pilotId

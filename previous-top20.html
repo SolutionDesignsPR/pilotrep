@@ -4,10 +4,10 @@
   <script src="ga4.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Top 20 Contributors — PilotRep</title>
-  <link rel="canonical" href="https://www.pilotrep.com/top-contributors.html" />
+  <title>Previous Top 20 Contributors — PilotRep</title>
+  <link rel="canonical" href="https://www.pilotrep.com/previous-top20.html" />
 
-  <meta name="description" content="The pilots who have left the most reputation reports on PilotRep this month." />
+  <meta name="description" content="Archive of the top 20 pilots who left the most reputation reports on PilotRep each month." />
 
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="alternate icon" href="/favicon.ico" />
@@ -40,7 +40,7 @@
 
     .page { position: relative; z-index: 1; }
 
-    /* ── TOP NAV (shared header, ported from pilot.html) ── */
+    /* ── TOP NAV (shared header, ported from top-contributors.html) ── */
     .topnav {
       display: flex;
       align-items: center;
@@ -218,115 +218,94 @@
       .nav-search-sub { align-self: center; padding-left: 0; }
     }
 
-    .tc-header {
+    .pt-header {
       text-align: center;
       padding: 56px 24px 8px;
     }
-    .tc-title-img {
-      display: block;
-      height: 64px;
-      width: auto;
-      margin: 0 auto 8px;
+    .pt-title {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 8px;
     }
-    @media (max-width: 480px) {
-      .tc-title-img { height: 48px; }
-    }
-    .tc-reset {
+    .pt-subtitle {
       font-size: 12px;
       color: var(--muted);
       letter-spacing: 0.04em;
     }
 
-    .tc-my-rank {
+    .pt-filters {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
       max-width: 520px;
-      margin: 28px auto 0;
+      margin: 24px auto 0;
       padding: 0 24px;
     }
-    .tc-my-rank-inner {
-      background: rgba(79,195,247,0.06);
+    .pt-filters select {
+      background: var(--panel);
       border: 1.5px solid var(--cyan-dim);
-      border-radius: 8px;
-      padding: 12px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 13px;
+      border-radius: 6px;
+      color: var(--white);
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 9px 14px;
+      cursor: pointer;
+      outline: none;
     }
-    .tc-my-rank-label { color: var(--muted); }
-    .tc-my-rank-value { color: var(--cyan); font-weight: 700; }
+    .pt-filters select:hover { border-color: var(--cyan); }
 
-    .tc-list-wrap {
+    .pt-list-wrap {
       max-width: 520px;
       margin: 32px auto 0;
       padding: 0 24px 60px;
     }
-    .tc-panel {
+    .pt-panel {
       background: var(--panel);
       border: 1.5px solid var(--border);
       border-radius: 8px;
       overflow: hidden;
     }
-    .tc-row-header, .tc-row {
+    .pt-row-header, .pt-row {
       display: grid;
       grid-template-columns: 32px 1fr 70px;
       align-items: center;
       padding: 12px 18px;
     }
-    .tc-row-header {
+    .pt-row-header {
       border-bottom: 1.5px solid var(--border);
       font-size: 11px;
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: 0.06em;
     }
-    .tc-row { border-bottom: 1px solid rgba(100,180,255,0.06); }
-    .tc-row:last-child { border-bottom: none; }
-    .tc-row:nth-child(even) { background: rgba(79,195,247,0.03); }
-    .tc-rank { font-size: 14px; font-weight: 700; color: var(--muted); }
-    .tc-rank.gold   { color: #f0c542; }
-    .tc-rank.silver { color: #c7cdd6; }
-    .tc-rank.bronze { color: #a9744a; }
-    .tc-pilot { display: flex; align-items: center; gap: 10px; min-width: 0; }
-    .tc-pilot-avatar {
+    .pt-row { border-bottom: 1px solid rgba(100,180,255,0.06); }
+    .pt-row:last-child { border-bottom: none; }
+    .pt-row:nth-child(even) { background: rgba(79,195,247,0.03); }
+    .pt-rank { font-size: 14px; font-weight: 700; color: var(--muted); }
+    .pt-rank.gold   { color: #f0c542; }
+    .pt-rank.silver { color: #c7cdd6; }
+    .pt-rank.bronze { color: #a9744a; }
+    .pt-pilot { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .pt-pilot-avatar {
       width: 28px; height: 28px; border-radius: 50%;
       background: rgba(79,195,247,0.15); flex-shrink: 0;
       object-fit: cover;
     }
-    .tc-pilot-name {
+    .pt-pilot-name {
       font-size: 13.5px; font-weight: 700; color: var(--white);
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
       text-decoration: none;
       transition: color 0.15s;
     }
-    .tc-pilot-name:hover { color: var(--cyan); }
-    .tc-count { font-size: 14px; font-weight: 700; color: var(--cyan); text-align: right; }
-    .tc-empty { padding: 40px 18px; text-align: center; color: var(--muted); font-size: 13px; }
-
-    .tc-archive-link {
-      display: block;
-      max-width: 520px;
-      margin: 18px auto 0;
-      padding: 0 24px;
-      text-align: center;
-    }
-    .tc-archive-link a {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--cyan);
-      text-decoration: none;
-      border: 1.5px solid var(--cyan-dim);
-      border-radius: 6px;
-      padding: 10px 20px;
-      transition: color 0.15s, border-color 0.15s, background 0.15s;
-    }
-    .tc-archive-link a:hover {
-      color: var(--white);
-      border-color: var(--cyan);
-      background: rgba(79,195,247,0.08);
-    }
+    .pt-pilot-name:hover { color: var(--cyan); }
+    .pt-count { font-size: 14px; font-weight: 700; color: var(--cyan); text-align: right; }
+    .pt-empty { padding: 40px 18px; text-align: center; color: var(--muted); font-size: 13px; }
 
   </style>
 </head>
@@ -361,33 +340,27 @@
     </div>
   </header>
 
-  <div class="tc-header">
-    <img class="tc-title-img" src="assets/images/PR_Top_20.svg" alt="Top 20 Contributors" />
-    <div class="tc-reset" id="tcResetLine">Until —</div>
+  <div class="pt-header">
+    <div class="pt-title">Previous top 20 contributors</div>
+    <div class="pt-subtitle" id="ptSubtitle">Loading…</div>
   </div>
 
-  <div class="tc-my-rank" id="tcMyRank" style="display:none;">
-    <div class="tc-my-rank-inner">
-      <span class="tc-my-rank-label">Your rank this month</span>
-      <span class="tc-my-rank-value" id="tcMyRankValue">—</span>
-    </div>
+  <div class="pt-filters">
+    <select id="ptYearSelect" aria-label="Year"></select>
+    <select id="ptMonthSelect" aria-label="Month"></select>
   </div>
 
-  <div class="tc-list-wrap">
-    <div class="tc-panel">
-      <div class="tc-row-header">
+  <div class="pt-list-wrap">
+    <div class="pt-panel">
+      <div class="pt-row-header">
         <div>#</div>
         <div>Pilot</div>
         <div style="text-align:right;">Reps left</div>
       </div>
-      <div id="tcRows">
-        <div class="tc-empty">Loading…</div>
+      <div id="ptRows">
+        <div class="pt-empty">Loading…</div>
       </div>
     </div>
-  </div>
-
-  <div class="tc-archive-link">
-    <a href="previous-top20.html">Previous Top 20 Contributors</a>
   </div>
 
   <script src="site-footer.js"></script>
@@ -396,11 +369,7 @@
 
 <script src="login-success-modal.js"></script>
 <script>
-  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const now = new Date();
-  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  document.getElementById('tcResetLine').textContent =
-    'Until ' + months[lastDay.getMonth()] + ' ' + lastDay.getDate();
+  const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
   function escapeHtml(str) {
     const div = document.createElement('div');
@@ -415,37 +384,106 @@
     return '';
   }
 
-  (async () => {
-    try {
-      const res = await fetch('/.netlify/functions/top-contributors');
-      const data = await res.json();
-      const rowsEl = document.getElementById('tcRows');
+  const yearSelect = document.getElementById('ptYearSelect');
+  const monthSelect = document.getElementById('ptMonthSelect');
+  const rowsEl = document.getElementById('ptRows');
+  const subtitleEl = document.getElementById('ptSubtitle');
 
-      if (!res.ok || !data.top || data.top.length === 0) {
-        rowsEl.innerHTML = '<div class="tc-empty">No qualifying reps yet this month. Be the first on the board.</div>';
+  let availableMonths = [];
+
+  function populateYearOptions(selectedYear) {
+    const years = [...new Set(availableMonths.map(m => m.year))].sort((a, b) => b - a);
+    yearSelect.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
+    yearSelect.value = String(selectedYear);
+  }
+
+  function populateMonthOptions(selectedYear, selectedMonth) {
+    const months = availableMonths
+      .filter(m => m.year === selectedYear)
+      .map(m => m.month)
+      .sort((a, b) => b - a);
+    monthSelect.innerHTML = months
+      .map(m => `<option value="${m}">${MONTH_NAMES[m - 1].toUpperCase()}</option>`)
+      .join('');
+    monthSelect.value = String(selectedMonth);
+  }
+
+  function renderRows(rows) {
+    if (!rows || rows.length === 0) {
+      rowsEl.innerHTML = '<div class="pt-empty">No archived data for this month.</div>';
+      return;
+    }
+    rowsEl.innerHTML = rows.map(row => `
+      <div class="pt-row">
+        <div class="pt-rank ${rankClass(row.rank)}">${row.rank}</div>
+        <div class="pt-pilot">
+          <img class="pt-pilot-avatar" src="https://images.evetech.net/characters/${row.pilot_id}/portrait?size=64" alt="" />
+          <a class="pt-pilot-name" href="pilot.html?id=${row.pilot_id}">${escapeHtml(row.pilot_name || 'Unknown Pilot')}</a>
+        </div>
+        <div class="pt-count">${row.rep_count}</div>
+      </div>
+    `).join('');
+  }
+
+  async function loadSnapshot(year, month) {
+    rowsEl.innerHTML = '<div class="pt-empty">Loading…</div>';
+    subtitleEl.textContent = 'Loading…';
+    try {
+      const params = (year && month) ? `?year=${year}&month=${month}` : '';
+      const res = await fetch(`/.netlify/functions/get-previous-top20${params}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        rowsEl.innerHTML = '<div class="pt-empty">Could not load the archive. Please try again.</div>';
+        subtitleEl.textContent = '';
         return;
       }
 
-      rowsEl.innerHTML = data.top.map(row => `
-        <div class="tc-row">
-          <div class="tc-rank ${rankClass(row.rank)}">${row.rank}</div>
-          <div class="tc-pilot">
-            <img class="tc-pilot-avatar" src="https://images.evetech.net/characters/${row.reviewer_id}/portrait?size=64" alt="" />
-            <a class="tc-pilot-name" href="pilot.html?id=${row.reviewer_id}">${escapeHtml(row.reviewer_name || 'Unknown Pilot')}</a>
-          </div>
-          <div class="tc-count">${row.qualifying_reps}</div>
-        </div>
-      `).join('');
+      availableMonths = data.available || [];
 
-      if (data.myRank) {
-        document.getElementById('tcMyRank').style.display = 'block';
-        document.getElementById('tcMyRankValue').textContent =
-          '#' + data.myRank.rank + ' — ' + data.myRank.qualifying_reps + ' reps left';
+      if (availableMonths.length === 0) {
+        rowsEl.innerHTML = '<div class="pt-empty">No archived months yet. Check back after the 1st.</div>';
+        subtitleEl.textContent = '';
+        yearSelect.innerHTML = '';
+        monthSelect.innerHTML = '';
+        return;
       }
+
+      const sel = data.selected;
+      populateYearOptions(sel.year);
+      populateMonthOptions(sel.year, sel.month);
+      subtitleEl.textContent = `${MONTH_NAMES[sel.month - 1]} ${sel.year}`;
+      renderRows(data.rows);
+
+      const url = new URL(window.location);
+      url.searchParams.set('year', sel.year);
+      url.searchParams.set('month', sel.month);
+      window.history.replaceState({}, '', url);
     } catch (err) {
-      console.error('Top contributors load error:', err);
-      document.getElementById('tcRows').innerHTML = '<div class="tc-empty">Could not load the leaderboard. Please try again.</div>';
+      console.error('Previous top 20 load error:', err);
+      rowsEl.innerHTML = '<div class="pt-empty">Could not load the archive. Please try again.</div>';
+      subtitleEl.textContent = '';
     }
+  }
+
+  yearSelect.addEventListener('change', () => {
+    const year = parseInt(yearSelect.value, 10);
+    const months = availableMonths.filter(m => m.year === year).map(m => m.month).sort((a, b) => b - a);
+    const month = months[0];
+    loadSnapshot(year, month);
+  });
+
+  monthSelect.addEventListener('change', () => {
+    const year = parseInt(yearSelect.value, 10);
+    const month = parseInt(monthSelect.value, 10);
+    loadSnapshot(year, month);
+  });
+
+  (() => {
+    const params = new URLSearchParams(window.location.search);
+    const yearParam = parseInt(params.get('year'), 10);
+    const monthParam = parseInt(params.get('month'), 10);
+    loadSnapshot(yearParam || null, monthParam || null);
   })();
 
   (async () => {
@@ -471,7 +509,7 @@
     } catch (_) {}
   })();
 
-  // ── SEARCH BAR (ported from pilot.html) ─────────────────────────────────
+  // ── SEARCH BAR (ported from top-contributors.html) ─────────────────────────────────
   const searchInput    = document.getElementById('navSearchInput');
   const searchBtn      = document.getElementById('navSearchBtn');
   const searchClearBtn = document.getElementById('navSearchClear');
