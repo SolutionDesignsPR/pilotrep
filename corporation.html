@@ -585,6 +585,68 @@
     }
     .share-toast.show { opacity: 1; }
 
+    .rep-share-toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 240px;
+      background: var(--panel);
+      border: 1.5px solid var(--cyan);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      z-index: 9999;
+    }
+    .rep-share-toast.show { opacity: 1; pointer-events: auto; }
+    .rep-share-toast-close {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 3px;
+    }
+    .rep-share-toast-close:hover { color: var(--white); }
+    .rep-share-toast-headline {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+    .rep-share-toast-sub { font-size: 11px; color: var(--muted); }
+    .rep-share-toast-btn {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      color: var(--white);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 7px 16px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: border-color 0.15s;
+    }
+    .rep-share-toast-btn:hover, .rep-share-toast-btn:focus-visible { border-color: var(--cyan-dim); }
+
     .validation-toast {
       position: fixed;
       bottom: 28px;
@@ -1196,6 +1258,28 @@
   <div class="validation-toast" id="validationToast"></div>
 
 
+  <div class="rep-share-toast" id="anonLimitToast">
+    <button class="rep-share-toast-close" id="anonLimitToastClose" aria-label="Close">&times;</button>
+    <div>
+      <div class="rep-share-toast-headline">Anonymous Limit Reached</div>
+      <div class="rep-share-toast-sub" id="anonLimitToastSub">—</div>
+    </div>
+    <button class="rep-share-toast-btn" id="anonLimitToastBtn">
+      <span>Post As Yourself</span>
+    </button>
+  </div>
+
+  <div class="rep-share-toast" id="bannedToast">
+    <button class="rep-share-toast-close" id="bannedToastClose" aria-label="Close">&times;</button>
+    <div>
+      <div class="rep-share-toast-headline">Account Banned</div>
+      <div class="rep-share-toast-sub" id="bannedToastSub">—</div>
+    </div>
+    <button class="rep-share-toast-btn" id="bannedToastBtn">
+      <span>Contact Us</span>
+    </button>
+  </div>
+
   <div class="confirm-overlay" id="confirmOverlay">
     <div class="confirm-modal">
       <div class="confirm-modal-title">Confirm Your Rep</div>
@@ -1773,6 +1857,58 @@
     };
   }
 
+  // ── ANONYMOUS RATE LIMIT TOAST ──
+  const anonLimitToast      = document.getElementById('anonLimitToast');
+  const anonLimitToastClose = document.getElementById('anonLimitToastClose');
+  const anonLimitToastSub   = document.getElementById('anonLimitToastSub');
+  const anonLimitToastBtn   = document.getElementById('anonLimitToastBtn');
+  let anonLimitRetry = null;
+
+  function closeAnonLimitToast() {
+    anonLimitToast.classList.remove('show');
+    anonLimitRetry = null;
+  }
+
+  function showAnonLimitToast(nextEligibleIso, retryFn) {
+    const dt = new Date(nextEligibleIso);
+    anonLimitToastSub.textContent = `You can post your next anonymous Rep on ${dt.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}`;
+    anonLimitRetry = retryFn;
+    anonLimitToast.classList.add('show');
+    anonLimitToastBtn.focus({ preventScroll: true });
+  }
+
+  anonLimitToastClose.addEventListener('click', closeAnonLimitToast);
+
+  anonLimitToastBtn.addEventListener('click', () => {
+    const retry = anonLimitRetry;
+    closeAnonLimitToast();
+    anonCheck.checked = false;
+    anonCheck.dispatchEvent(new Event('change'));
+    if (retry) retry();
+  });
+
+  // ── BANNED TOAST ──
+  const bannedToast      = document.getElementById('bannedToast');
+  const bannedToastClose = document.getElementById('bannedToastClose');
+  const bannedToastSub   = document.getElementById('bannedToastSub');
+  const bannedToastBtn   = document.getElementById('bannedToastBtn');
+
+  function closeBannedToast() {
+    bannedToast.classList.remove('show');
+  }
+
+  function showBannedToast(reapplyDateIso) {
+    const dt = new Date(reapplyDateIso);
+    bannedToastSub.textContent = `You may contact us to request reinstatement on or after ${dt.toLocaleDateString(undefined, { dateStyle: 'medium' })}.`;
+    bannedToast.classList.add('show');
+    bannedToastBtn.focus({ preventScroll: true });
+  }
+
+  bannedToastClose.addEventListener('click', closeBannedToast);
+  bannedToastBtn.addEventListener('click', () => {
+    window.location.href = 'contact.html';
+  });
+
   confirmCancelBtn.addEventListener('click', () => confirmOverlay.classList.remove('show'));
   confirmOverlay.addEventListener('click', (e) => {
     if (e.target === confirmOverlay) confirmOverlay.classList.remove('show');
@@ -1804,7 +1940,13 @@
       let data = {};
       try { data = await res.json(); } catch (_) {}
       if (!res.ok) {
-        showValidation(data.error || 'Submission failed. Please try again.', false, 6000);
+        if (data.error === 'ANON_RATE_LIMIT') {
+          showAnonLimitToast(data.nextEligible, () => performSubmitRep(selectedDot, selectedSys));
+        } else if (data.error === 'BANNED') {
+          showBannedToast(data.reapplyDate);
+        } else {
+          showValidation(data.error || 'Submission failed. Please try again.', false, 6000);
+        }
       } else {
         const rep = {
           grade,

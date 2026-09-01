@@ -45,7 +45,7 @@ exports.handler = async (event) => {
   // they're just blocked from submitting new reps.
   const { data: pilotRecord, error: banLookupError } = await supabase
     .from('pilots')
-    .select('banned')
+    .select('banned, banned_at')
     .eq('character_id', session.characterId)
     .maybeSingle();
 
@@ -60,7 +60,13 @@ exports.handler = async (event) => {
   }
 
   if (pilotRecord && pilotRecord.banned) {
-    return { statusCode: 403, body: JSON.stringify({ error: 'This character is no longer able to submit reps on PilotRep.' }) };
+    const bannedAt = pilotRecord.banned_at ? new Date(pilotRecord.banned_at) : new Date();
+    const reapplyDate = new Date(bannedAt);
+    reapplyDate.setMonth(reapplyDate.getMonth() + 6);
+    return {
+      statusCode: 403,
+      body: JSON.stringify({ error: 'BANNED', reapplyDate: reapplyDate.toISOString() })
+    };
   }
 
   // 2. Parse body
@@ -113,6 +119,16 @@ exports.handler = async (event) => {
     );
     if (isProfaneSubstring || profanityFilter.isProfane(normalizedComment)) {
       return { statusCode: 400, body: JSON.stringify({ error: 'Profanity Detected : Please Revise Your Rep' }) };
+    }
+
+    // 3e. Hard block on unfounded serious criminal accusations and specific
+    // harassment formats. These aren't caught by the profanity filter above
+    // since the words themselves (e.g. "pedophile") aren't profanity — they're
+    // being weaponized as a defamatory accusation, which is a different risk
+    // entirely and warrants zero tolerance rather than a moderation queue.
+    const HARD_BLOCK_PATTERN = /(pedo|nonce|groomer|rapist|molest|(banged|f[u*@]cked)\s+(my|his|her)\s+(mom|mother|sister|dad|father|wife|gf|girlfriend))/i;
+    if (HARD_BLOCK_PATTERN.test(normalizedComment)) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'That comment isn\u2019t allowed. Please revise your rep.' }) };
     }
   }
 

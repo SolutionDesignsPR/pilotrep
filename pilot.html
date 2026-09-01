@@ -1303,6 +1303,17 @@
     </button>
   </div>
 
+  <div class="rep-share-toast" id="bannedToast">
+    <button class="rep-share-toast-close" id="bannedToastClose" aria-label="Close">&times;</button>
+    <div>
+      <div class="rep-share-toast-headline">Account Banned</div>
+      <div class="rep-share-toast-sub" id="bannedToastSub">—</div>
+    </div>
+    <button class="rep-share-toast-btn" id="bannedToastBtn">
+      <span>Contact Us</span>
+    </button>
+  </div>
+
   <div class="confirm-overlay" id="confirmOverlay">
     <div class="confirm-modal">
       <div class="confirm-modal-title">Confirm Your Rep</div>
@@ -1310,6 +1321,7 @@
       <label class="confirm-modal-check">
         <input type="checkbox" id="confirmHideCheck"> Don't Show This Again
       </label>
+
       <div class="confirm-modal-actions">
         <button type="button" class="confirm-cancel-btn" id="confirmCancelBtn">Cancel</button>
         <button type="button" class="submit-btn" id="confirmSubmitBtn">Confirm</button>
@@ -1535,6 +1547,30 @@
     anonCheck.checked = false;
     anonCheck.dispatchEvent(new Event('change'));
     if (retry) retry();
+  });
+
+  // ── BANNED TOAST ──
+  const bannedToast      = document.getElementById('bannedToast');
+  const bannedToastClose = document.getElementById('bannedToastClose');
+  const bannedToastSub   = document.getElementById('bannedToastSub');
+  const bannedToastBtn   = document.getElementById('bannedToastBtn');
+
+  function closeBannedToast() {
+    bannedToast.classList.remove('show');
+  }
+
+  // No auto-dismiss here either — same reasoning as the anon-limit toast,
+  // this carries a specific date the pilot needs to actually read.
+  function showBannedToast(reapplyDateIso) {
+    const dt = new Date(reapplyDateIso);
+    bannedToastSub.textContent = `You may contact us to request reinstatement on or after ${dt.toLocaleDateString(undefined, { dateStyle: 'medium' })}.`;
+    bannedToast.classList.add('show');
+    bannedToastBtn.focus({ preventScroll: true });
+  }
+
+  bannedToastClose.addEventListener('click', closeBannedToast);
+  bannedToastBtn.addEventListener('click', () => {
+    window.location.href = 'contact.html';
   });
 
   repShareToastBtn.addEventListener('click', () => {
@@ -2114,6 +2150,8 @@
       if (!res.ok) {
         if (data.error === 'ANON_RATE_LIMIT') {
           showAnonLimitToast(data.nextEligible, () => performSubmitRep(selectedDot, selectedSys));
+        } else if (data.error === 'BANNED') {
+          showBannedToast(data.reapplyDate);
         } else {
           showValidation(data.error || 'Submission failed. Please try again.', false, 6000);
         }

@@ -378,7 +378,7 @@
       <div class="tc-row-header">
         <div>#</div>
         <div>Pilot</div>
-        <div style="text-align:right;">Reps left</div>
+        <div style="text-align:right;">Qualifying Reps</div>
       </div>
       <div id="tcRows">
         <div class="tc-empty">Loading…</div>
@@ -440,7 +440,7 @@
       if (data.myRank) {
         document.getElementById('tcMyRank').style.display = 'block';
         document.getElementById('tcMyRankValue').textContent =
-          '#' + data.myRank.rank + ' — ' + data.myRank.qualifying_reps + ' reps left';
+          '#' + data.myRank.rank + ' — ' + data.myRank.qualifying_reps + ' qualifying reps';
       }
     } catch (err) {
       console.error('Top contributors load error:', err);

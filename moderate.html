@@ -122,6 +122,8 @@
     }
     tr:last-child td { border-bottom: none; }
     td.comment { max-width: 320px; color: var(--white); }
+    tr.flagged-row { background: rgba(220,80,80,0.12); }
+    tr.flagged-row td.comment { color: #ff8a8a; font-weight: 600; }
     td.muted { color: var(--muted); }
 
     .del-btn {
@@ -172,6 +174,10 @@
       </div>
       <button class="btn-outline" onclick="logout()">Log Out</button>
     </div>
+
+    <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); margin-bottom:12px;">
+      <input type="checkbox" id="flaggedOnlyCheck"> Show flagged only
+    </label>
 
     <table id="repsTable">
       <thead>
@@ -263,7 +269,10 @@
         }
 
         data.reps.forEach(r => body.appendChild(renderRow(r)));
-        statusEl.textContent = `Showing ${data.reps.length} most recent submissions.`;
+        const flaggedCount = data.reps.filter(r => r.flagged).length;
+        statusEl.textContent = `Showing ${data.reps.length} most recent submissions` +
+          (flaggedCount > 0 ? ` — ${flaggedCount} flagged for review.` : '.');
+        applyFlaggedFilter();
       } catch (err) {
         statusEl.textContent = 'Failed to load reps: ' + err.message;
         statusEl.className = 'err';
@@ -273,6 +282,7 @@
     function renderRow(r) {
       const tr = document.createElement('tr');
       tr.dataset.id = r.id;
+      if (r.flagged) tr.classList.add('flagged-row');
 
       const date = new Date(r.createdAt);
       const dateStr = isNaN(date) ? '' : date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -322,6 +332,14 @@
       div.textContent = str == null ? '' : String(str);
       return div.innerHTML;
     }
+
+    function applyFlaggedFilter() {
+      const onlyFlagged = document.getElementById('flaggedOnlyCheck').checked;
+      document.querySelectorAll('#repsBody tr').forEach(tr => {
+        tr.style.display = (onlyFlagged && !tr.classList.contains('flagged-row')) ? 'none' : '';
+      });
+    }
+    document.getElementById('flaggedOnlyCheck').addEventListener('change', applyFlaggedFilter);
 
     // If a valid session cookie already exists, jump straight to the panel.
     (async () => {

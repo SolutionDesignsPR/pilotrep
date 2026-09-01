@@ -8,6 +8,10 @@ const supabase = createClient(
 const SESSION_MAX_AGE_MS = 4 * 60 * 60 * 1000; // 4 hours
 const LIST_LIMIT = 150;
 
+// Same pattern submit-rep.js hard-blocks going forward — kept here too so
+// anything submitted before that filter existed still surfaces for review.
+const FLAG_PATTERN = /(pedo|nonce|groomer|rapist|molest|(banged|f[u*@]cked)\s+(my|his|her)\s+(mom|mother|sister|dad|father|wife|gf|girlfriend))/i;
+
 // Same base64-cookie pattern as the rest of the app, just a separate
 // cookie name so a regular pilot session can never pass as a moderator one.
 function getModSession(cookieHeader) {
@@ -47,6 +51,7 @@ exports.handler = async (event) => {
       targetName:     r.target_name || '',
       grade:          r.grade,
       comment:        (r.comment && r.comment.trim()) ? r.comment.trim() : '',
+      flagged:        !!(r.comment && FLAG_PATTERN.test(r.comment)),
       anonymous:      r.anonymous,
       reviewerName:   r.anonymous ? '(anonymous)' : (r.reviewer_name || ''),
       reviewerId:     r.reviewer_id || null,
