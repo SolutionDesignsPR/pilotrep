@@ -56,7 +56,7 @@ exports.handler = async (event) => {
     // Fetch all reps for this entity
     const { data: reps, error } = await supabase
       .from('reps')
-      .select('id, grade, grade_index, system_type, comment, anonymous, reviewer_name, reviewer_id, is_corp_alliance, created_at')
+      .select('id, grade, grade_index, system_type, comment, anonymous, reviewer_name, reviewer_id, is_corp_alliance, zkill_url, created_at')
       .eq('target_id', String(id))
       .eq('target_type', type)
       .order('created_at', { ascending: false });
@@ -153,6 +153,7 @@ exports.handler = async (event) => {
         author:      r.anonymous ? '' : (r.reviewer_name || ''),
         reviewerId:  r.anonymous ? null : (r.reviewer_id || null),
         isCorpAlliance: !!r.is_corp_alliance,
+        zkillUrl:    r.zkill_url || null,
         date:        formatDate(r.created_at),
         upvotes:     counts.up,
         downvotes:   counts.down,

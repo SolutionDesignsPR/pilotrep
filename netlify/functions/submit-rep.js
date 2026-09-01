@@ -77,7 +77,7 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: 'Invalid request body' }) };
   }
 
-  const { targetId, targetType, targetCorpId, targetAllianceId, targetName, grade, gradeIndex, systemType, comment, anonymous } = body;
+  const { targetId, targetType, targetCorpId, targetAllianceId, targetName, grade, gradeIndex, systemType, comment, anonymous, zkillUrl } = body;
 
   // 3. Validate required fields
   if (!targetId || !targetType || !grade || gradeIndex === undefined) {
@@ -132,6 +132,22 @@ exports.handler = async (event) => {
     }
   }
 
+  // 3f. Validate the optional zKillboard link. Only a real kill permalink is
+  // accepted — this is a free-text field otherwise, and without a strict
+  // pattern it would be an easy way to plant an arbitrary (or malicious)
+  // link inside a rep. Normalize to a consistent canonical form regardless
+  // of what variant (http/https, www, trailing slash) was pasted in.
+  const trimmedZkillUrl = (zkillUrl && zkillUrl.trim()) ? zkillUrl.trim() : null;
+  let normalizedZkillUrl = null;
+  if (trimmedZkillUrl) {
+    const ZKILL_PATTERN = /^https?:\/\/(www\.)?zkillboard\.com\/kill\/(\d+)\/?$/i;
+    const match = trimmedZkillUrl.match(ZKILL_PATTERN);
+    if (!match) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'That doesn\u2019t look like a valid zKillboard link.' }) };
+    }
+    normalizedZkillUrl = `https://zkillboard.com/kill/${match[2]}/`;
+  }
+
   const reviewerId = session.characterId;
   const reviewerName = session.characterName;
 
@@ -170,7 +186,8 @@ exports.handler = async (event) => {
     p_system_type: systemType || null,
     p_comment: trimmedComment,
     p_anonymous: anonymous || false,
-    p_is_corp_alliance: isCorpAlliance
+    p_is_corp_alliance: isCorpAlliance,
+    p_zkill_url: normalizedZkillUrl
   });
 
   // Fail closed: if we can't verify eligibility, refuse the rep rather than

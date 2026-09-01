@@ -803,6 +803,15 @@
       border-radius: 3px;
       white-space: nowrap;
     }
+    .rep-zkill-link {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 15px;
+      transform: translateY(-1px);
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .rep-zkill-link svg { display: block; }
 
     .see-all-wrap { text-align: center; margin-top: 18px; }
     .see-all-btn {
@@ -982,6 +991,38 @@
       margin-top: 10px;
       margin-bottom: 26px;
     }
+
+    .zkill-field-wrap { max-width: 230px; margin: 0 auto; }
+    .zkill-toggle-link a {
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--cyan-dim);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      cursor: pointer;
+    }
+    .zkill-toggle-link a:hover { color: var(--cyan); }
+    .zkill-toggle-link.revealed a {
+      color: var(--white);
+      text-decoration: none;
+      cursor: default;
+    }
+    .zkill-input {
+      width: 100%;
+      background: var(--white);
+      border: none;
+      border-radius: 4px;
+      color: #0b1220;
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      padding: 9px 10px;
+      outline: none;
+    }
+    .zkill-input::placeholder { color: #7a8aa0; }
 
     .anon-row {
       display: flex;
@@ -1241,13 +1282,22 @@
 
       <div class="section-divider"></div>
 
-      <div class="subsection-label">Comment On Your Encounter</div>
+      <div class="subsection-label" style="margin-bottom: 14px;">Comment On Your Encounter</div>
       <div class="comment-field-wrap">
         <input type="text" class="comment-input" maxlength="30" placeholder="MAXIMUM 5 WORDS OR 30 LETTERS" />
         <div class="comment-hint">No Spam • No Profanity • Keep It Professional • Comments Are Moderated</div>
       </div>
 
-      <div class="section-divider"></div>
+      <div class="section-divider" style="margin: 22px auto;"></div>
+
+      <div id="zkillLabel" class="zkill-toggle-link" style="text-align: center; margin-bottom: 8px;">
+        <a href="#" id="zkillToggle">Add Optional ZKillboard Link</a>
+      </div>
+      <div class="zkill-field-wrap" id="zkillFieldWrap" style="display: none;">
+        <input type="text" class="zkill-input" id="zkillInput" placeholder="ZKILLBOARD.COM/KILL/12345678/" />
+      </div>
+
+      <div class="section-divider" style="margin: 22px auto;"></div>
 
       <div class="anon-row" id="anonRow" style="display:none;">
         <span class="anon-submitting">Submitting as: <a id="submitterName" href="#" class="submitter-link">—</a></span>
@@ -1372,6 +1422,20 @@
 
   // Comment field: enforce 5 word / 30 letter limit
   const commentInput = document.querySelector('.comment-input');
+  const zkillInput = document.getElementById('zkillInput');
+
+  // ── ZKILLBOARD LINK: reveal-on-click ──
+  const zkillLabel = document.getElementById('zkillLabel');
+  const zkillToggle = document.getElementById('zkillToggle');
+  const zkillFieldWrap = document.getElementById('zkillFieldWrap');
+  zkillToggle.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (zkillLabel.classList.contains('revealed')) return;
+    zkillLabel.classList.add('revealed');
+    zkillToggle.textContent = 'Add Valid ZKillboard URL';
+    zkillFieldWrap.style.display = '';
+    zkillInput.focus();
+  });
   const anonRow = document.getElementById('anonRow');
   commentInput.addEventListener('input', () => {
     let words = commentInput.value.trim().split(/\s+/).filter(Boolean);
@@ -1822,10 +1886,19 @@
           ? `<a class="submitter-link" href="/pilot.html?id=${rep.reviewerId}">${escapeHtml(rep.author)}</a>`
           : escapeHtml(rep.author))
       : 'Anonymous';
+    const zkillLink = rep.zkillUrl
+      ? `<a class="rep-zkill-link" href="${escapeHtml(rep.zkillUrl)}" target="_blank" rel="noopener noreferrer" title="View killmail">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 3H3v10h10v-3"/>
+            <path d="M9 3h4v4"/>
+            <path d="M13 3L7 9"/>
+          </svg>
+        </a>`
+      : '';
     row.innerHTML = `
       <div>
         <div class="rep-row-date">${dateLabel}</div>
-        <div class="rep-row-meta">${authorLabel}</div>
+        <div class="rep-row-meta">${authorLabel}${zkillLink}</div>
         ${rep.comment && rep.comment.trim() ? `<div class="comment-text">${escapeHtml(rep.comment)}</div>` : ''}
       </div>
       <div class="rep-row-right has-votes">
@@ -2142,6 +2215,7 @@
           gradeIndex: INPUT_TO_NUM[grade],
           systemType: selectedSys.textContent.trim(),
           comment:    commentInput.value.trim(),
+          zkillUrl:   zkillInput.value.trim(),
           anonymous:  anonCheck.checked
         })
       });
@@ -2166,6 +2240,7 @@
           tier: selectedDot.dataset.tier,
           system: selectedSys.textContent,
           comment: commentInput.value.trim(),
+          zkillUrl: zkillInput.value.trim() || null,
           author: anonCheck.checked ? '' : currentUser,
           isCorpAlliance
         };
@@ -2177,6 +2252,7 @@
         dots.forEach(d => d.classList.remove('selected'));
         sysButtons.forEach(b => b.classList.remove('selected'));
         commentInput.value = '';
+        zkillInput.value = '';
         showRepShareToast();
       }
     } catch (err) {
@@ -2268,6 +2344,7 @@
           comment:  r.comment,
           author:     r.author,
           reviewerId: r.reviewerId,
+          zkillUrl:   r.zkillUrl || null,
           isCorpAlliance: r.isCorpAlliance,
           date:     r.date,
           upvotes:   r.upvotes,
