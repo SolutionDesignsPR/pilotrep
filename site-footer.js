@@ -12,13 +12,12 @@ document.write(
       '<a href="faq.html">FAQ</a>' +
       '<a href="privacy-policy.html">Privacy Policy</a>' +
       '<a href="serviceterms.html">Terms Of Service</a>' +
-      '<a href="#" id="cookieSettingsLink">Cookie Settings</a>' +
     '</div>' +
     '<div class="eve-time" id="eveTime" style="margin-top:28px;">EVE TIME 00:00:00</div>' +
     '<div class="legal-note" style="margin-top:10px;">' +
       'EVE Online and all related materials are property of Fenris Creations.<br>PilotRep is a third-party fan site and is not affiliated with Fenris Creations.' +
     '</div>' +
-    '<div class="footer-copy">&copy; 2026 PilotRep. All rights reserved.</div>' +
+    '<div class="footer-copy">&copy; 2026 PilotRep. All Rights Reserved. <a href="#" id="cookieSettingsLink">Cookie Settings</a>.</div>' +
   '</footer>'
 );
 

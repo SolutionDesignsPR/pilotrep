@@ -448,29 +448,25 @@
       width: fit-content;
       max-width: 90%;
       white-space: nowrap;
-      background: var(--cyan-dim);
-      border: 1.5px solid var(--cyan);
-      border-radius: 5px;
-      padding: 11px 18px;
     }
     .stats-section .stats-btn:nth-child(1) { justify-self: end; }
     .top-contrib-btn {
       display: block;
       width: fit-content;
       margin: 24px auto 0;
-      background: transparent;
-      border: 1.5px solid var(--border);
+      background: var(--cyan-dim);
+      border: 1.5px solid var(--cyan);
       border-radius: 5px;
       padding: 11px 24px;
-      color: var(--muted);
+      color: var(--white);
       font-size: 12px;
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       text-decoration: none;
-      transition: border-color 0.15s, color 0.15s;
+      transition: filter 0.15s;
     }
-    .top-contrib-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
+    .top-contrib-btn:hover { filter: brightness(1.15); }
     .stats-section .stats-btn:nth-child(2) { justify-self: start; }
     .stats-label {
       font-size: 12px;

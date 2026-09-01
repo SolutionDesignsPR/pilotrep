@@ -1292,6 +1292,17 @@
     </button>
   </div>
 
+  <div class="rep-share-toast" id="anonLimitToast">
+    <button class="rep-share-toast-close" id="anonLimitToastClose" aria-label="Close">&times;</button>
+    <div>
+      <div class="rep-share-toast-headline">Anonymous Limit Reached</div>
+      <div class="rep-share-toast-sub" id="anonLimitToastSub">—</div>
+    </div>
+    <button class="rep-share-toast-btn" id="anonLimitToastBtn">
+      <span>Post As Yourself</span>
+    </button>
+  </div>
+
   <div class="confirm-overlay" id="confirmOverlay">
     <div class="confirm-modal">
       <div class="confirm-modal-title">Confirm Your Rep</div>
@@ -1492,6 +1503,38 @@
   repShareToastBtn.addEventListener('mouseleave', () => {
     clearRepShareTimer();
     repShareDismissTimer = setTimeout(closeRepShareToast, 1500);
+  });
+
+  // ── ANONYMOUS RATE LIMIT TOAST ──
+  const anonLimitToast      = document.getElementById('anonLimitToast');
+  const anonLimitToastClose = document.getElementById('anonLimitToastClose');
+  const anonLimitToastSub   = document.getElementById('anonLimitToastSub');
+  const anonLimitToastBtn   = document.getElementById('anonLimitToastBtn');
+  let anonLimitRetry = null;
+
+  function closeAnonLimitToast() {
+    anonLimitToast.classList.remove('show');
+    anonLimitRetry = null;
+  }
+
+  // No auto-dismiss timer here (unlike the share toast) — this one carries
+  // a specific date/time the pilot needs to actually read.
+  function showAnonLimitToast(nextEligibleIso, retryFn) {
+    const dt = new Date(nextEligibleIso);
+    anonLimitToastSub.textContent = `You can post your next anonymous Rep on ${dt.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}`;
+    anonLimitRetry = retryFn;
+    anonLimitToast.classList.add('show');
+    anonLimitToastBtn.focus({ preventScroll: true });
+  }
+
+  anonLimitToastClose.addEventListener('click', closeAnonLimitToast);
+
+  anonLimitToastBtn.addEventListener('click', () => {
+    const retry = anonLimitRetry;
+    closeAnonLimitToast();
+    anonCheck.checked = false;
+    anonCheck.dispatchEvent(new Event('change'));
+    if (retry) retry();
   });
 
   repShareToastBtn.addEventListener('click', () => {
@@ -2069,7 +2112,11 @@
       let data = {};
       try { data = await res.json(); } catch (_) {}
       if (!res.ok) {
-        showValidation(data.error || 'Submission failed. Please try again.', false, 6000);
+        if (data.error === 'ANON_RATE_LIMIT') {
+          showAnonLimitToast(data.nextEligible, () => performSubmitRep(selectedDot, selectedSys));
+        } else {
+          showValidation(data.error || 'Submission failed. Please try again.', false, 6000);
+        }
       } else {
         const isCorpAlliance = !!(
           (targetCorpId && currentUserCorpId && targetCorpId === currentUserCorpId) ||

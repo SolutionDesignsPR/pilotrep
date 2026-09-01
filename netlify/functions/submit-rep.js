@@ -170,6 +170,12 @@ exports.handler = async (event) => {
   const result = Array.isArray(rpcResult) ? rpcResult[0] : rpcResult;
 
   if (result && result.blocked) {
+    if (result.reason === 'rate_hour' || result.reason === 'rate_day') {
+      return {
+        statusCode: 429,
+        body: JSON.stringify({ error: 'ANON_RATE_LIMIT', nextEligible: result.next_eligible })
+      };
+    }
     const formatted = new Date(result.next_eligible).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
     return {
       statusCode: 429,

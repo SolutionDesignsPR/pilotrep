@@ -65,3 +65,9 @@
   color: var(--muted);
   letter-spacing: 0.05em;
 }
+.footer-copy a {
+  color: var(--muted);
+  text-decoration: underline;
+  transition: color 0.15s;
+}
+.footer-copy a:hover { color: var(--cyan); }
