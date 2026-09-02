@@ -475,9 +475,9 @@
       </div>
     </div>
 
-    <!-- Most Reps -->
+    <!-- Most Active -->
     <div class="list-panel">
-      <div class="list-header">Most Reps</div>
+      <div class="list-header">Most Active</div>
       <div id="mostReviewedRows">
         <div class="pilot-list-empty">Loading…</div>
       </div>
@@ -583,19 +583,21 @@
     });
   }
 
-  async function loadPanel(containerId, dataKey) {
+  async function loadLeaderboards() {
     try {
-      const res = await fetch(`/.netlify/functions/get-leaderboard?type=pilot&limit=5`);
+      // metric=active only changes how "mostReviewed" is ranked (reps given + received);
+      // recentlyReviewed in the same response is unaffected, so one call covers both panels.
+      const res = await fetch(`/.netlify/functions/get-leaderboard?type=pilot&metric=active&limit=20`);
       const data = await res.json();
-      renderPilotList(containerId, data[dataKey]);
+      renderPilotList('recentlyRatedRows', data.recentlyReviewed);
+      renderPilotList('mostReviewedRows', data.mostReviewed);
     } catch (e) {
       console.warn('Leaderboard fetch failed (non-fatal):', e);
       // Empty-state placeholders already in the HTML cover this case
     }
   }
 
-  loadPanel('recentlyRatedRows', 'recentlyReviewed');
-  loadPanel('mostReviewedRows', 'mostReviewed');
+  loadLeaderboards();
 
   // ── SEARCH BAR ────────────────────────────────────────────────────────────
   const searchInput    = document.getElementById('navSearchInput');

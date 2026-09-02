@@ -104,6 +104,48 @@ exports.handler = async (event) => {
       // Clamped to 100 as a sane upper bound against abuse.
       const limit = Math.max(1, Math.min(100, parseInt(limitParam, 10) || 10));
 
+      // Community search first — a single indexed Supabase query, regardless of
+      // login state. This is the common case (someone already reps'd on PilotRep)
+      // and is far faster than the two sequential ESI round-trips below, so it
+      // runs before any auth/ESI work rather than only as an unauthenticated
+      // fallback. Live ESI is only reached when this comes back empty.
+      try {
+        const { data: repMatches, error: repMatchError } = await supabase
+          .from('reps')
+          .select('target_id, target_type, target_name')
+          .not('target_name', 'is', null)
+          .ilike('target_name', `%${query}%`)
+          .limit(Math.max(150, limit * 20));
+
+        if (!repMatchError && repMatches && repMatches.length > 0) {
+          const byName = (a, b) => a.name.localeCompare(b.name);
+          const byType = (t) => {
+            const seenIds = new Set();
+            const out = [];
+            for (const r of repMatches) {
+              if (r.target_type !== t) continue;
+              if (seenIds.has(r.target_id)) continue;
+              seenIds.add(r.target_id);
+              out.push({ id: Number(r.target_id), name: r.target_name });
+            }
+            return out.sort(byName).slice(0, limit);
+          };
+
+          return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({
+              mode:         'community',
+              characters:   byType('pilot'),
+              corporations: byType('corporation'),
+              alliances:    byType('alliance')
+            })
+          };
+        }
+      } catch (err) {
+        console.warn('Community search error (non-fatal, falling back to ESI):', err);
+      }
+
       // Try authenticated search first (requires logged-in user's token via cookie)
       const cookieHeader = event.headers.cookie || '';
       const match = cookieHeader.match(/pilotrep_session=([^;]+)/);
@@ -186,46 +228,6 @@ exports.handler = async (event) => {
             body: JSON.stringify({ mode: 'authenticated', characters, corporations, alliances })
           };
         }
-      }
-
-      // Community search — unauthenticated, substring-match against pilots/corps/alliances
-      // that already have at least one rep on PilotRep. Tries this before falling back
-      // to ESI's exact-match-only endpoint, since it supports real predictive search.
-      try {
-        const { data: repMatches, error: repMatchError } = await supabase
-          .from('reps')
-          .select('target_id, target_type, target_name')
-          .not('target_name', 'is', null)
-          .ilike('target_name', `%${query}%`)
-          .limit(Math.max(150, limit * 20));
-
-        if (!repMatchError && repMatches && repMatches.length > 0) {
-          const byName = (a, b) => a.name.localeCompare(b.name);
-          const byType = (t) => {
-            const seenIds = new Set();
-            const out = [];
-            for (const r of repMatches) {
-              if (r.target_type !== t) continue;
-              if (seenIds.has(r.target_id)) continue;
-              seenIds.add(r.target_id);
-              out.push({ id: Number(r.target_id), name: r.target_name });
-            }
-            return out.sort(byName).slice(0, limit);
-          };
-
-          return {
-            statusCode: 200,
-            headers,
-            body: JSON.stringify({
-              mode:         'community',
-              characters:   byType('pilot'),
-              corporations: byType('corporation'),
-              alliances:    byType('alliance')
-            })
-          };
-        }
-      } catch (err) {
-        console.warn('Community search error (non-fatal, falling back to ESI):', err);
       }
 
       // Fallback — unauthenticated exact-name match via /universe/ids/

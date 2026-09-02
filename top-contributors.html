@@ -245,7 +245,8 @@
     .tc-my-rank-inner {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
+      gap: 8px;
       font-size: 13px;
     }
     .tc-my-rank-label { color: var(--muted); }
@@ -364,7 +365,7 @@
 
   <div class="tc-my-rank" id="tcMyRank" style="display:none;">
     <div class="tc-my-rank-inner">
-      <span class="tc-my-rank-label">Your Rank This Month</span>
+      <span class="tc-my-rank-label" id="tcMyRankLabel">Your Rank This Month</span>
       <span class="tc-my-rank-value" id="tcMyRankValue">—</span>
     </div>
   </div>
@@ -435,7 +436,12 @@
 
       if (data.myRank) {
         document.getElementById('tcMyRank').style.display = 'block';
+        document.getElementById('tcMyRankLabel').style.display = '';
         document.getElementById('tcMyRankValue').textContent = '#' + data.myRank.rank;
+      } else if (data.loggedIn) {
+        document.getElementById('tcMyRank').style.display = 'block';
+        document.getElementById('tcMyRankLabel').style.display = 'none';
+        document.getElementById('tcMyRankValue').textContent = 'Leave A Rep To Get Ranked';
       }
     } catch (err) {
       console.error('Top contributors load error:', err);

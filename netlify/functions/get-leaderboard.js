@@ -61,8 +61,9 @@ exports.handler = async (event) => {
   };
 
   try {
-    const { type = 'pilot', limit = '5' } = event.queryStringParameters || {};
+    const { type = 'pilot', limit = '5', metric = 'received' } = event.queryStringParameters || {};
     const limitNum = Math.max(1, Math.min(20, parseInt(limit, 10) || 5));
+    const useActiveMetric = type === 'pilot' && metric === 'active';
 
     if (!['pilot', 'corporation', 'alliance'].includes(type)) {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid type' }) };
@@ -76,13 +77,30 @@ exports.handler = async (event) => {
 
     if (error) throw new Error(error.message);
 
-    if (!reps || reps.length === 0) {
+    // 1b. "Active" metric only: also pull reviewer-side rows (ALL target types — a pilot
+    // can review a corp or alliance too) so pilots who give reps but haven't received any
+    // still count toward activity instead of being invisible to this leaderboard.
+    let byReviewer = {};
+    if (useActiveMetric) {
+      const { data: allReps, error: allRepsError } = await supabase
+        .from('reps')
+        .select('reviewer_id, created_at');
+      if (allRepsError) throw new Error(allRepsError.message);
+      for (const r of (allReps || [])) {
+        const key = r.reviewer_id;
+        if (!byReviewer[key]) byReviewer[key] = { count: 0, mostRecent: r.created_at };
+        byReviewer[key].count++;
+        if (new Date(r.created_at) > new Date(byReviewer[key].mostRecent)) byReviewer[key].mostRecent = r.created_at;
+      }
+    }
+
+    if ((!reps || reps.length === 0) && Object.keys(byReviewer).length === 0) {
       return { statusCode: 200, headers, body: JSON.stringify({ mostReviewed: [], recentlyReviewed: [] }) };
     }
 
     // 2. Aggregate per target_id: full rep list (for capped scoring) + most recent timestamp
     const byTarget = {};
-    for (const r of reps) {
+    for (const r of (reps || [])) {
       const key = r.target_id;
       if (!byTarget[key]) byTarget[key] = { id: key, reps: [], mostRecent: r.created_at };
       const agg = byTarget[key];
@@ -103,11 +121,42 @@ exports.handler = async (event) => {
       };
     });
 
-    // 3. Build the two leaderboards off the same aggregate
-    const mostReviewed = [...entries].sort((a, b) => b.repCount - a.repCount).slice(0, limitNum);
+    // 3. Build the two leaderboards off the same aggregate.
+    // "recentlyReviewed" always reflects reps received, regardless of metric.
     const recentlyReviewed = [...entries]
       .sort((a, b) => new Date(b.mostRecent) - new Date(a.mostRecent))
       .slice(0, limitNum);
+
+    // "mostReviewed" is either received-only (default, unchanged) or, for
+    // metric=active, an equal-weighted sum of reps given + reps received —
+    // covering pilots who've never received a rep but actively review others.
+    let mostReviewed;
+    if (useActiveMetric) {
+      const activeIds = new Set([...Object.keys(byTarget), ...Object.keys(byReviewer)]);
+      const activeEntries = [...activeIds].map(id => {
+        const t = byTarget[id];
+        const r = byReviewer[id];
+        const receivedCount = t ? t.reps.length : 0;
+        const leftCount = r ? r.count : 0;
+        const avgIndex = t ? cappedAverageIndex(t.reps) : null;
+        const roundedIndex = avgIndex === null ? null : Math.max(0, Math.min(12, Math.round(avgIndex)));
+        const gradeEntry = roundedIndex === null ? null : GRADE_TABLE[roundedIndex];
+        const timestamps = [t?.mostRecent, r?.mostRecent].filter(Boolean).map(d => new Date(d).getTime());
+        const mostRecent = timestamps.length ? new Date(Math.max(...timestamps)).toISOString() : null;
+        return {
+          id,
+          repCount:   receivedCount + leftCount,
+          mostRecent,
+          grade:      gradeEntry ? gradeEntry.grade : '—',
+          gradeClass: gradeEntry ? gradeClassSuffix(gradeEntry.grade) : '',
+        };
+      });
+      mostReviewed = activeEntries
+        .sort((a, b) => b.repCount - a.repCount || new Date(b.mostRecent || 0) - new Date(a.mostRecent || 0))
+        .slice(0, limitNum);
+    } else {
+      mostReviewed = [...entries].sort((a, b) => b.repCount - a.repCount).slice(0, limitNum);
+    }
 
     // 4. Resolve name/corp/portrait via ESI — only for the IDs actually needed
     const neededIds = [...new Set([...mostReviewed, ...recentlyReviewed].map(e => e.id))];

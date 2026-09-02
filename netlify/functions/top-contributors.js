@@ -45,6 +45,6 @@ exports.handler = async (event) => {
 
   return {
     statusCode: 200,
-    body: JSON.stringify({ top: topRows, myRank })
+    body: JSON.stringify({ top: topRows, myRank, loggedIn: !!(session && session.characterId) })
   };
 };
