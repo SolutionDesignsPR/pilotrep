@@ -243,10 +243,6 @@
       padding: 0 24px;
     }
     .tc-my-rank-inner {
-      background: rgba(79,195,247,0.06);
-      border: 1.5px solid var(--cyan-dim);
-      border-radius: 8px;
-      padding: 12px 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -368,7 +364,7 @@
 
   <div class="tc-my-rank" id="tcMyRank" style="display:none;">
     <div class="tc-my-rank-inner">
-      <span class="tc-my-rank-label">Your rank this month</span>
+      <span class="tc-my-rank-label">Your Rank This Month</span>
       <span class="tc-my-rank-value" id="tcMyRankValue">—</span>
     </div>
   </div>
@@ -439,8 +435,7 @@
 
       if (data.myRank) {
         document.getElementById('tcMyRank').style.display = 'block';
-        document.getElementById('tcMyRankValue').textContent =
-          '#' + data.myRank.rank + ' — ' + data.myRank.qualifying_reps + ' qualifying reps';
+        document.getElementById('tcMyRankValue').textContent = '#' + data.myRank.rank;
       }
     } catch (err) {
       console.error('Top contributors load error:', err);

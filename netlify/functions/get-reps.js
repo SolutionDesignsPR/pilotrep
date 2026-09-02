@@ -19,6 +19,15 @@ function getSession(cookieHeader) {
   return session;
 }
 
+// Defensive normalization: guarantees an absolute URL regardless of how the
+// row got its data (validated submission, legacy seed data, or any future
+// import path). Without this, a scheme-less value like "zkillboard.com/kill/1/"
+// resolves as a relative link off the current page instead of an external one.
+function safeZkillUrl(raw) {
+  if (!raw) return null;
+  return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+}
+
 // Grade index to letter mapping (13-point scale)
 const GRADE_TABLE = [
   { index: 0,  grade: 'F',  tier: 'neg',     html: 'F'  },
@@ -153,7 +162,7 @@ exports.handler = async (event) => {
         author:      r.anonymous ? '' : (r.reviewer_name || ''),
         reviewerId:  r.anonymous ? null : (r.reviewer_id || null),
         isCorpAlliance: !!r.is_corp_alliance,
-        zkillUrl:    r.zkill_url || null,
+        zkillUrl:    safeZkillUrl(r.zkill_url),
         date:        formatDate(r.created_at),
         upvotes:     counts.up,
         downvotes:   counts.down,
