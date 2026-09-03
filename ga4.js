@@ -29,6 +29,21 @@
     gtag('js', new Date());
     gtag('config', GA_MEASUREMENT_ID);
     loadGtagScript();
+    trackLoginIfNeeded();
+  }
+
+  // Fires GA4's standard "login" event whenever auth-callback.js has just
+  // redirected here with ?login=success — same signal login-success-modal.js
+  // already relies on. Runs once per actual login redirect, whether it's a
+  // first-time login or a repeat one. Queued through the same gtag() call
+  // as everything else, so it automatically respects whatever consent state
+  // was just set above (a rejected-cookies pilot still sends a cookieless,
+  // non-identifiable ping — same as any other event on the site).
+  function trackLoginIfNeeded() {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('login') === 'success') {
+      gtag('event', 'login', { method: 'EVE SSO' });
+    }
   }
 
   function updateConsent(state) {

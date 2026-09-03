@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="ga4.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PilotRep | Moderator</title>
   <meta name="robots" content="noindex, nofollow" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="alternate icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="site-footer.css" />
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -29,10 +31,9 @@
       color: var(--white);
       font-family: Helvetica, Arial, sans-serif;
       min-height: 100vh;
-      padding: 32px 16px 64px;
     }
 
-    .wrap { max-width: 960px; margin: 0 auto; }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 32px 16px 64px; }
 
     h1 {
       font-size: 22px;
@@ -41,6 +42,184 @@
       margin-bottom: 4px;
     }
     .sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+
+    /* ── TOP NAV (shared header, ported from pilot.html) ── */
+    .topnav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 22px 32px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+    .nav-left {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .nav-logo img { display: block; }
+    .nav-logged-in {
+      display: none;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .nav-logged-in a { color: var(--cyan); text-decoration: none; transition: color 0.15s; }
+    .nav-logged-in a:hover { color: var(--white); }
+    .nav-login-prompt {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .nav-login-prompt:hover { color: var(--white); }
+    .nav-links {
+      display: inline-flex;
+      gap: 0;
+      flex: 1;
+      justify-content: center;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .nav-links a {
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      color: var(--white);
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1.5px solid var(--border);
+      padding: 8px 18px;
+      margin-left: -1.5px;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .nav-links a:first-child { border-radius: 4px 0 0 4px; margin-left: 0; }
+    .nav-links a:last-child  { border-radius: 0 4px 4px 0; }
+    .nav-links a.active {
+      color: var(--cyan);
+      border-color: var(--cyan);
+      background: rgba(79,195,247,0.08);
+    }
+    .nav-links a.active:hover { color: #7dd8fa; border-color: var(--cyan); }
+    .nav-links a:hover:not(.active) { color: var(--cyan); border-color: var(--cyan-dim); }
+
+    .nav-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+    .nav-search {
+      display: flex;
+      align-items: center;
+      width: 320px;
+      position: relative;
+    }
+    .nav-search input {
+      flex: 1;
+      background: rgba(79,195,247,0.08);
+      border: 1.5px solid var(--cyan-dim);
+      border-right: none;
+      border-radius: 4px 0 0 4px;
+      color: var(--white);
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      padding: 8px 44px 8px 12px;
+      outline: none;
+      min-width: 0;
+    }
+    .nav-search input::placeholder { color: var(--muted); }
+    .nav-search .nav-search-clear-btn {
+      position: absolute;
+      right: 48px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 4px;
+      z-index: 2;
+    }
+    .nav-search .nav-search-clear-btn:hover { color: var(--white); }
+    .nav-search button {
+      background: var(--cyan);
+      border: 1.5px solid var(--cyan);
+      border-radius: 0 4px 4px 0;
+      color: var(--bg);
+      cursor: pointer;
+      padding: 8px 11px;
+      display: flex;
+      align-items: center;
+    }
+    .nav-search svg { width: 14px; height: 14px; }
+    .search-drop-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--white);
+      border-bottom: 1px solid rgba(79,195,247,0.08);
+      text-decoration: none;
+    }
+    .search-drop-item:last-child { border-bottom: none; }
+    .search-drop-item:hover { background: rgba(79,195,247,0.1); }
+    .search-drop-label {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 8px 14px 4px;
+      border-bottom: 1px solid rgba(79,195,247,0.08);
+    }
+    .search-drop-name { flex: 1; }
+    .search-drop-type {
+      font-size: 10px;
+      color: var(--cyan);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .search-drop-note {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      padding: 12px 14px;
+      text-align: center;
+      border-top: 1px solid rgba(79,195,247,0.08);
+      line-height: 1.6;
+    }
+    .search-drop-note a { color: var(--cyan); text-decoration: none; font-weight: 600; }
+    .search-drop-note a:hover { color: #7dd8fa; }
+    .nav-search-sub {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.03em;
+      align-self: flex-start;
+      padding-left: 12px;
+    }
+    @media (max-width: 760px) {
+      .topnav { flex-direction: column; align-items: center; text-align: center; gap: 16px; padding: 24px 20px; }
+      .nav-left { align-items: center; }
+      .nav-links { position: static; left: auto; transform: none; width: 100%; }
+      .nav-right { align-items: center; width: 100%; }
+      .nav-search { width: 100%; max-width: 380px; margin: 0 auto; }
+      .nav-search-sub { align-self: center; padding-left: 0; }
+    }
 
     /* Login gate */
     #gate {
@@ -125,6 +304,8 @@
     tr.flagged-row { background: rgba(220,80,80,0.12); }
     tr.flagged-row td.comment { color: #ff8a8a; font-weight: 600; }
     td.muted { color: var(--muted); }
+    td.true-identity a { color: var(--cyan); text-decoration: none; }
+    td.true-identity a:hover { text-decoration: underline; }
 
     .del-btn {
       background: transparent;
@@ -141,62 +322,88 @@
 
     #status { color: var(--muted); font-size: 13px; margin-top: 16px; }
     #status.err { color: var(--danger); }
-
-    .mod-logo-bar {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 22px 16px 0;
-    }
-    .mod-logo-bar a { display: inline-block; }
   </style>
 </head>
 <body>
 
-  <div class="mod-logo-bar">
-    <a href="index.html"><img src="assets/images/PilotRep_Logo_NavBar.svg" alt="Pilot Rep" style="height:38px;width:auto;display:block;" /></a>
-  </div>
+<div class="page">
 
-
-  <div id="gate">
-    <h1>PilotRep Moderator</h1>
-    <p class="sub" style="margin-bottom:0;">Enter password to continue</p>
-    <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password" />
-    <br />
-    <button onclick="login()">Log In</button>
-    <div id="gateError"></div>
-  </div>
-
-  <div class="wrap" id="panel">
-    <div class="toolbar">
-      <div>
-        <h1>PilotRep Moderator</h1>
-        <p class="sub">Most recent rep submissions — review and remove as needed</p>
-      </div>
-      <button class="btn-outline" onclick="logout()">Log Out</button>
+  <header class="topnav">
+    <div class="nav-left">
+      <a href="index.html" class="nav-logo"><img src="assets/images/PilotRep_Logo_NavBar.svg" alt="Pilot Rep" style="height:38px;width:auto;display:block;" /></a>
+      <div class="nav-logged-in" id="navLoggedInAs">LOGGED IN AS &nbsp;<a href="pilot.html" id="navLoggedInLink">—</a></div>
+      <a href="#" class="nav-login-prompt" id="navLoginPrompt" onclick="event.preventDefault(); window.location.href='/.netlify/functions/auth-start?origin='+encodeURIComponent(window.location.pathname+window.location.search);">Log In With EVE Online</a>
     </div>
 
-    <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); margin-bottom:12px;">
-      <input type="checkbox" id="flaggedOnlyCheck"> Show flagged only
-    </label>
+    <nav class="nav-links">
+      <a href="pilot-landing.html">Pilots</a>
+      <a href="corporation-landing.html">Corporations</a>
+      <a href="alliance-landing.html">Alliances</a>
+    </nav>
 
-    <table id="repsTable">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Target</th>
-          <th>Grade</th>
-          <th>Reviewer</th>
-          <th>Comment</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="repsBody"></tbody>
-    </table>
+    <div class="nav-right">
+      <div class="nav-search" style="position:relative;">
+        <input type="text" id="navSearchInput" placeholder="Search for Pilots, Corporations and Alliances" autocomplete="off" />
+        <button id="navSearchClear" class="nav-search-clear-btn" aria-label="Clear search" type="button" style="display:none;">&times;</button>
+        <button id="navSearchBtn" aria-label="Search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </button>
+        <div id="searchDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#0e1a2b;border:1px solid var(--cyan-dim);border-radius:0 0 6px 6px;z-index:999;max-height:360px;overflow-y:auto;"></div>
+      </div>
+      <div class="nav-search-sub">Search New Eden. Rate Encounters.</div>
+    </div>
+  </header>
 
-    <div id="status"></div>
+  <div class="wrap">
+    <div id="gate">
+      <h1>PilotRep Moderator</h1>
+      <p class="sub" style="margin-bottom:0;">Enter password to continue</p>
+      <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password" />
+      <br />
+      <button onclick="login()">Log In</button>
+      <div id="gateError"></div>
+    </div>
+
+    <div id="panel">
+      <div class="toolbar">
+        <div>
+          <h1>PilotRep Moderator</h1>
+          <p class="sub">Most recent rep submissions — review and remove as needed</p>
+        </div>
+        <button class="btn-outline" onclick="logout()">Log Out</button>
+      </div>
+
+      <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); margin-bottom:12px;">
+        <input type="checkbox" id="flaggedOnlyCheck"> Show flagged only
+      </label>
+
+      <table id="repsTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Target</th>
+            <th>Grade</th>
+            <th>Reviewer</th>
+            <th>True Identity</th>
+            <th>Comment</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="repsBody"></tbody>
+      </table>
+
+      <div id="status"></div>
+    </div>
   </div>
 
-  <script>
+  <script src="site-footer.js"></script>
+
+</div>
+
+<script src="login-success-modal.js"></script>
+<script>
     const FN = '/.netlify/functions/';
 
     async function login() {
@@ -290,11 +497,20 @@
       const target = (r.targetName || `${r.targetType} #${r.targetId}`) + (r.isCorpAlliance ? ' (corp/alliance)' : '');
       const reviewer = r.anonymous ? '(anonymous)' : (r.reviewerName || '—');
 
+      let trueIdentityHtml = '—';
+      if (r.anonymous) {
+        const name = r.actualReviewerName || 'Unknown Pilot';
+        trueIdentityHtml = r.reviewerId
+          ? `<a href="pilot.html?id=${r.reviewerId}" target="_blank" rel="noopener">${escapeHtml(name)}</a>`
+          : escapeHtml(name);
+      }
+
       tr.innerHTML = `
         <td class="muted">${escapeHtml(dateStr)}</td>
         <td>${escapeHtml(target)}</td>
         <td>${escapeHtml(r.grade || '')}</td>
         <td class="muted">${escapeHtml(reviewer)}</td>
+        <td class="true-identity">${trueIdentityHtml}</td>
         <td class="comment">${escapeHtml(r.comment || '—')}</td>
         <td><button class="del-btn">Delete</button></td>
       `;
@@ -348,7 +564,137 @@
         if (res.ok) showPanel();
       } catch (_) {}
     })();
-  </script>
+
+    // ── Site nav auth state (ported from other pages) ──
+    (async () => {
+      try {
+        const res = await fetch('/.netlify/functions/auth-me');
+        const data = await res.json();
+        if (data.loggedIn) {
+          const authLink = document.getElementById('footerAuthLink');
+          if (authLink) {
+            authLink.textContent = 'Logout';
+            authLink.href = '/.netlify/functions/auth-logout';
+          }
+          const navLoggedIn = document.getElementById('navLoggedInAs');
+          const navLoggedInLink = document.getElementById('navLoggedInLink');
+          if (navLoggedIn && navLoggedInLink && data.characterId) {
+            navLoggedInLink.textContent = data.characterName;
+            navLoggedInLink.href = 'my-pilotrep.html';
+            navLoggedIn.style.display = 'block';
+          }
+          const navLoginPrompt = document.getElementById('navLoginPrompt');
+          if (navLoginPrompt) navLoginPrompt.style.display = 'none';
+        }
+      } catch (_) {}
+    })();
+
+    // ── SEARCH BAR (ported from pilot.html) ─────────────────────────────────
+    const searchInput    = document.getElementById('navSearchInput');
+    const searchBtn      = document.getElementById('navSearchBtn');
+    const searchClearBtn = document.getElementById('navSearchClear');
+    const searchDropdown = document.getElementById('searchDropdown');
+
+    let searchTimer;
+
+    searchInput.addEventListener('input', () => {
+      searchClearBtn.style.display = searchInput.value.length ? 'block' : 'none';
+      clearTimeout(searchTimer);
+      const q = searchInput.value.trim();
+      if (q.length < 3) { searchDropdown.style.display = 'none'; return; }
+      searchTimer = setTimeout(() => runSearch(), 300);
+    });
+
+    searchClearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      searchClearBtn.style.display = 'none';
+      searchDropdown.style.display = 'none';
+      searchInput.focus();
+    });
+
+    function goToSearchPage() {
+      const q = searchInput.value.trim();
+      if (q.length < 3) return;
+      window.location.href = `/search.html?q=${encodeURIComponent(q)}`;
+    }
+
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') goToSearchPage();
+    });
+
+    searchBtn.addEventListener('click', goToSearchPage);
+
+    async function runSearch() {
+      const q = searchInput.value.trim();
+      if (q.length < 3) { searchDropdown.style.display = 'none'; return; }
+      try {
+        const res = await fetch(`/.netlify/functions/esi-proxy?action=search&query=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        renderDropdown(data, q);
+      } catch (e) {
+        searchDropdown.style.display = 'none';
+      }
+    }
+
+    function renderDropdown(data, q) {
+      const { characters = [], corporations = [], alliances = [], mode = 'authenticated' } = data;
+      const total = characters.length + corporations.length + alliances.length;
+      const advancedSearchNote = `<div class="search-drop-note">For Advanced Search<br><a href="/.netlify/functions/auth-start">Log In With EVE Online</a></div>`;
+      if (total === 0) {
+        if (mode === 'community' || mode === 'fallback') {
+          searchDropdown.innerHTML = advancedSearchNote;
+          searchDropdown.style.display = 'block';
+        } else {
+          searchDropdown.style.display = 'none';
+        }
+        return;
+      }
+
+      let html = '';
+      if (characters.length) {
+        html += `<div class="search-drop-label">Pilots</div>`;
+        characters.forEach(c => {
+          html += `<a class="search-drop-item" href="/pilot.html?id=${c.id}">
+            <span class="search-drop-name">${c.name}</span>
+            <span class="search-drop-type">Pilot</span>
+          </a>`;
+        });
+      }
+      if (corporations.length) {
+        html += `<div class="search-drop-label">Corporations</div>`;
+        corporations.forEach(c => {
+          html += `<a class="search-drop-item" href="/corporation.html?id=${c.id}">
+            <span class="search-drop-name">${c.name}</span>
+            <span class="search-drop-type">Corp</span>
+          </a>`;
+        });
+      }
+      if (alliances.length) {
+        html += `<div class="search-drop-label">Alliances</div>`;
+        alliances.forEach(a => {
+          html += `<a class="search-drop-item" href="/alliance.html?id=${a.id}">
+            <span class="search-drop-name">${a.name}</span>
+            <span class="search-drop-type">Alliance</span>
+          </a>`;
+        });
+      }
+      if (mode === 'community' || mode === 'fallback') {
+        html += advancedSearchNote;
+      } else {
+        html += `<a class="search-drop-item" href="/search.html?q=${encodeURIComponent(q)}" style="color:var(--cyan);justify-content:center;">
+          See all results for "${q}" →
+        </a>`;
+      }
+
+      searchDropdown.innerHTML = html;
+      searchDropdown.style.display = 'block';
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.nav-search')) searchDropdown.style.display = 'none';
+    });
+</script>
 
 </body>
 </html>

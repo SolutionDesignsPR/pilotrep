@@ -54,6 +54,7 @@ exports.handler = async (event) => {
       flagged:        !!(r.comment && FLAG_PATTERN.test(r.comment)),
       anonymous:      r.anonymous,
       reviewerName:   r.anonymous ? '(anonymous)' : (r.reviewer_name || ''),
+      actualReviewerName: r.reviewer_name || '',
       reviewerId:     r.reviewer_id || null,
       isCorpAlliance: !!r.is_corp_alliance,
       createdAt:      r.created_at
