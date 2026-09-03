@@ -279,6 +279,10 @@
     .tc-row { border-bottom: 1px solid rgba(100,180,255,0.06); }
     .tc-row:last-child { border-bottom: none; }
     .tc-row:nth-child(even) { background: rgba(79,195,247,0.03); }
+    .tc-row.is-you {
+      background: rgba(79,195,247,0.16);
+      border-left: 3px solid var(--cyan);
+    }
     .tc-rank { font-size: 14px; font-weight: 700; color: var(--muted); }
     .tc-rank.gold   { color: #f0c542; }
     .tc-rank.silver { color: #c7cdd6; }
@@ -296,7 +300,7 @@
       transition: color 0.15s;
     }
     .tc-pilot-name:hover { color: var(--cyan); }
-    .tc-count { font-size: 14px; font-weight: 700; color: var(--cyan); text-align: right; }
+    .tc-count { font-size: 14px; font-weight: 700; color: var(--white); text-align: right; }
     .tc-empty { padding: 40px 18px; text-align: center; color: var(--muted); font-size: 13px; }
 
     .tc-archive-link {
@@ -424,7 +428,7 @@
       }
 
       rowsEl.innerHTML = data.top.map(row => `
-        <div class="tc-row">
+        <div class="tc-row${row.isYou ? ' is-you' : ''}">
           <div class="tc-rank ${rankClass(row.rank)}">${row.rank}</div>
           <div class="tc-pilot">
             <img class="tc-pilot-avatar" src="https://images.evetech.net/characters/${row.reviewer_id}/portrait?size=64" alt="" />
@@ -434,14 +438,16 @@
         </div>
       `).join('');
 
-      if (data.myRank) {
-        document.getElementById('tcMyRank').style.display = 'block';
-        document.getElementById('tcMyRankLabel').style.display = '';
-        document.getElementById('tcMyRankValue').textContent = '#' + data.myRank.rank;
+      if (data.isQualified) {
+        document.getElementById('tcMyRank').style.display = 'none';
       } else if (data.loggedIn) {
         document.getElementById('tcMyRank').style.display = 'block';
         document.getElementById('tcMyRankLabel').style.display = 'none';
-        document.getElementById('tcMyRankValue').textContent = 'Leave A Rep To Get Ranked';
+        document.getElementById('tcMyRankValue').textContent = 'Leave A Rep To Qualify';
+      } else {
+        document.getElementById('tcMyRank').style.display = 'block';
+        document.getElementById('tcMyRankLabel').style.display = 'none';
+        document.getElementById('tcMyRankValue').textContent = 'Log In To See Where You Qualify';
       }
     } catch (err) {
       console.error('Top contributors load error:', err);

@@ -30,21 +30,18 @@ exports.handler = async (event) => {
     return { statusCode: 500, body: JSON.stringify({ error: 'Could not load leaderboard' }) };
   }
 
-  let myRank = null;
   const session = getSession(event.headers.cookie);
-  if (session && session.characterId) {
-    const alreadyInTop = topRows.some(row => Number(row.reviewer_id) === Number(session.characterId));
-    if (!alreadyInTop) {
-      const { data: myRows, error: myError } = await supabase
-        .rpc('get_my_monthly_rank', { p_reviewer_id: session.characterId });
-      if (!myError && myRows && myRows[0]) {
-        myRank = myRows[0];
-      }
-    }
-  }
+  const loggedIn = !!(session && session.characterId);
+  let isQualified = false;
+
+  const markedRows = topRows.map(row => {
+    const isYou = loggedIn && Number(row.reviewer_id) === Number(session.characterId);
+    if (isYou) isQualified = true;
+    return { ...row, isYou };
+  });
 
   return {
     statusCode: 200,
-    body: JSON.stringify({ top: topRows, myRank, loggedIn: !!(session && session.characterId) })
+    body: JSON.stringify({ top: markedRows, loggedIn, isQualified })
   };
 };

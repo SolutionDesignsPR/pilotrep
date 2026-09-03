@@ -168,7 +168,7 @@ exports.handler = async (event) => {
     return { statusCode: 403, body: JSON.stringify({ error: 'You cannot rep your own Corporation or Alliance' }) };
   }
 
-  // 5 & 6. Enforce the 6-month cooldown and insert the rep atomically.
+  // 5 & 6. Enforce the 3-month cooldown and insert the rep atomically.
   // A prior version checked the cooldown, then inserted, as two separate
   // calls — two near-simultaneous submissions (e.g. from two tabs/devices)
   // could both pass the check before either insert landed. This single RPC
