@@ -121,6 +121,11 @@
       ad_personalization: state,
       analytics_storage: state
     });
+    fetch('/.netlify/functions/log-consent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ choice: state })
+    }).catch(function () { /* logging must never block the UI */ });
     hideBanner();
   }
 
