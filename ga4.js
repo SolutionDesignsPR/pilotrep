@@ -30,6 +30,7 @@
     gtag('config', GA_MEASUREMENT_ID);
     loadGtagScript();
     trackLoginIfNeeded();
+    trackProfileViewIfApplicable();
   }
 
   // Fires GA4's standard "login" event whenever auth-callback.js has just
@@ -39,11 +40,77 @@
   // as everything else, so it automatically respects whatever consent state
   // was just set above (a rejected-cookies pilot still sends a cookieless,
   // non-identifiable ping — same as any other event on the site).
+  //
+  // The param is cleared from the URL right after firing (history.replaceState,
+  // no reload) so a page refresh while ?login=success is still in the address
+  // bar can't fire a second, duplicate "login" event. login-success-modal.js
+  // does its own separate cleanup when the welcome modal closes, but that can
+  // be several seconds later (or never, if the tab is refreshed first) — this
+  // makes the GA4 side of things safe regardless of that timing.
   function trackLoginIfNeeded() {
     var params = new URLSearchParams(window.location.search);
     if (params.get('login') === 'success') {
       gtag('event', 'login', { method: 'EVE SSO' });
+      params.delete('login');
+      var qs = params.toString();
+      var newUrl = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
+      window.history.replaceState({}, '', newUrl);
     }
+  }
+
+  // Fires GA4's "view_profile" event on pilot/corporation/alliance profile
+  // pages. Detected purely from the URL (page + ?id=) rather than anything
+  // page-specific, so this works for all three profile pages without needing
+  // any changes inside pilot.html / corporation.html / alliance.html.
+  function trackProfileViewIfApplicable() {
+    var path = window.location.pathname.split('/').pop().toLowerCase();
+    var entityType = { 'pilot.html': 'pilot', 'corporation.html': 'corporation', 'alliance.html': 'alliance' }[path];
+    if (!entityType) return;
+    var id = new URLSearchParams(window.location.search).get('id');
+    if (!id) return;
+    gtag('event', 'view_profile', { entity_type: entityType, entity_id: id });
+  }
+
+  // ── Search + rep-submission tracking (site-wide from one place) ───────────
+  // The search bar and rep-submission form are both duplicated, page by page,
+  // across the whole site rather than living in one shared header/component —
+  // so rather than editing every page individually, this wraps fetch() once,
+  // here, and watches for the two backend endpoints every page's copy already
+  // calls: esi-proxy?action=search (every search, on every page, including
+  // search.html itself) and submit-rep (every pilot/corp/alliance rep
+  // submission). Whichever page the request comes from, it gets tracked.
+  var nativeFetch = window.fetch;
+  if (typeof nativeFetch === 'function') {
+    window.fetch = function (input, init) {
+      try {
+        var url = typeof input === 'string' ? input : (input && input.url) || '';
+
+        if (url.indexOf('/esi-proxy') !== -1 && url.indexOf('action=search') !== -1) {
+          var qMatch = url.match(/[?&]query=([^&]+)/);
+          if (qMatch) {
+            gtag('event', 'search', { search_term: decodeURIComponent(qMatch[1]) });
+          }
+        }
+
+        if (url.indexOf('/submit-rep') !== -1 && init && init.method === 'POST') {
+          var payload = null;
+          try { payload = JSON.parse(init.body); } catch (e) {}
+          if (payload) {
+            return nativeFetch.apply(this, arguments).then(function (res) {
+              if (res.ok) {
+                gtag('event', 'submit_rep', {
+                  target_type: payload.targetType || '',
+                  grade: payload.grade || '',
+                  anonymous: !!payload.anonymous
+                });
+              }
+              return res;
+            });
+          }
+        }
+      } catch (e) { /* tracking must never break a real request */ }
+      return nativeFetch.apply(this, arguments);
+    };
   }
 
   function updateConsent(state) {
