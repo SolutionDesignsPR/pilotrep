@@ -389,7 +389,12 @@
     .grade-circle-dots {
       position: absolute;
       inset: 0;
+    }
+    .grade-circle-dots.spin {
       animation: grade-circle-spin 60s linear infinite;
+    }
+    .grade-circle-dots.spin-reverse {
+      animation-direction: reverse;
     }
     .grade-circle-dots::before,
     .grade-circle-dots::after {
@@ -408,7 +413,7 @@
       to { transform: rotate(360deg); }
     }
     @media (prefers-reduced-motion: reduce) {
-      .grade-circle-dots {
+      .grade-circle-dots.spin {
         animation: none;
       }
     }
@@ -1702,6 +1707,16 @@
   const corpAllianceRepsCountEl = document.getElementById('corpAllianceRepsCount');
   const totalRepsCountEl = document.getElementById('totalRepsCount');
   const gradeCircleLetterEl = document.getElementById('gradeCircleLetter');
+  const gradeCircleDotsEl = document.querySelector('.grade-circle-dots');
+
+  function setGradeCircleSpin(cls) {
+    if (!cls) {
+      gradeCircleDotsEl.classList.remove('spin', 'spin-reverse');
+      return;
+    }
+    gradeCircleDotsEl.classList.add('spin');
+    gradeCircleDotsEl.classList.toggle('spin-reverse', cls === 'grade-F');
+  }
 
   let noCommentRepsExpanded = false;
   let noCommentRepsOpen = false;
@@ -2109,12 +2124,14 @@
     if (submittedReps.length === 0) {
       gradeCircleLetterEl.textContent = '–';
       gradeCircleLetterEl.className = 'grade-circle-letter';
+      setGradeCircleSpin(null);
     } else {
       const avg = submittedReps.reduce((sum, r) => sum + r.gradeNum, 0) / submittedReps.length;
       const idx = Math.min(12, Math.max(0, Math.round(avg)));
       const grade = GRADE_TABLE[idx];
       gradeCircleLetterEl.innerHTML = grade.html;
       gradeCircleLetterEl.className = 'grade-circle-letter ' + grade.cls;
+      setGradeCircleSpin(grade.cls);
     }
     if (noCommentRepsOpen) renderNoCommentReps();
     updatePilotRepsToggleState();
@@ -2332,6 +2349,7 @@
         gradeCircleLetterEl.innerHTML = data.repScoreHtml || '–';
         const tierCls = data.repScoreTier === 'pos' ? 'grade-A' : data.repScoreTier === 'neg' ? 'grade-F' : 'grade-B';
         gradeCircleLetterEl.className = 'grade-circle-letter ' + tierCls;
+        setGradeCircleSpin(tierCls);
         // Load reps
         submittedReps = data.reps.map(r => ({
           id:       r.id,
